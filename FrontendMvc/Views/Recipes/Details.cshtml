@@ -17,30 +17,33 @@
     #mainContent {
         max-width: 100%;
     }
-    
+
     /* Sadece bu sayfadaki row'u optimize et */
     .recipe-details-container .row {
         margin-left: -8px;
         margin-right: -8px;
     }
-    
+
     .recipe-details-container [class*="col-"] {
         padding-left: 8px;
         padding-right: 8px;
     }
-    
+
     /* Print Styles */
     @@media print {
         .sidebar, .header, .no-print, button, .btn, #likeButton, .star-rating {
             display: none !important;
         }
+
         .recipe-details-container {
             max-width: 100% !important;
             margin: 0 !important;
         }
+
         body {
             background: white !important;
         }
+
         .bd {
             border: none !important;
             box-shadow: none !important;
@@ -50,36 +53,36 @@
 
 <!-- Schema.org Recipe Structured Data -->
 <script type="application/ld+json">
-{
-  "@@context": "https://schema.org/",
-  "@@type": "Recipe",
-  "name": "@Html.Raw(Json.Serialize(Model.Title))",
-  "description": "@Html.Raw(Json.Serialize(Model.Description ?? ""))",
-  "image": "@(string.IsNullOrEmpty(Model.ImageUrl) ? "" : (Model.ImageUrl.StartsWith("http") ? Model.ImageUrl : $"{Context.Request.Scheme}://{Context.Request.Host}{Model.ImageUrl}"))",
-  "author": {
-    "@@type": "Organization",
-    "name": "Tarif Sitesi"
-  },
-  "prepTime": "PT@(Model.PrepTimeMinutes)M",
-  "cookTime": "PT@(Model.CookingTimeMinutes)M",
-  "totalTime": "PT@(Model.PrepTimeMinutes + Model.CookingTimeMinutes)M",
-  "recipeYield": "@Model.Servings",
-  "recipeIngredient": @Html.Raw(Json.Serialize(Model.Ingredients.Split(new[] { '\n', '\r', ',' }, StringSplitOptions.RemoveEmptyEntries).Select(i => i.Trim()).Where(i => !string.IsNullOrEmpty(i)).ToList())),
-  "recipeInstructions": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Steps.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Select(s => new Dictionary<string, object> { { "@type", "HowToStep" }, { "text", s.Trim() } }).Where(s => !string.IsNullOrEmpty(s["text"]?.ToString())).ToList())),
-  @if (Model.AverageRating.HasValue)
-  {
-  <text>
-  "aggregateRating": {
-    "@@type": "AggregateRating",
-    "ratingValue": "@Model.AverageRating.Value.ToString("F1")",
-    "reviewCount": "@Model.RatingCount"
-  },
-  </text>
-  }
-  "recipeCategory": "@(Model.Category?.Name ?? "")",
-  "recipeCuisine": "Turkish",
-  "difficulty": "@Model.Difficulty"
-}
+    {
+      "@@context": "https://schema.org/",
+      "@@type": "Recipe",
+      "name": "@Html.Raw(Json.Serialize(Model.Title))",
+      "description": "@Html.Raw(Json.Serialize(Model.Description ?? ""))",
+      "image": "@(string.IsNullOrEmpty(Model.ImageUrl) ? "" : (Model.ImageUrl.StartsWith("http") ? Model.ImageUrl : $"{Context.Request.Scheme}://{Context.Request.Host}{Model.ImageUrl}"))",
+      "author": {
+        "@@type": "Organization",
+        "name": "Tarif Sitesi"
+      },
+      "prepTime": "PT@(Model.PrepTimeMinutes)M",
+      "cookTime": "PT@(Model.CookingTimeMinutes)M",
+      "totalTime": "PT@(Model.PrepTimeMinutes + Model.CookingTimeMinutes)M",
+      "recipeYield": "@Model.Servings",
+      "recipeIngredient": @Html.Raw(Json.Serialize(Model.Ingredients.Split(new[] { '\n', '\r', ',' }, StringSplitOptions.RemoveEmptyEntries).Select(i => i.Trim()).Where(i => !string.IsNullOrEmpty(i)).ToList())),
+      "recipeInstructions": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Steps.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Select(s => new Dictionary<string, object> { { "@type", "HowToStep" }, { "text", s.Trim() } }).Where(s => !string.IsNullOrEmpty(s["text"]?.ToString())).ToList())),
+    @if (Model.AverageRating.HasValue)
+    {
+        <text>
+              "aggregateRating": {
+                "@@type": "AggregateRating",
+                "ratingValue": "@Model.AverageRating.Value.ToString("F1")",
+                "reviewCount": "@Model.RatingCount"
+              },
+        </text>
+    }
+      "recipeCategory": "@(Model.Category?.Name ?? "")",
+      "recipeCuisine": "Turkish",
+      "difficulty": "@Model.Difficulty"
+    }
 </script>
 
 <!-- Breadcrumbs -->
@@ -108,158 +111,142 @@
                                 <h1 class="lh-1 mB-0" style="font-size: 2rem;">@Model.Title</h1>
                             </div>
                             <div class="peer no-print">
-                                <div class="d-flex gap-10" style="gap: 8px;">
+                                <div class="d-flex ai-c gap-6" style="gap: 6px; flex-wrap: wrap;">
+                                    <!-- Recipe Details Boxes -->
+                                    <div class="bd bgc-grey-50 ta-c bdrs-3" style="width: 70px; height: 70px; min-width: 70px; max-width: 70px; min-height: 70px; max-height: 70px; flex-shrink: 0; flex-grow: 0; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px 4px;">
+                                        <i class="ti-time c-blue-500" style="font-size: 16px; margin-bottom: 4px;"></i>
+                                        <div class="fsz-xs c-grey-600" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; line-height: 1.2;">Pişirme</div>
+                                        <div class="fw-600 fsz-xs c-grey-800" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">@Model.CookingTimeMinutes dk</div>
+                                    </div>
+                                    <div class="bd bgc-grey-50 ta-c bdrs-3" style="width: 70px; height: 70px; min-width: 70px; max-width: 70px; min-height: 70px; max-height: 70px; flex-shrink: 0; flex-grow: 0; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px 4px;">
+                                        <i class="ti-timer c-green-500" style="font-size: 16px; margin-bottom: 4px;"></i>
+                                        <div class="fsz-xs c-grey-600" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; line-height: 1.2;">Hazırlık</div>
+                                        <div class="fw-600 fsz-xs c-grey-800" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">@Model.PrepTimeMinutes dk</div>
+                                    </div>
+                                    <div class="bd bgc-grey-50 ta-c bdrs-3" style="width: 70px; height: 70px; min-width: 70px; max-width: 70px; min-height: 70px; max-height: 70px; flex-shrink: 0; flex-grow: 0; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px 4px;">
+                                        <i class="ti-user c-orange-500" style="font-size: 16px; margin-bottom: 4px;"></i>
+                                        <div class="fsz-xs c-grey-600" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; line-height: 1.2;">Kişilik</div>
+                                        <div class="fw-600 fsz-xs c-grey-800" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">@Model.Servings</div>
+                                    </div>
+                                    <div class="bd bgc-grey-50 ta-c bdrs-3" style="width: 70px; height: 70px; min-width: 70px; max-width: 70px; min-height: 70px; max-height: 70px; flex-shrink: 0; flex-grow: 0; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px 4px;">
+                                        <i class="ti-settings c-purple-500" style="font-size: 16px; margin-bottom: 4px;"></i>
+                                        <div class="fsz-xs c-grey-600" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; line-height: 1.2;">Zorluk</div>
+                                        <div class="fw-600 fsz-xs c-grey-800" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">@Model.Difficulty</div>
+                                    </div>
                                     <!-- Share Buttons -->
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="shareRecipe()" title="Paylaş">
-                                        <i class="ti-share"></i>
+                                    <button type="button" class="bd bgc-grey-50 ta-c bdrs-3" style="width: 70px; height: 70px; min-width: 70px; max-width: 70px; min-height: 70px; max-height: 70px; flex-shrink: 0; flex-grow: 0; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px 4px; border: 1px solid #e0e0e0; background: #f5f5f5; cursor: pointer; transition: all 0.2s;" onclick="shareRecipe()" title="Paylaş" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
+                                        <i class="ti-share c-grey-700" style="font-size: 16px; margin-bottom: 4px;"></i>
+                                        <div class="fsz-xs c-grey-600" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">Paylaş</div>
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.print()" title="Yazdır">
-                                        <i class="ti-printer"></i>
+                                    <button type="button" class="bd bgc-grey-50 ta-c bdrs-3" style="width: 70px; height: 70px; min-width: 70px; max-width: 70px; min-height: 70px; max-height: 70px; flex-shrink: 0; flex-grow: 0; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px 4px; border: 1px solid #e0e0e0; background: #f5f5f5; cursor: pointer; transition: all 0.2s;" onclick="window.print()" title="Yazdır" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
+                                        <i class="ti-printer c-grey-700" style="font-size: 16px; margin-bottom: 4px;"></i>
+                                        <div class="fsz-xs c-grey-600" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">Yazdır</div>
                                     </button>
                                 </div>
                             </div>
                         </div>
-                        @if (Model.Category != null)
-                        {
-                            <span class="badge bgc-blue-50 c-blue-700 p-10 lh-0 tt-c rounded-pill">
-                                <i class="@Model.Category.Icon"></i> @Model.Category.Name
-                            </span>
-                        }
+                        <div class="d-flex ai-c gap-10" style="flex-wrap: wrap; gap: 10px;">
+                            @if (Model.Category != null)
+                            {
+                                <span class="badge bgc-blue-50 c-blue-700 p-10 lh-0 tt-c rounded-pill">
+                                    <i class="@Model.Category.Icon"></i> @Model.Category.Name
+                                </span>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Description))
+                            {
+                                <span class="fsz-sm c-grey-600" style="line-height: 1.4;">@Model.Description</span>
+                            }
+                        </div>
                     </div>
-                    
+
                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
                         <div class="layer w-100 mB-20">
                             <img id="recipeImage" src="@Model.ImageUrl" alt="@Model.Title" class="w-100 bdrs-3" style="max-height: 500px; object-fit: cover; cursor: pointer;" title="Beğenmek için çift tıklayın">
                         </div>
-                        
+
                         <!-- İstatistikler ve Etkileşim (Fotoğrafın altında) -->
                         <div class="layer w-100 mB-30">
-                            <div class="bd bgc-grey-50 p-20 bdrs-3">
-                                <!-- İstatistikler -->
-                                <div class="row mB-20">
-                                    <div class="col-md-3 col-6 pY-10">
-                                        <div class="ta-c">
-                                            <i class="ti-eye c-blue-500 fsz-lg d-b mB-5"></i>
-                                            <div class="fsz-sm c-grey-600">Görüntüleme</div>
-                                            <div class="fw-600">@Model.ViewCount</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 col-6 pY-10">
-                                        <div class="ta-c">
-                                            <i class="ti-star c-yellow-500 fsz-lg d-b mB-5"></i>
-                                            <div class="fsz-sm c-grey-600">Puan</div>
-                                            <div class="fw-600" id="ratingStats">
-                                                @if (Model.AverageRating.HasValue)
+                            <div class="p-15" style="background-color: #fafafa; border: 1px solid #f0f0f0; border-radius: 12px;">
+                                <!-- İstatistikler ve Etkileşim -->
+                                <div class="peers fxw-nw ai-c jc-sb pY-5">
+                                    <div class="peer" style="flex: 1; min-width: 0; overflow: visible;">
+                                        <div class="peers fxw-nw ai-c gap-20" style="flex-wrap: wrap;">
+                                            <div class="peer">
+                                                <i class="ti-eye c-blue-500" style="font-size: 16px;"></i>
+                                                <span class="fsz-sm c-grey-700 mL-5 fw-500">@Model.ViewCount</span>
+                                            </div>
+                                            <div class="peer">
+                                                @if (User.Identity?.IsAuthenticated == true)
                                                 {
-                                                    <span>@Model.AverageRating.Value.ToString("F1")</span><text> / 5.0</text>
-                                                    <div class="fsz-xs c-grey-600">(@Model.RatingCount)</div>
+                                                    <button id="likeButtonStat" class="btn btn-link p-0" data-recipe-id="@Model.Id" style="border: none; background: none; padding: 0; min-width: auto; line-height: 1; cursor: pointer; text-decoration: none;">
+                                                        <i class="ti-heart" style="font-size: 16px; color: #999; font-weight: normal; transition: all 0.2s; text-decoration: none;" id="likeIconStat"></i>
+                                                    </button>
                                                 }
                                                 else
                                                 {
-                                                    <span class="c-grey-600">-</span>
+                                                    <i class="ti-heart" style="font-size: 16px; color: #999; font-weight: normal;" id="likeIconStat"></i>
                                                 }
+                                                <span class="fsz-sm c-grey-700 mL-5 fw-500" id="likeCount">@Model.LikeCount</span>
                                             </div>
+                                            @if (User.Identity?.IsAuthenticated == true)
+                                            {
+                                                <div class="peer" style="flex-shrink: 0; min-width: auto;">
+                                                    <div class="peers fxw-nw ai-c" style="gap: 8px;">
+                                                        <div class="star-rating" data-recipe-id="@Model.Id" style="min-width: 130px;" data-initial-rating="@(Model.AverageRating.HasValue ? Model.AverageRating.Value : 0)">
+                                                            @for (int i = 1; i <= 5; i++)
+                                                            {
+                                                                <i class="ti-star star-icon" data-rating="@i"></i>
+                                                            }
+                                                        </div>
+                                                        @if (Model.AverageRating.HasValue)
+                                                        {
+                                                            <span class="fsz-sm c-grey-700 fw-500" id="ratingStats" style="display: inline-block; white-space: nowrap; line-height: 1.2;">
+                                                                Puan : @Model.AverageRating.Value.ToString("F1")
+                                                                <span class="c-grey-500">(@Model.RatingCount Kişi Puan Verdi)</span>
+                                                                <span id="userRatingDisplay" class="fsz-sm c-grey-700 fw-500" style="display: none; margin-left: 20px;"></span>
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="peer">
+                                                    @if (Model.AverageRating.HasValue)
+                                                    {
+                                                        <span class="fsz-sm c-grey-700 fw-500" id="ratingStats" style="display: inline-block; white-space: nowrap; line-height: 1.2;">
+                                                            Puan : @Model.AverageRating.Value.ToString("F1")
+                                                            <span class="c-grey-500">(@Model.RatingCount Kişi Puan Verdi)</span>
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="fsz-sm c-grey-500">-</span>
+                                                    }
+                                                </div>
+                                            }
                                         </div>
                                     </div>
-                                    <div class="col-md-3 col-6 pY-10">
-                                        <div class="ta-c">
-                                            <i class="ti-heart c-red-500 fsz-lg d-b mB-5"></i>
-                                            <div class="fsz-sm c-grey-600">Beğeni</div>
-                                            <div class="fw-600" id="likeCount">@Model.LikeCount</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3 col-6 pY-10">
-                                        <div class="ta-c">
-                                            <i class="ti-calendar c-grey-500 fsz-lg d-b mB-5"></i>
-                                            <div class="fsz-sm c-grey-600">Tarih</div>
-                                            <div class="fw-600 fsz-xs">@Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy")</div>
-                                        </div>
+                                    <div class="peer">
+                                        <i class="ti-calendar c-grey-500" style="font-size: 14px;"></i>
+                                        <span class="fsz-xs c-grey-600 mL-5">@Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy")</span>
                                     </div>
                                 </div>
-                                
-                                <div class="bdT pT-20">
-                                    @if (User.Identity?.IsAuthenticated == true)
-                                    {
-                                        <!-- Rating Yıldızları -->
-                                        <div class="ta-c mB-15">
-                                            <div class="mB-10">
-                                                <span class="fsz-sm c-grey-600">Bu tarifi puanlayın:</span>
-                                            </div>
-                                            <div class="star-rating" data-recipe-id="@Model.Id">
-                                                @for (int i = 1; i <= 5; i++)
-                                                {
-                                                    <i class="ti-star star-icon" data-rating="@i" style="font-size: 28px; cursor: pointer; color: #ddd; margin: 0 3px;"></i>
-                                                }
-                                            </div>
-                                            <div class="mT-5">
-                                                <span class="fsz-xs c-grey-600" id="userRatingText"></span>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Like Butonu -->
-                                        <div class="ta-c">
-                                            <button id="likeButton" class="btn btn-outline-danger" data-recipe-id="@Model.Id" style="min-width: 150px;">
-                                                <i class="ti-heart" id="likeIcon"></i> <span id="likeButtonText">Beğen</span>
-                                            </button>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="ta-c">
-                                            <p class="fsz-sm c-grey-600 mB-10">Bu tarifi puanlamak ve beğenmek için lütfen giriş yapın.</p>
-                                            <a asp-controller="Account" asp-action="Login" class="btn btn-primary">
-                                                <i class="ti-user mR-5"></i> Giriş Yap
-                                            </a>
-                                        </div>
-                                    }
-                                </div>
+
+                                @if (User.Identity?.IsAuthenticated == false)
+                                {
+                                    <div class="ta-c pT-15">
+                                        <p class="fsz-sm c-grey-600 mB-10">Bu tarifi puanlamak ve beğenmek için lütfen giriş yapın.</p>
+                                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-sm">
+                                            <i class="ti-user mR-5"></i> Giriş Yap
+                                        </a>
+                                    </div>
+                                }
                             </div>
                         </div>
                     }
-                    
-                    <!-- Açıklama -->
-                    @if (!string.IsNullOrEmpty(Model.Description))
-                    {
-                        <div class="layer w-100 mB-20">
-                            <p class="fsz-md c-grey-700">@Model.Description</p>
-                        </div>
-                    }
-                    
-                    <!-- Bilgi Kartları -->
-                    <div class="layer w-100 mB-30">
-                        <div class="row gap-10">
-                            <div class="col-md-3">
-                                <div class="bd bgc-grey-50 p-15 ta-c bdrs-3">
-                                    <i class="ti-time fsz-xl c-blue-500 d-b mB-5"></i>
-                                    <div class="fsz-sm c-grey-600">Pişirme</div>
-                                    <div class="fw-600">@Model.CookingTimeMinutes dk</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="bd bgc-grey-50 p-15 ta-c bdrs-3">
-                                    <i class="ti-timer fsz-xl c-green-500 d-b mB-5"></i>
-                                    <div class="fsz-sm c-grey-600">Hazırlık</div>
-                                    <div class="fw-600">@Model.PrepTimeMinutes dk</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="bd bgc-grey-50 p-15 ta-c bdrs-3">
-                                    <i class="ti-user fsz-xl c-orange-500 d-b mB-5"></i>
-                                    <div class="fsz-sm c-grey-600">Kişilik</div>
-                                    <div class="fw-600">@Model.Servings</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="bd bgc-grey-50 p-15 ta-c bdrs-3">
-                                    <i class="ti-settings fsz-xl c-purple-500 d-b mB-5"></i>
-                                    <div class="fsz-sm c-grey-600">Zorluk</div>
-                                    <div class="fw-600">@Model.Difficulty</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
+
                     <!-- Malzemeler -->
                     <div class="layer w-100 mB-30 recipe-section">
                         <div class="peers fxw-nw ai-c mB-15">
@@ -287,7 +274,7 @@
                             </ul>
                         </div>
                     </div>
-                    
+
                     <!-- Yapılış -->
                     <div class="layer w-100 mB-30">
                         <h5 class="mB-15">
@@ -297,7 +284,7 @@
                             <pre class="m-0 fsz-sm" style="white-space: pre-wrap; font-family: inherit;">@Model.Steps</pre>
                         </div>
                     </div>
-                    
+
                     <!-- Püf Noktaları -->
                     @if (!string.IsNullOrEmpty(Model.Tips))
                     {
@@ -310,7 +297,7 @@
                             </div>
                         </div>
                     }
-                    
+
                     <!-- Alternatif Malzemeler -->
                     @if (!string.IsNullOrEmpty(Model.AlternativeIngredients))
                     {
@@ -330,28 +317,79 @@
 </div>
 
 <style>
-    .star-rating .star-icon {
-        transition: color 0.2s;
+    .star-rating {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        flex-wrap: nowrap !important;
+        min-width: 130px !important;
+        overflow: visible !important;
     }
-    
-    .star-rating .star-icon:hover,
-    .star-rating .star-icon.active {
-        color: #ffc107 !important;
+
+        .star-rating .star-icon {
+            transition: all 0.2s ease !important;
+            font-size: 20px !important;
+            line-height: 1 !important;
+            display: inline-block !important;
+            color: #ddd !important;
+            cursor: pointer !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: auto !important;
+            height: auto !important;
+            flex-shrink: 0 !important;
+        }
+
+            .star-rating .star-icon:hover,
+            .star-rating .star-icon.active {
+                color: #ffc107 !important;
+            }
+
+            .star-rating .star-icon.rated {
+                color: #ffc107 !important;
+            }
+
+            .star-rating .star-icon:hover {
+                transform: scale(1.15) !important;
+            }
+
+    #likeButtonStat {
+        cursor: pointer;
+        text-decoration: none !important;
+        border: none !important;
+        box-shadow: none !important;
     }
-    
-    .star-rating .star-icon.rated {
-        color: #ffc107 !important;
+
+        #likeButtonStat:hover,
+        #likeButtonStat:focus,
+        #likeButtonStat:active {
+            text-decoration: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+    #likeIconStat {
+        color: #999;
+        font-weight: normal;
+        transition: all 0.2s ease;
+        text-decoration: none !important;
+        -webkit-text-stroke: 1px #999;
+        -webkit-text-fill-color: transparent;
     }
-    
-    #likeButton.liked {
-        background-color: #dc3545;
-        color: white;
-        border-color: #dc3545;
-    }
-    
-    #likeButton.liked:hover {
-        background-color: #c82333;
-        border-color: #bd2130;
+
+        #likeIconStat.liked {
+            color: #dc3545 !important;
+            font-weight: 900 !important;
+            -webkit-text-stroke: 0px !important;
+            -webkit-text-fill-color: #dc3545 !important;
+            text-decoration: none !important;
+        }
+
+    #likeButtonStat:hover #likeIconStat:not(.liked) {
+        color: #dc3545;
+        transform: scale(1.1);
+        -webkit-text-stroke: 1px #dc3545;
     }
 </style>
 
@@ -363,41 +401,290 @@
             const recipeId = @Model.Id;
             const userId = '@currentUserId';
             const apiBaseUrl = 'https://localhost:7016';
-            
+
             // Rating sistemi
-            const starIcons = document.querySelectorAll('.star-icon');
             let currentUserRating = null;
-            
-            // Kullanıcının mevcut puanını yükle
+
+            // Kullanıcının mevcut puanını yükle (sadece currentUserRating'ı set et, yıldızları güncelleme)
             async function loadUserRating() {
                 try {
                     const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/rating/user/${encodeURIComponent(userId)}`);
                     if (response.ok) {
                         const data = await response.json();
-                        if (data.rating) {
+                        // Kullanıcının puanı varsa sadece currentUserRating'ı set et
+                        if (data.rating && data.rating > 0) {
                             currentUserRating = data.rating;
-                            updateStarDisplay(data.rating);
-                            const userRatingText = document.getElementById('userRatingText');
-                            if (userRatingText) {
-                                userRatingText.textContent = `Puanınız: ${data.rating}/5`;
-                            }
+                            updateUserRatingDisplay(data.rating);
+                        } else {
+                            currentUserRating = 0;
+                            updateUserRatingDisplay(0);
                         }
                     }
                 } catch (error) {
                     console.error('Rating yüklenirken hata:', error);
+                    currentUserRating = 0;
+                    updateUserRatingDisplay(0);
                 }
             }
-            
-            function updateStarDisplay(rating) {
-                starIcons.forEach((star, index) => {
-                    if (index < rating) {
-                        star.classList.add('rated', 'active');
+
+            // Kullanıcının puanını göster
+            function updateUserRatingDisplay(rating) {
+                const userRatingDisplay = document.getElementById('userRatingDisplay');
+                if (userRatingDisplay) {
+                    if (rating && rating > 0) {
+                        userRatingDisplay.innerHTML = `Puanınız : ${rating}`;
+                        userRatingDisplay.style.display = 'inline';
                     } else {
-                        star.classList.remove('rated', 'active');
+                        userRatingDisplay.style.display = 'none';
+                    }
+                }
+            }
+
+            function updateStarDisplay(rating, isHover = false) {
+                // rating 1-5 ölçeğinde geliyor, görsel için 0-10 ölçeğine çevir
+                let visualRating = 0;
+                if (rating && rating > 0) {
+                    visualRating = rating * 2; // 1-5 -> 2-10
+                }
+
+                const starRatingContainer = document.querySelector('.star-rating');
+                if (!starRatingContainer) return;
+
+                // Mevcut yıldızları al
+                let stars = starRatingContainer.querySelectorAll('.star-icon');
+                
+                // Eğer yıldızlar yoksa oluştur
+                if (stars.length === 0) {
+                    starRatingContainer.innerHTML = '';
+                    for (let i = 0; i < 5; i++) {
+                        const star = document.createElement('i');
+                        star.className = 'ti-star star-icon';
+                        star.setAttribute('data-rating', i + 1);
+                        star.style.cssText = 'font-size: 20px; cursor: pointer; color: #ddd; transition: all 0.2s; line-height: 1; display: inline-block;';
+                        starRatingContainer.appendChild(star);
+                    }
+                    stars = starRatingContainer.querySelectorAll('.star-icon');
+                }
+
+                // Yarım yıldız container'larını temizle ve normal yıldızlara dönüştür
+                const halfStarContainers = starRatingContainer.querySelectorAll('.half-star-container');
+                halfStarContainers.forEach(container => {
+                    const star = document.createElement('i');
+                    star.className = 'ti-star star-icon';
+                    star.setAttribute('data-rating', container.getAttribute('data-rating') || '1');
+                    star.style.cssText = 'font-size: 20px; cursor: pointer; color: #ddd; transition: all 0.2s; line-height: 1; display: inline-block;';
+                    container.replaceWith(star);
+                });
+
+                // Yıldızları tekrar al
+                stars = starRatingContainer.querySelectorAll('.star-icon');
+
+                // Yıldızları güncelle (görsel olarak 0-10 ölçeğinde)
+                stars.forEach((star, index) => {
+                    const starValue = (index + 1) * 2; // 2, 4, 6, 8, 10 (görsel)
+                    const starStart = index * 2; // 0, 2, 4, 6, 8 (görsel)
+
+                    // Önce temizle
+                    star.classList.remove('rated', 'active');
+                    star.style.setProperty('color', '#ddd', 'important');
+
+                    if (visualRating >= starValue) {
+                        // Tam dolu yıldız
+                        star.classList.add('rated', 'active');
+                        star.style.setProperty('color', '#ffc107', 'important');
+                    } else if (visualRating > starStart && visualRating < starValue) {
+                        // Yarım yıldız - mevcut yıldızı container ile değiştir
+                        const halfStarContainer = document.createElement('div');
+                        halfStarContainer.className = 'half-star-container';
+                        halfStarContainer.setAttribute('data-rating', index + 1);
+                        halfStarContainer.style.cssText = 'position: relative; display: inline-block; width: 20px; height: 20px; line-height: 1; cursor: pointer;';
+
+                        const emptyStar = document.createElement('i');
+                        emptyStar.className = 'ti-star';
+                        emptyStar.style.cssText = 'font-size: 20px; position: absolute; left: 0; top: 0; color: #ddd; z-index: 1; width: 20px; height: 20px;';
+
+                        // Yarım yıldız için yüzde hesapla
+                        const fractionalPart = (visualRating - starStart) / (starValue - starStart);
+                        const fillPercentage = fractionalPart * 100;
+
+                        const filledStarWrapper = document.createElement('div');
+                        filledStarWrapper.style.cssText = `position: absolute; left: 0; top: 0; width: ${fillPercentage}%; height: 20px; overflow: hidden; z-index: 2;`;
+
+                        const filledStar = document.createElement('i');
+                        filledStar.className = 'ti-star';
+                        filledStar.style.cssText = 'font-size: 20px; position: absolute; left: 0; top: 0; color: #ffc107; width: 20px; height: 20px; display: block;';
+
+                        filledStarWrapper.appendChild(filledStar);
+                        halfStarContainer.appendChild(emptyStar);
+                        halfStarContainer.appendChild(filledStarWrapper);
+                        star.replaceWith(halfStarContainer);
                     }
                 });
             }
-            
+
+            // Event delegation kullanarak tüm yıldız elementlerine event listener ekle
+            function attachStarEventListeners() {
+                const starRatingContainer = document.querySelector('.star-rating');
+                if (!starRatingContainer) return;
+
+                // Event delegation kullan - container'a event listener ekle (sadece bir kez)
+                starRatingContainer.addEventListener('mouseover', function(e) {
+                    const target = e.target.closest('.star-icon, .half-star-container');
+                    if (!target) return;
+
+                    let starIndex = -1;
+                    if (target.classList.contains('star-icon')) {
+                        starIndex = parseInt(target.getAttribute('data-rating')) - 1;
+                    } else if (target.classList.contains('half-star-container')) {
+                        starIndex = parseInt(target.getAttribute('data-rating')) - 1;
+                    }
+
+                    if (starIndex >= 0) {
+                        // Hover'da kullanıcının puanı varsa onu göster, yoksa hover rating'i göster
+                        if (currentUserRating && currentUserRating > 0) {
+                            updateStarDisplay(currentUserRating, true);
+                        } else {
+                            const hoverRating = starIndex + 1; // 1-5 ölçeği
+                            updateStarDisplay(hoverRating, true);
+                        }
+                    }
+                });
+
+                starRatingContainer.addEventListener('mouseout', function(e) {
+                    const target = e.target.closest('.star-icon, .half-star-container');
+                    if (!target) return;
+
+                    // Her zaman ortalama puanı göster
+                    const initialRating = parseFloat(starRatingContainer.getAttribute('data-initial-rating')) || 0;
+                    updateStarDisplay(initialRating, false);
+                });
+
+                starRatingContainer.addEventListener('click', async function(e) {
+                    const target = e.target.closest('.star-icon, .half-star-container');
+                    if (!target) return;
+
+                    let starIndex = -1;
+                    if (target.classList.contains('star-icon')) {
+                        starIndex = parseInt(target.getAttribute('data-rating')) - 1;
+                    } else if (target.classList.contains('half-star-container')) {
+                        starIndex = parseInt(target.getAttribute('data-rating')) - 1;
+                    }
+
+                    if (starIndex >= 0) {
+                        const clickRating = starIndex + 1; // 1, 2, 3, 4, 5
+                        
+                        // Confirm mesajı
+                        const confirmed = confirm(`Bu tarife ${clickRating} yıldız vermek istediğinizden emin misiniz?`);
+                        
+                        if (!confirmed) {
+                            // Kullanıcı iptal etti, ortalama puana dön
+                            const initialRating = parseFloat(starRatingContainer.getAttribute('data-initial-rating')) || 0;
+                            updateStarDisplay(initialRating, false);
+                            return;
+                        }
+                        
+                        try {
+                            const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/rate?rating=${clickRating}&userId=${encodeURIComponent(userId)}`, {
+                                method: 'POST'
+                            });
+
+                            if (response.ok) {
+                                const data = await response.json();
+                                currentUserRating = clickRating;
+                                updateUserRatingDisplay(clickRating);
+                                // Puan verildikten sonra güncellenmiş ortalama puanı göster
+                                // updateRatingStats içinde ortalama puan güncelleniyor ve yıldızlar güncelleniyor
+                                await updateRatingStats();
+                            } else {
+                                alert('Puan verilirken bir hata oluştu.');
+                                // Hata durumunda ortalama puana dön
+                                const initialRating = parseFloat(starRatingContainer.getAttribute('data-initial-rating')) || 0;
+                                updateStarDisplay(initialRating, false);
+                            }
+                        } catch (error) {
+                            console.error('Puan verilirken hata:', error);
+                            alert('Puan verilirken bir hata oluştu.');
+                            // Hata durumunda ortalama puana dön
+                            const initialRating = parseFloat(starRatingContainer.getAttribute('data-initial-rating')) || 0;
+                            updateStarDisplay(initialRating, false);
+                        }
+                    }
+                });
+            }
+
+            // Sayfa yüklendiğinde event listener'ları ekle
+            document.addEventListener('DOMContentLoaded', function() {
+                attachStarEventListeners();
+            });
+
+            // Sayfa yüklendiğinde kullanıcının puanını ve beğeni durumunu yükle
+            document.addEventListener('DOMContentLoaded', async function() {
+                // Önce kullanıcının puanını yükle (sadece currentUserRating'ı set et)
+                await loadUserRating();
+                
+                // Her zaman ortalama puanı göster
+                const starRatingContainer = document.querySelector('.star-rating');
+                if (starRatingContainer) {
+                    const initialRatingStr = starRatingContainer.getAttribute('data-initial-rating');
+                    const initialRating = parseFloat(initialRatingStr) || 0;
+                    if (initialRating > 0) {
+                        updateStarDisplay(initialRating, false);
+                    }
+                }
+                
+                loadLikeStatus();
+            });
+
+            // Ortalama puan yıldızlarını güncelle
+            function updateAverageRatingStars(averageRating) {
+                const starsContainer = document.querySelector('.average-rating-stars');
+                if (!starsContainer) return;
+
+                if (averageRating === null || averageRating === undefined) {
+                    starsContainer.innerHTML = '';
+                    for (let i = 0; i < 5; i++) {
+                        const star = document.createElement('i');
+                        star.className = 'ti-star c-grey-300';
+                        star.style.cssText = 'font-size: 14px;';
+                        starsContainer.appendChild(star);
+                    }
+                    return;
+                }
+
+                starsContainer.innerHTML = '';
+                const fullStars = Math.floor(averageRating);
+                const hasHalfStar = (averageRating - fullStars) >= 0.5;
+
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= fullStars) {
+                        const star = document.createElement('i');
+                        star.className = 'ti-star c-yellow-500';
+                        star.style.cssText = 'font-size: 14px;';
+                        starsContainer.appendChild(star);
+                    } else if (i === fullStars + 1 && hasHalfStar) {
+                        const halfStarContainer = document.createElement('div');
+                        halfStarContainer.style.cssText = 'position: relative; display: inline-block; width: 14px; height: 14px; line-height: 1;';
+
+                        const emptyStar = document.createElement('i');
+                        emptyStar.className = 'ti-star c-grey-300';
+                        emptyStar.style.cssText = 'font-size: 14px; position: absolute; left: 0; top: 0;';
+
+                        const filledStar = document.createElement('i');
+                        filledStar.className = 'ti-star c-yellow-500';
+                        filledStar.style.cssText = 'font-size: 14px; position: absolute; left: 0; top: 0; width: 50%; overflow: hidden; clip-path: inset(0 50% 0 0);';
+
+                        halfStarContainer.appendChild(emptyStar);
+                        halfStarContainer.appendChild(filledStar);
+                        starsContainer.appendChild(halfStarContainer);
+                    } else {
+                        const star = document.createElement('i');
+                        star.className = 'ti-star c-grey-300';
+                        star.style.cssText = 'font-size: 14px;';
+                        starsContainer.appendChild(star);
+                    }
+                }
+            }
+
             // Rating ve Like bilgilerini güncelle (sayfa yenilemeden)
             async function updateRatingStats() {
                 try {
@@ -408,9 +695,25 @@
                         const ratingDisplay = document.getElementById('ratingStats');
                         if (ratingDisplay) {
                             if (data.averageRating !== null && data.averageRating !== undefined) {
-                                ratingDisplay.innerHTML = `<span>${data.averageRating.toFixed(1)}</span> / 5.0 <div class="fsz-xs c-grey-600">(${data.ratingCount})</div>`;
+                                ratingDisplay.innerHTML = `Puan : ${data.averageRating.toFixed(1)} <span class="c-grey-500">(${data.ratingCount} Kişi Puan Verdi)</span>`;
+                                
+                                // Kullanıcının puanını tekrar göster (eğer varsa)
+                                if (currentUserRating && currentUserRating > 0) {
+                                    updateUserRatingDisplay(currentUserRating);
+                                }
+                                
+                                updateAverageRatingStars(data.averageRating);
+                                
+                                // data-initial-rating attribute'unu güncelle
+                                const starRatingContainer = document.querySelector('.star-rating');
+                                if (starRatingContainer) {
+                                    starRatingContainer.setAttribute('data-initial-rating', data.averageRating);
+                                    // Yıldızları güncellenmiş ortalama puana göre göster
+                                    updateStarDisplay(data.averageRating, false);
+                                }
                             } else {
-                                ratingDisplay.innerHTML = `<span class="c-grey-600">-</span>`;
+                                ratingDisplay.innerHTML = `<span class="c-grey-500">-</span>`;
+                                updateAverageRatingStars(null);
                             }
                         }
                     }
@@ -418,60 +721,12 @@
                     console.error('Rating istatistikleri güncellenirken hata:', error);
                 }
             }
-            
-            starIcons.forEach((star, index) => {
-                star.addEventListener('mouseenter', () => {
-                    updateStarDisplay(index + 1);
-                });
-                
-                star.addEventListener('mouseleave', () => {
-                    updateStarDisplay(currentUserRating || 0);
-                });
-                
-                star.addEventListener('click', async () => {
-                    const rating = index + 1;
-                    try {
-                        const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/rate?rating=${rating}&userId=${encodeURIComponent(userId)}`, {
-                            method: 'POST'
-                        });
-                        
-                        if (response.ok) {
-                            const data = await response.json();
-                            currentUserRating = rating;
-                            updateStarDisplay(rating);
-                            const userRatingText = document.getElementById('userRatingText');
-                            if (userRatingText) {
-                                userRatingText.textContent = `Puanınız: ${rating}/5`;
-                            }
-                            
-                            // Rating istatistiklerini güncelle (sayfa yenilemeden)
-                            if (data.averageRating !== undefined && data.ratingCount !== undefined) {
-                                const ratingDisplay = document.getElementById('ratingStats');
-                                if (ratingDisplay) {
-                                    if (data.averageRating !== null) {
-                                        ratingDisplay.innerHTML = `<span>${data.averageRating.toFixed(1)}</span> / 5.0 <div class="fsz-xs c-grey-600">(${data.ratingCount})</div>`;
-                                    } else {
-                                        ratingDisplay.innerHTML = `<span class="c-grey-600">-</span>`;
-                                    }
-                                }
-                            } else {
-                                // Eğer response'da yoksa ayrı bir istek yap
-                                await updateRatingStats();
-                            }
-                        } else {
-                            alert('Puan verilirken bir hata oluştu.');
-                        }
-                    } catch (error) {
-                        console.error('Puan verilirken hata:', error);
-                        alert('Puan verilirken bir hata oluştu.');
-                    }
-                });
-            });
-            
+
+
             // Like sistemi
-            const likeButton = document.getElementById('likeButton');
+            const likeButtonStat = document.getElementById('likeButtonStat');
             let isLiked = false;
-            
+
             async function loadLikeStatus() {
                 try {
                     const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/like?userId=${encodeURIComponent(userId)}`);
@@ -484,32 +739,45 @@
                     console.error('Like durumu yüklenirken hata:', error);
                 }
             }
-            
+
             function updateLikeButton() {
-                if (likeButton) {
+                const likeIconStat = document.getElementById('likeIconStat');
+                const likeButtonStat = document.getElementById('likeButtonStat');
+                if (likeIconStat) {
                     if (isLiked) {
-                        likeButton.classList.add('liked');
-                        likeButton.innerHTML = '<i class="ti-heart" id="likeIcon"></i> <span id="likeButtonText">Beğenildi</span>';
+                        likeIconStat.classList.add('liked');
+                        likeIconStat.style.setProperty('color', '#dc3545', 'important');
+                        likeIconStat.style.setProperty('font-weight', '900', 'important');
+                        likeIconStat.style.setProperty('-webkit-text-stroke', '0px', 'important');
+                        likeIconStat.style.setProperty('-webkit-text-fill-color', '#dc3545', 'important');
+                        likeIconStat.style.setProperty('text-decoration', 'none', 'important');
                     } else {
-                        likeButton.classList.remove('liked');
-                        likeButton.innerHTML = '<i class="ti-heart" id="likeIcon"></i> <span id="likeButtonText">Beğen</span>';
+                        likeIconStat.classList.remove('liked');
+                        likeIconStat.style.setProperty('color', '#999', 'important');
+                        likeIconStat.style.setProperty('font-weight', 'normal', 'important');
+                        likeIconStat.style.setProperty('-webkit-text-stroke', '1px #999', 'important');
+                        likeIconStat.style.setProperty('-webkit-text-fill-color', 'transparent', 'important');
+                        likeIconStat.style.setProperty('text-decoration', 'none', 'important');
                     }
                 }
+                if (likeButtonStat) {
+                    likeButtonStat.style.setProperty('text-decoration', 'none', 'important');
+                }
             }
-            
+
             // Like işlemi fonksiyonu
             async function toggleLike() {
                 try {
                     const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/like?userId=${encodeURIComponent(userId)}`, {
                         method: 'POST'
                     });
-                    
+
                     if (response.ok) {
                         const data = await response.json();
                         // Backend'den dönen isLiked ve likeCount'u kullan
                         isLiked = data.isLiked;
                         updateLikeButton();
-                        
+
                         // Like count'u güncelle
                         const likeCountElement = document.getElementById('likeCount');
                         if (likeCountElement) {
@@ -523,25 +791,25 @@
                     alert('Beğeni işlemi sırasında bir hata oluştu.');
                 }
             }
-            
-            // Like butonu event listener
-            if (likeButton) {
-                likeButton.addEventListener('click', toggleLike);
+
+            // İstatistikler satırındaki kalp ikonuna tıklama olayı
+            if (likeButtonStat) {
+                likeButtonStat.addEventListener('click', toggleLike);
             }
-            
+
             // Fotoğrafa çift tıklama ile beğenme
             const recipeImage = document.getElementById('recipeImage');
-            if (recipeImage && likeButton) {
+            if (recipeImage) {
                 recipeImage.addEventListener('dblclick', async () => {
                     await toggleLike();
                 });
             }
-            
+
             // Share Recipe Function
             function shareRecipe() {
                 const recipeUrl = window.location.href;
                 const recipeTitle = '@Html.Raw(Json.Serialize(Model.Title))';
-                
+
                 if (navigator.share) {
                     // Web Share API (modern browsers)
                     navigator.share({
@@ -559,18 +827,18 @@
                     });
                 }
             }
-            
+
             // Servings Calculator
             const originalServings = @Model.Servings;
             let originalIngredients = [];
-            
+
             function initServingsCalculator() {
                 originalIngredients = Array.from(document.querySelectorAll('#ingredientsList li')).map(li => ({
                     element: li,
                     text: li.getAttribute('data-original') || li.textContent.trim()
                 }));
             }
-            
+
             function adjustServings(newServings) {
                 if (!originalIngredients.length) initServingsCalculator();
                 const multiplier = parseFloat(newServings) / originalServings;
@@ -583,7 +851,7 @@
                     element.textContent = updatedText || text;
                 });
             }
-            
+
             function resetServings() {
                 if (!originalIngredients.length) initServingsCalculator();
                 document.getElementById('servingsMultiplier').value = originalServings;
@@ -591,7 +859,7 @@
                     element.textContent = text;
                 });
             }
-            
+
             // Sayfa yüklendiğinde
             initServingsCalculator();
             loadUserRating();

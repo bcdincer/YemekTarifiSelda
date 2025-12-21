@@ -100,8 +100,8 @@
                         @foreach (var recipe in Model)
                         {
                             <div class="col-md-6 col-lg-3 mb-3 recipe-item">
-                                <a asp-controller="Recipes" asp-action="Details" asp-route-id="@recipe.Id" class="recipe-card-link" style="text-decoration: none; display: block;">
-                                    <div class="bd bgc-white bdrs-3 ov-h recipe-card" style="transition: all 0.3s ease; cursor: pointer;">
+                                <a asp-controller="Recipes" asp-action="Details" asp-route-id="@recipe.Id" class="recipe-card-link" style="text-decoration: none; display: block; height: 100%;">
+                                    <div class="bd bgc-white bdrs-3 ov-h recipe-card" style="transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; height: 100%;">
                                         @if (!string.IsNullOrEmpty(recipe.ImageUrl))
                                         {
                                             <div class="recipe-card-image-wrapper" style="position: relative; overflow: hidden;">
@@ -124,14 +124,14 @@
                                                 </div>
                                             </div>
                                         }
-                                        <div class="p-20">
-                                            <h6 class="mB-10 c-grey-800" style="transition: color 0.3s ease;">
+                                        <div class="p-20" style="flex: 1; display: flex; flex-direction: column;">
+                                            <h6 class="mB-10 c-grey-800" style="transition: color 0.3s ease; min-height: 48px; line-height: 1.4;">
                                                 @recipe.Title
                                             </h6>
-                                            <p class="fsz-sm c-grey-600 mB-15">
+                                            <p class="fsz-sm c-grey-600 mB-10" style="min-height: 40px; line-height: 1.4;">
                                                 @(recipe.Description.Length > 100 ? recipe.Description.Substring(0, 100) + "..." : recipe.Description)
                                             </p>
-                                            <div class="peers fxw-nw ai-c fsz-sm c-grey-600 mB-10">
+                                            <div class="peers fxw-nw ai-c fsz-sm c-grey-600 mB-10" style="min-height: 24px; flex-shrink: 0;">
                                                 <div class="peer mR-15">
                                                     <i class="ti-time"></i> @recipe.CookingTimeMinutes dk
                                                 </div>
@@ -145,15 +145,39 @@
                                                     </div>
                                                 }
                                             </div>
-                                            <div class="peers fxw-nw ai-c mT-10 gap-10" style="min-height: 32px; align-items: center;">
+                                            <div class="peers fxw-nw ai-c mT-10 gap-10" style="min-height: 32px; flex-shrink: 0; margin-top: auto; align-items: center;">
                                                 <div class="peer" style="min-width: 120px;">
                                                     @if (recipe.AverageRating.HasValue)
                                                     {
                                                         <div class="peers fxw-nw ai-c">
-                                                            <div class="peer">
+                                                            <div class="peer" style="display: inline-flex; align-items: center; gap: 2px;">
+                                                                @{
+                                                                    double visualRating = recipe.AverageRating.Value * 2; // 1-5 -> 2-10
+                                                                }
                                                                 @for (int i = 0; i < 5; i++)
                                                                 {
-                                                                    <i class="ti-star @(i < (int)Math.Round(recipe.AverageRating.Value) ? "c-yellow-500" : "c-grey-300")" style="font-size: 14px;"></i>
+                                                                    int starValue = (i + 1) * 2; // 2, 4, 6, 8, 10
+                                                                    int starStart = i * 2; // 0, 2, 4, 6, 8
+                                                                    
+                                                                    if (visualRating >= starValue)
+                                                                    {
+                                                                        <i class="ti-star c-yellow-500" style="font-size: 14px;"></i>
+                                                                    }
+                                                                    else if (visualRating > starStart && visualRating < starValue)
+                                                                    {
+                                                                        double fractionalPart = (visualRating - starStart) / (starValue - starStart);
+                                                                        double fillPercentage = fractionalPart * 100;
+                                                                        <div style="position: relative; display: inline-block; width: 14px; height: 14px; line-height: 1;">
+                                                                            <i class="ti-star c-grey-300" style="font-size: 14px; position: absolute; left: 0; top: 0; z-index: 1;"></i>
+                                                                            <div style="position: absolute; left: 0; top: 0; width: @(fillPercentage.ToString("F1", System.Globalization.CultureInfo.InvariantCulture))%; height: 14px; overflow: hidden; z-index: 2;">
+                                                                                <i class="ti-star c-yellow-500" style="font-size: 14px; position: absolute; left: 0; top: 0; width: 14px; height: 14px; display: block;"></i>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <i class="ti-star c-grey-300" style="font-size: 14px;"></i>
+                                                                    }
                                                                 }
                                                             </div>
                                                             <div class="peer mL-5 fsz-sm c-grey-600">
