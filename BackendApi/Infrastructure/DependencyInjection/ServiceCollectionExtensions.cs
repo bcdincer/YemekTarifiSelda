@@ -23,6 +23,9 @@ public static class ServiceCollectionExtensions
         // FluentValidation
         services.AddValidatorsFromAssemblyContaining<CreateRecipeDtoValidator>();
         services.AddValidatorsFromAssemblyContaining<CategoryDtoValidator>();
+        services.AddValidatorsFromAssemblyContaining<CreateCollectionDtoValidator>();
+        services.AddValidatorsFromAssemblyContaining<CreateCommentDtoValidator>();
+        services.AddValidatorsFromAssemblyContaining<UpdateCommentDtoValidator>();
 
         // Hangfire (Background Jobs & Queue)
         var hangfireConnectionString = configuration.GetConnectionString("DefaultConnection");
@@ -58,6 +61,21 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRatingService, RatingService>();
         services.AddScoped<ILikeRepository, LikeRepository>();
         services.AddScoped<ILikeService, LikeService>();
+        services.AddScoped<ICollectionRepository, CollectionRepository>();
+        services.AddScoped<ICollectionRecipeRepository, CollectionRecipeRepository>();
+        services.AddScoped<ICollectionService, CollectionService>();
+        services.AddScoped<ICommentRepository, CommentRepository>();
+        services.AddScoped<ICommentLikeRepository, CommentLikeRepository>();
+        services.AddScoped<ICommentService, CommentService>();
+        services.AddScoped<IJwtService, JwtService>();
+        
+        // Meal Plan & Shopping List
+        services.AddScoped<IMealPlanRepository, MealPlanRepository>();
+        services.AddScoped<IMealPlanItemRepository, MealPlanItemRepository>();
+        services.AddScoped<IShoppingListRepository, ShoppingListRepository>();
+        services.AddScoped<IShoppingListItemRepository, ShoppingListItemRepository>();
+        services.AddScoped<IMealPlanService, MealPlanService>();
+        services.AddScoped<IShoppingListService, ShoppingListService>();
 
         // AI Agent Service (will be implemented later)
         // services.AddScoped<IAiAgentService, AiAgentService>();

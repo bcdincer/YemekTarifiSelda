@@ -3,6 +3,7 @@ using FrontendMvc.Models.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Json;
 
 namespace FrontendMvc.Controllers;
 
@@ -11,15 +12,21 @@ public class AccountController : Controller
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ILogger<AccountController> _logger;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IConfiguration _configuration;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        ILogger<AccountController> logger)
+        ILogger<AccountController> logger,
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
+        _httpClientFactory = httpClientFactory;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -51,6 +58,58 @@ public class AccountController : Controller
         if (result.Succeeded)
         {
             _logger.LogInformation("User logged in.");
+            
+            // Kullanıcı bilgilerini al
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                // Backend API'den JWT token al
+                try
+                {
+                    var backendApiUrl = _configuration["BackendApi:BaseUrl"] ?? "https://localhost:7016";
+                    var client = _httpClientFactory.CreateClient();
+                    client.BaseAddress = new Uri(backendApiUrl);
+                    
+                    var loginRequest = new
+                    {
+                        userId = user.Id,
+                        userName = user.UserName ?? user.Email,
+                        email = user.Email
+                    };
+                    
+                    var response = await client.PostAsJsonAsync("/api/auth/login", loginRequest);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var loginResponse = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+                        if (loginResponse.TryGetProperty("token", out var tokenElement))
+                        {
+                            var token = tokenElement.GetString();
+                            if (!string.IsNullOrEmpty(token))
+                            {
+                                // Token'ı cookie'ye kaydet
+                                var cookieOptions = new CookieOptions
+                                {
+                                    HttpOnly = true,
+                                    Secure = Request.IsHttps,
+                                    SameSite = SameSiteMode.Lax,
+                                    Expires = DateTimeOffset.UtcNow.AddDays(30)
+                                };
+                                Response.Cookies.Append("authToken", token, cookieOptions);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Backend API'den token alınamadı. Status: {StatusCode}", response.StatusCode);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Backend API'den token alınamadı, devam ediliyor.");
+                    // Token alınamazsa da devam et, kullanıcı giriş yapmış
+                }
+            }
+            
             return RedirectToLocal(returnUrl ?? "/Admin/Dashboard");
         }
         
@@ -131,6 +190,13 @@ public class AccountController : Controller
 
     [HttpGet]
     public IActionResult AccessDenied()
+    {
+        return View();
+    }
+
+    [HttpGet]
+    [Authorize]
+    public IActionResult Profile()
     {
         return View();
     }

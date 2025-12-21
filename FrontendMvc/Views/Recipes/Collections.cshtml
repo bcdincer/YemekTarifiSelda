@@ -1,0 +1,407 @@
+@model List<FrontendMvc.Models.Recipes.CollectionViewModel>
+
+@{
+    ViewData["Title"] = "Koleksiyonlarım";
+}
+
+<div >
+    <div class="col-12">
+        <div class="bd bgc-white p-20 collections-main-container">
+            <div class="layers">
+                <div class="layer w-100 mB-20" style="flex-shrink: 0;">
+                    <div class="peers fxw-nw ai-c jc-sb">
+                        <div class="peer peer-greed">
+                            <h4 class="lh-1 mB-0">
+                                <i class="ti-bookmark c-blue-500 mR-10"></i>
+                                Koleksiyonlarım
+                            </h4>
+                            <p class="fsz-sm c-grey-600 mT-5">Tariflerinizi organize edin</p>
+                        </div>
+                        <div class="peer">
+                            <button type="button" class="btn btn-primary" onclick="showCreateCollectionModal()">
+                                <i class="ti-plus mR-5"></i> Yeni Koleksiyon
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="layer w-100 mB-20" style="flex-shrink: 0;">
+                        <div class="alert alert-danger mB-0">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    </div>
+                }
+
+                <div class="layer w-100 collections-content-layer">
+                    @if (Model == null || !Model.Any())
+                    {
+                        <div class="text-center p-40">
+                            <i class="ti-bookmark fsz-xxl c-grey-400 d-b mB-20"></i>
+                            <h4 class="c-grey-600 mB-10">Henüz koleksiyonunuz yok</h4>
+                            <p class="c-grey-600 mB-30">Tariflerinizi organize etmek için koleksiyonlar oluşturun.</p>
+                            <button type="button" class="btn btn-primary" onclick="showCreateCollectionModal()">
+                                <i class="ti-plus mR-5"></i> İlk Koleksiyonunuzu Oluşturun
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row gap-20 collections-scrollable" id="collectionsContainer">
+                            @foreach (var collection in Model)
+                            {
+                                <div class="col-md-6 col-lg-4 mb-3 collection-item">
+                                    <a asp-controller="Recipes" asp-action="CollectionDetail" asp-route-id="@collection.Id" class="collection-card-link" style="text-decoration: none; display: block; height: 100%;">
+                                        <div class="bd bgc-white bdrs-3 ov-h collection-card" style="transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+                                            <div class="p-20" style="flex: 1; display: flex; flex-direction: column;">
+                                                <div class="d-flex ai-c jc-sb mB-15">
+                                                    <h5 class="mB-0 c-grey-800 fw-600" style="transition: color 0.3s ease; flex: 1; min-width: 0;">
+                                                        <i class="ti-bookmark c-blue-500 mR-5"></i>
+                                                        <span style="word-wrap: break-word; overflow-wrap: break-word;">@collection.Name</span>
+                                                    </h5>
+                                                    <div class="dropdown mL-10" onclick="event.stopPropagation(); event.preventDefault();">
+                                                        <button class="btn btn-link p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="line-height: 1;">
+                                                            <i class="ti-more-vertical c-grey-600"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end">
+                                                            <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); editCollection(@collection.Id, '@Html.Raw(collection.Name.Replace("'", "\\'"))', '@Html.Raw((collection.Description ?? "").Replace("'", "\\'"))'); return false;"><i class="ti-pencil mR-5"></i> Düzenle</a></li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li><a class="dropdown-item text-danger" href="#" onclick="event.stopPropagation(); deleteCollection(@collection.Id, '@Html.Raw(collection.Name.Replace("'", "\\'"))'); return false;"><i class="ti-trash mR-5"></i> Sil</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(collection.Description))
+                                                {
+                                                    <p class="fsz-sm c-grey-600 mB-15" style="flex: 1; word-wrap: break-word; overflow-wrap: break-word; min-height: 40px; line-height: 1.4;">
+                                                        @collection.Description
+                                                    </p>
+                                                }
+                                                else
+                                                {
+                                                    <div style="flex: 1; min-height: 40px;"></div>
+                                                }
+                                                <div class="peers fxw-nw ai-c mT-auto pt-15" style="border-top: 1px solid #f0f0f0; margin-top: auto;">
+                                                    <div class="peer">
+                                                        <i class="ti-layout-list-thumb c-grey-500"></i>
+                                                        <span class="fsz-sm c-grey-600 mL-5">@collection.RecipeCount tarif</span>
+                                                    </div>
+                                                    <div class="peer mL-auto">
+                                                        <span class="fsz-xs c-grey-500">@collection.UpdatedAt.ToLocalTime().ToString("dd.MM.yyyy")</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Collection Modal -->
+<div class="modal fade" id="createCollectionModal" tabindex="-1" role="dialog" aria-labelledby="createCollectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createCollectionModalLabel">Yeni Koleksiyon Oluştur</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeCreateCollectionModal()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createCollectionForm">
+                    <div class="form-group">
+                        <label for="collectionName">Koleksiyon Adı *</label>
+                        <input type="text" class="form-control" id="collectionName" required placeholder="Örn: Hafta Sonu Kahvaltıları">
+                    </div>
+                    <div class="form-group">
+                        <label for="collectionDescription">Açıklama</label>
+                        <textarea class="form-control" id="collectionDescription" rows="3" placeholder="İsteğe bağlı açıklama"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeCreateCollectionModal()">İptal</button>
+                <button type="button" class="btn btn-primary" id="saveCollectionBtn" onclick="editingCollectionId ? updateCollection() : createCollection()">
+                    <span id="saveCollectionBtnText">Oluştur</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Collections container için tam yükseklik */
+    .collections-main-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 150px);
+        min-height: 600px;
+    }
+    
+    .collections-main-container .layers {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .collections-content-layer {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        min-height: 0;
+    }
+    
+    /* Scrollbar styling */
+    .collections-content-layer::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .collections-content-layer::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .collections-content-layer::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+    
+    .collections-content-layer::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+    
+    /* Gap-20 overflow özelliğini override et */
+    #collectionsContainer.collections-scrollable {
+        overflow: visible !important;
+    }
+    
+    /* Collection Card Hover Effects */
+    .collection-card-link {
+        text-decoration: none !important;
+    }
+    
+    .collection-card {
+        transition: all 0.3s ease;
+    }
+    
+    .collection-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important;
+        border-color: #c0c0c0 !important;
+    }
+    
+    .collection-card-link:hover .collection-card h5 {
+        color: #007bff !important;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal.show {
+        display: block;
+    }
+
+    .modal-dialog {
+        position: relative;
+        width: auto;
+        max-width: 500px;
+        margin: 50px auto;
+    }
+
+    .modal-content {
+        position: relative;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .modal-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .modal-header .close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #999;
+    }
+
+    .modal-header .close:hover {
+        color: #333;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 15px 20px;
+        border-top: 1px solid #e0e0e0;
+        gap: 10px;
+    }
+</style>
+
+@section Scripts {
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script>
+            const apiBaseUrl = window.API_BASE_URL || 'https://localhost:7016';
+
+            function showCreateCollectionModal() {
+                document.getElementById('createCollectionModal').style.display = 'block';
+                document.getElementById('createCollectionModal').classList.add('show');
+                document.getElementById('collectionName').focus();
+            }
+
+            function closeCreateCollectionModal() {
+                document.getElementById('createCollectionModal').style.display = 'none';
+                document.getElementById('createCollectionModal').classList.remove('show');
+                document.getElementById('createCollectionForm').reset();
+                editingCollectionId = null;
+                document.getElementById('createCollectionModalLabel').textContent = 'Yeni Koleksiyon Oluştur';
+                document.getElementById('saveCollectionBtnText').textContent = 'Oluştur';
+            }
+
+            async function createCollection() {
+                const name = document.getElementById('collectionName').value.trim();
+                const description = document.getElementById('collectionDescription').value.trim();
+
+                if (!name) {
+                    showToast('Koleksiyon adı gereklidir.', 'warning');
+                    return;
+                }
+
+                try {
+                    const response = await apiFetch(`${apiBaseUrl}/api/users/collections`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            name: name,
+                            description: description || null
+                        })
+                    });
+
+                    if (response.ok) {
+                        showToast('Koleksiyon oluşturuldu!', 'success');
+                        setTimeout(() => window.location.reload(), 500);
+                    } else {
+                        const error = await response.json();
+                        showToast(error.error || 'Koleksiyon oluşturulurken bir hata oluştu.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error creating collection:', error);
+                    showToast('Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                }
+            }
+
+            let editingCollectionId = null;
+
+            function editCollection(id, name, description) {
+                editingCollectionId = id;
+                document.getElementById('collectionName').value = name;
+                document.getElementById('collectionDescription').value = description || '';
+                document.getElementById('createCollectionModalLabel').textContent = 'Koleksiyon Düzenle';
+                document.getElementById('saveCollectionBtnText').textContent = 'Kaydet';
+                showCreateCollectionModal();
+            }
+
+            async function updateCollection() {
+                const name = document.getElementById('collectionName').value.trim();
+                const description = document.getElementById('collectionDescription').value.trim();
+
+                if (!name) {
+                    showToast('Koleksiyon adı gereklidir.', 'warning');
+                    return;
+                }
+
+                if (!editingCollectionId) {
+                    showToast('Düzenlenecek koleksiyon bulunamadı.', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await apiFetch(`${apiBaseUrl}/api/users/collections/${editingCollectionId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            name: name,
+                            description: description || null
+                        })
+                    });
+
+                    if (response.ok || response.status === 204) {
+                        showToast('Koleksiyon güncellendi!', 'success');
+                        setTimeout(() => window.location.reload(), 500);
+                    } else {
+                        const error = await response.json();
+                        showToast(error.error || 'Koleksiyon güncellenirken bir hata oluştu.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error updating collection:', error);
+                    showToast('Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                }
+            }
+
+            async function deleteCollection(id, name) {
+                if (!confirm(`"${name}" koleksiyonunu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) {
+                    return;
+                }
+
+                try {
+                    const response = await apiFetch(`${apiBaseUrl}/api/users/collections/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok || response.status === 204) {
+                        showToast('Koleksiyon silindi!', 'success');
+                        setTimeout(() => window.location.reload(), 500);
+                    } else {
+                        const error = await response.json();
+                        showToast(error.error || 'Koleksiyon silinirken bir hata oluştu.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting collection:', error);
+                    showToast('Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                }
+            }
+
+            // Modal dışına tıklanınca kapat
+            window.onclick = function(event) {
+                const modal = document.getElementById('createCollectionModal');
+                if (event.target === modal) {
+                    closeCreateCollectionModal();
+                }
+            }
+
+        </script>
+    }
+}

@@ -1,0 +1,277 @@
+@model FrontendMvc.Models.MealPlan.CreateMealPlanViewModel
+
+@{
+    var mealPlanId = ViewBag.MealPlanId as int?;
+    var isEdit = mealPlanId.HasValue;
+    ViewData["Title"] = isEdit ? "Yemek Planını Düzenle" : "Yeni Yemek Planı Oluştur";
+    var recipes = ViewBag.Recipes as List<FrontendMvc.Models.Recipes.RecipeViewModel> ?? new List<FrontendMvc.Models.Recipes.RecipeViewModel>();
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="bd bgc-white p-30">
+                <h2 class="mB-20">
+                    <i class="ti-calendar c-blue-500"></i> @(isEdit ? "Yemek Planını Düzenle" : "Yeni Yemek Planı Oluştur")
+                </h2>
+
+                <form asp-action="@(isEdit ? "Edit" : "Create")" method="post" id="mealPlanForm" data-val="true">
+                    @if (isEdit)
+                    {
+                        <input type="hidden" name="id" value="@mealPlanId.Value" />
+                    }
+                    @Html.AntiForgeryToken()
+                    
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger mB-20">
+                            <div asp-validation-summary="All" class="mB-0"></div>
+                        </div>
+                    }
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mB-20">
+                                <label asp-for="Name" class="fw-600 mB-8">Plan Adı *</label>
+                                <input asp-for="Name" class="form-control" placeholder="Örn: Aralık 2024 - Hafta 1" required>
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mB-20">
+                                <label asp-for="StartDate" class="fw-600 mB-8">Başlangıç Tarihi *</label>
+                                <input asp-for="StartDate" type="date" class="form-control" required>
+                                <span asp-validation-for="StartDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mB-20">
+                                <label asp-for="EndDate" class="fw-600 mB-8">Bitiş Tarihi *</label>
+                                <input asp-for="EndDate" type="date" class="form-control" required>
+                                <span asp-validation-for="EndDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mB-30">
+                        <h4 class="mB-15">Öğünler</h4>
+                        <div id="mealItems">
+                            @if (Model.Items != null && Model.Items.Any())
+                            {
+                                for (int i = 0; i < Model.Items.Count; i++)
+                                {
+                                    <div class="meal-item-row bd bgc-grey-50 p-15 mB-10 bdrs-3" data-index="@i">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group mB-10">
+                                                    <label class="fw-600 mB-5">Tarih</label>
+                                                    <input type="date" name="Items[@i].Date" class="form-control" value="@Model.Items[i].Date.ToString("yyyy-MM-dd")" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group mB-10">
+                                                    <label class="fw-600 mB-5">Öğün Tipi</label>
+                                                    <select name="Items[@i].MealType" class="form-control" required>
+                                                        @if (Model.Items[i].MealType == "Kahvaltı")
+                                                        {
+                                                            <option value="Kahvaltı" selected>Kahvaltı</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="Kahvaltı">Kahvaltı</option>
+                                                        }
+                                                        @if (Model.Items[i].MealType == "ÖğleYemeği")
+                                                        {
+                                                            <option value="ÖğleYemeği" selected>Öğle Yemeği</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="ÖğleYemeği">Öğle Yemeği</option>
+                                                        }
+                                                        @if (Model.Items[i].MealType == "AkşamYemeği")
+                                                        {
+                                                            <option value="AkşamYemeği" selected>Akşam Yemeği</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="AkşamYemeği">Akşam Yemeği</option>
+                                                        }
+                                                        @if (Model.Items[i].MealType == "Atıştırmalık")
+                                                        {
+                                                            <option value="Atıştırmalık" selected>Atıştırmalık</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="Atıştırmalık">Atıştırmalık</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group mB-10">
+                                                    <label class="fw-600 mB-5">Tarif</label>
+                                                    <select name="Items[@i].RecipeId" class="form-control" required>
+                                                        <option value="">Seçiniz...</option>
+                                                        @foreach (var recipe in recipes)
+                                                        {
+                                                            @if (Model.Items[i].RecipeId == recipe.Id)
+                                                            {
+                                                                <option value="@recipe.Id" selected>@recipe.Title</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@recipe.Id">@recipe.Title</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group mB-10">
+                                                    <label class="fw-600 mB-5">Kişilik</label>
+                                                    <input type="number" name="Items[@i].Servings" class="form-control" value="@Model.Items[i].Servings" min="1" required>
+                                                    <button type="button" class="btn btn-sm btn-danger w-100 mT-5" onclick="removeMealItem(this)">
+                                                        <i class="ti-trash"></i> Sil
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <button type="button" class="btn btn-success" onclick="addMealItem()">
+                            <i class="ti-plus mR-5"></i> Öğün Ekle
+                        </button>
+                    </div>
+
+                    <div class="d-flex gap-10">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ti-save mR-5"></i> Planı Kaydet
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="ti-close mR-5"></i> İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let itemIndex = @(Model.Items?.Count ?? 0);
+@{
+    var jsonOptions = new System.Text.Json.JsonSerializerOptions
+    {
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+    };
+}
+const recipes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(recipes.Select(r => new { r.Id, r.Title }), jsonOptions));
+
+function addMealItem() {
+    const container = document.getElementById('mealItems');
+    const startDate = '@Model.StartDate.ToString("yyyy-MM-dd")';
+    const endDate = '@Model.EndDate.ToString("yyyy-MM-dd")';
+    
+    const div = document.createElement('div');
+    div.className = 'meal-item-row bd bgc-grey-50 p-15 mB-10 bdrs-3';
+    div.setAttribute('data-index', itemIndex);
+    
+    const recipeOptions = recipes.map(r => '<option value="' + (r.Id || r.id) + '">' + (r.Title || r.title || '') + '</option>').join('');
+    
+    div.innerHTML = '<div class="row">' +
+        '<div class="col-md-4">' +
+            '<div class="form-group mB-10">' +
+                '<label class="fw-600 mB-5">Tarih</label>' +
+                '<input type="date" name="Items[' + itemIndex + '].Date" class="form-control" value="' + startDate + '" min="' + startDate + '" max="' + endDate + '" required>' +
+            '</div>' +
+        '</div>' +
+        '<div class="col-md-3">' +
+            '<div class="form-group mB-10">' +
+                '<label class="fw-600 mB-5">Öğün Tipi</label>' +
+                '<select name="Items[' + itemIndex + '].MealType" class="form-control" required>' +
+                    '<option value="Kahvaltı">Kahvaltı</option>' +
+                    '<option value="ÖğleYemeği">Öğle Yemeği</option>' +
+                    '<option value="AkşamYemeği" selected>Akşam Yemeği</option>' +
+                    '<option value="Atıştırmalık">Atıştırmalık</option>' +
+                '</select>' +
+            '</div>' +
+        '</div>' +
+        '<div class="col-md-3">' +
+            '<div class="form-group mB-10">' +
+                '<label class="fw-600 mB-5">Tarif</label>' +
+                '<select name="Items[' + itemIndex + '].RecipeId" class="form-control" required>' +
+                    '<option value="">Seçiniz...</option>' +
+                    recipeOptions +
+                '</select>' +
+            '</div>' +
+        '</div>' +
+        '<div class="col-md-2">' +
+            '<div class="form-group mB-10">' +
+                '<label class="fw-600 mB-5">Kişilik</label>' +
+                '<input type="number" name="Items[' + itemIndex + '].Servings" class="form-control" value="4" min="1" required>' +
+                '<button type="button" class="btn btn-sm btn-danger w-100 mT-5" onclick="removeMealItem(this)">' +
+                    '<i class="ti-trash"></i> Sil' +
+                '</button>' +
+            '</div>' +
+        '</div>' +
+    '</div>';
+    
+    container.appendChild(div);
+    itemIndex++;
+}
+
+function removeMealItem(button) {
+    button.closest('.meal-item-row').remove();
+}
+</script>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // jQuery Validation'ı bu sayfada devre dışı bırak
+            if (typeof $.validator !== 'undefined') {
+                // Tüm validation'ları temizle
+                $('#mealPlanForm').each(function() {
+                    var $form = $(this);
+                    if ($form.data('validator')) {
+                        $form.removeData('validator');
+                    }
+                    $form.off('submit.validate');
+                    $form.off('.validate');
+                    $form.find('[data-val]').each(function() {
+                        $(this).removeData('validator');
+                    });
+                });
+            }
+            
+            // Form submit'te sadece HTML5 validation kullan
+            $('#mealPlanForm').on('submit', function(e) {
+                // jQuery validation'ı tekrar temizle (güvenlik için)
+                var $form = $(this);
+                try {
+                    if ($form.data('validator')) {
+                        $form.removeData('validator');
+                    }
+                    $form.off('submit.validate');
+                    $form.off('.validate');
+                } catch (err) {
+                    // Sessizce devam et
+                }
+                
+                // HTML5 validation kontrolü yap
+                if (this.checkValidity() === false) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.classList.add('was-validated');
+                    return false;
+                }
+                
+                // Form geçerliyse submit et
+                return true;
+            });
+        });
+    </script>
+}
+

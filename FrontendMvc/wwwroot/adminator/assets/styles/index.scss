@@ -285,20 +285,26 @@ body {
 }
 
 // Forms --------------------------------------------------
-.form-control,
-.form-select {
-  background: var(--c-bkg-card);
-  color: var(--c-text-base);
-  border: 1px solid var(--c-border);
+[data-theme="dark"] {
+  .form-control,
+  .form-select {
+    background: var(--c-bkg-body);
+    color: var(--c-text-base);
+    border: 1px solid var(--c-border);
 
-  &:focus {
-    border-color: var(--c-primary);
-    box-shadow: 0 0 0 0.1rem rgba(75, 124, 243, .25);
+    &:focus {
+      background: var(--c-bkg-body);
+      border-color: var(--c-primary);
+      box-shadow: 0 0 0 0.1rem rgba(75, 124, 243, .25);
+      color: var(--c-text-base);
+    }
   }
-}
 
-input::placeholder {
-  color: var(--c-text-muted);
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--c-text-muted);
+    opacity: 0.7;
+  }
 }
 
 // Cards --------------------------------------------------
@@ -796,6 +802,172 @@ h1, h2, h3, h4, h5, h6 {
         opacity: 0.9;
       }
     }
+  }
+}
+
+// Dark mode form controls and inputs improvements -------------------
+[data-theme="dark"] {
+  // Form controls - better contrast
+  .form-control,
+  .form-select,
+  textarea.form-control,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="search"],
+  input[type="url"],
+  input[type="tel"],
+  select {
+    background-color: var(--c-bkg-body) !important;
+    border-color: var(--c-border) !important;
+    color: var(--c-text-base) !important;
+    
+    &:focus {
+      background-color: var(--c-bkg-body) !important;
+      border-color: var(--c-primary) !important;
+      color: var(--c-text-base) !important;
+      box-shadow: 0 0 0 0.2rem rgba(75, 124, 243, 0.25) !important;
+    }
+    
+    &::placeholder {
+      color: var(--c-text-muted) !important;
+      opacity: 0.7;
+    }
+    
+    &:disabled {
+      background-color: color-mix(in srgb, var(--c-bkg-body) 50%, var(--c-border)) !important;
+      color: var(--c-text-muted) !important;
+      opacity: 0.6;
+    }
+  }
+  
+  // Light grey backgrounds - make them darker in dark mode
+  .bgc-grey-50,
+  .bgc-grey-100 {
+    background-color: color-mix(in srgb, var(--c-bkg-card) 90%, var(--c-bkg-body)) !important;
+    border-color: var(--c-border) !important;
+  }
+  
+  .bgc-grey-200 {
+    background-color: color-mix(in srgb, var(--c-bkg-card) 85%, var(--c-border)) !important;
+    border-color: var(--c-border) !important;
+  }
+  
+  // Recipe details page specific - darker info boxes and containers
+  // Override inline styles with !important for dark mode
+  .bd.bgc-grey-50[style*="background"],
+  button.bd.bgc-grey-50[style*="background"],
+  .bd.bgc-grey-50.bdrs-3[style*="background"] {
+    background-color: color-mix(in srgb, var(--c-bkg-card) 85%, var(--c-bkg-body)) !important;
+    border-color: var(--c-border) !important;
+    
+    &:hover {
+      background-color: color-mix(in srgb, var(--c-bkg-card) 75%, var(--c-bkg-body)) !important;
+    }
+  }
+  
+  // Ingredients and steps containers
+  .bd.bgc-grey-50.p-20,
+  .bd.bgc-grey-50.p-15 {
+    background-color: color-mix(in srgb, var(--c-bkg-card) 85%, var(--c-bkg-body)) !important;
+    border-color: var(--c-border) !important;
+    color: var(--c-text-base) !important;
+  }
+  
+  // Text areas - better readability
+  textarea {
+    background-color: var(--c-bkg-body) !important;
+    border-color: var(--c-border) !important;
+    color: var(--c-text-base) !important;
+    
+    &::placeholder {
+      color: var(--c-text-muted) !important;
+      opacity: 0.7;
+    }
+  }
+  
+  // Select dropdowns
+  select.form-control,
+  select.form-select {
+    background-color: var(--c-bkg-body) !important;
+    border-color: var(--c-border) !important;
+    color: var(--c-text-base) !important;
+    
+    option {
+      background-color: var(--c-bkg-card) !important;
+      color: var(--c-text-base) !important;
+    }
+  }
+  
+  // Input groups
+  .input-group-text {
+    background-color: var(--c-bkg-card) !important;
+    border-color: var(--c-border) !important;
+    color: var(--c-text-base) !important;
+  }
+  
+  // Form labels - ensure visibility
+  label,
+  .form-label,
+  .fw-600 {
+    color: var(--c-text-base) !important;
+  }
+  
+  // Meal item rows and similar card-like containers
+  .meal-item-row,
+  .bd.bgc-grey-50,
+  .bd.bgc-grey-100 {
+    background-color: var(--c-bkg-body) !important;
+    border-color: var(--c-border) !important;
+    color: var(--c-text-base) !important;
+  }
+  
+  // Alert boxes
+  .alert {
+    background-color: color-mix(in srgb, var(--c-bkg-card) 90%, var(--c-border)) !important;
+    border-color: var(--c-border) !important;
+    color: var(--c-text-base) !important;
+    
+    &.alert-danger {
+      background-color: color-mix(in srgb, var(--c-danger) 15%, var(--c-bkg-card)) !important;
+      border-color: color-mix(in srgb, var(--c-danger) 30%, var(--c-border)) !important;
+      color: #ffcccc !important;
+    }
+    
+    &.alert-success {
+      background-color: color-mix(in srgb, var(--c-success) 15%, var(--c-bkg-card)) !important;
+      border-color: color-mix(in srgb, var(--c-success) 30%, var(--c-border)) !important;
+      color: #ccffcc !important;
+    }
+    
+    &.alert-warning {
+      background-color: color-mix(in srgb, #f59e0b 15%, var(--c-bkg-card)) !important;
+      border-color: color-mix(in srgb, #f59e0b 30%, var(--c-border)) !important;
+      color: #fff3cd !important;
+    }
+    
+    &.alert-info {
+      background-color: color-mix(in srgb, var(--c-primary) 15%, var(--c-bkg-card)) !important;
+      border-color: color-mix(in srgb, var(--c-primary) 30%, var(--c-border)) !important;
+      color: #cce5ff !important;
+    }
+  }
+  
+  // Better text contrast for muted text
+  .c-grey-500,
+  .c-grey-400 {
+    color: var(--c-text-muted) !important;
+  }
+  
+  // Ensure card backgrounds are properly themed
+  .bd.bgc-white {
+    background-color: var(--c-bkg-card) !important;
+    border-color: var(--c-border) !important;
+    color: var(--c-text-base) !important;
   }
 }
 

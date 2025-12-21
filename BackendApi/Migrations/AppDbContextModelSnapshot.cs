@@ -51,6 +51,173 @@ namespace BackendApi.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("BackendApi.Domain.Entities.Collection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Collections");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.CollectionRecipe", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CollectionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RecipeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CollectionId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.HasIndex("CollectionId", "RecipeId")
+                        .IsUnique();
+
+                    b.ToTable("CollectionRecipes");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.CommentLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("CommentId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("CommentLikes");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.MealPlan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StartDate");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MealPlans");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.MealPlanItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MealPlanId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("MealType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("RecipeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Servings")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Date");
+
+                    b.HasIndex("MealPlanId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.ToTable("MealPlanItems");
+                });
+
             modelBuilder.Entity("BackendApi.Domain.Entities.Recipe", b =>
                 {
                     b.Property<int>("Id")
@@ -135,6 +302,60 @@ namespace BackendApi.Migrations
                     b.ToTable("Recipes");
                 });
 
+            modelBuilder.Entity("BackendApi.Domain.Entities.RecipeComment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ParentCommentId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RecipeId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("ParentCommentId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RecipeComments");
+                });
+
             modelBuilder.Entity("BackendApi.Domain.Entities.RecipeLike", b =>
                 {
                     b.Property<int>("Id")
@@ -197,6 +418,132 @@ namespace BackendApi.Migrations
                     b.ToTable("RecipeRatings");
                 });
 
+            modelBuilder.Entity("BackendApi.Domain.Entities.ShoppingList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("MealPlanId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MealPlanId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ShoppingLists");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.ShoppingListItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Ingredient")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Quantity")
+                        .HasColumnType("text");
+
+                    b.Property<int>("ShoppingListId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Unit")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ShoppingListId");
+
+                    b.ToTable("ShoppingListItems");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.CollectionRecipe", b =>
+                {
+                    b.HasOne("BackendApi.Domain.Entities.Collection", "Collection")
+                        .WithMany("CollectionRecipes")
+                        .HasForeignKey("CollectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BackendApi.Domain.Entities.Recipe", "Recipe")
+                        .WithMany()
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Collection");
+
+                    b.Navigation("Recipe");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.CommentLike", b =>
+                {
+                    b.HasOne("BackendApi.Domain.Entities.RecipeComment", "Comment")
+                        .WithMany("CommentLikes")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.MealPlanItem", b =>
+                {
+                    b.HasOne("BackendApi.Domain.Entities.MealPlan", "MealPlan")
+                        .WithMany("Items")
+                        .HasForeignKey("MealPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BackendApi.Domain.Entities.Recipe", "Recipe")
+                        .WithMany()
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MealPlan");
+
+                    b.Navigation("Recipe");
+                });
+
             modelBuilder.Entity("BackendApi.Domain.Entities.Recipe", b =>
                 {
                     b.HasOne("BackendApi.Domain.Entities.Category", "Category")
@@ -205,6 +552,24 @@ namespace BackendApi.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.RecipeComment", b =>
+                {
+                    b.HasOne("BackendApi.Domain.Entities.RecipeComment", "ParentComment")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentCommentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("BackendApi.Domain.Entities.Recipe", "Recipe")
+                        .WithMany()
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ParentComment");
+
+                    b.Navigation("Recipe");
                 });
 
             modelBuilder.Entity("BackendApi.Domain.Entities.RecipeLike", b =>
@@ -229,9 +594,52 @@ namespace BackendApi.Migrations
                     b.Navigation("Recipe");
                 });
 
+            modelBuilder.Entity("BackendApi.Domain.Entities.ShoppingList", b =>
+                {
+                    b.HasOne("BackendApi.Domain.Entities.MealPlan", "MealPlan")
+                        .WithMany()
+                        .HasForeignKey("MealPlanId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("MealPlan");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.ShoppingListItem", b =>
+                {
+                    b.HasOne("BackendApi.Domain.Entities.ShoppingList", "ShoppingList")
+                        .WithMany("Items")
+                        .HasForeignKey("ShoppingListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ShoppingList");
+                });
+
             modelBuilder.Entity("BackendApi.Domain.Entities.Category", b =>
                 {
                     b.Navigation("Recipes");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.Collection", b =>
+                {
+                    b.Navigation("CollectionRecipes");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.MealPlan", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.RecipeComment", b =>
+                {
+                    b.Navigation("CommentLikes");
+
+                    b.Navigation("Replies");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.ShoppingList", b =>
+                {
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

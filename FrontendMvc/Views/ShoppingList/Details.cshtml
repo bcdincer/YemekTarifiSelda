@@ -1,0 +1,136 @@
+@model FrontendMvc.Models.MealPlan.ShoppingListViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="bd bgc-white p-30">
+                <div class="d-flex justify-content-between align-items-center mB-20">
+                    <div>
+                        <h2 class="mB-5">@Model.Name</h2>
+                        <p class="fsz-sm c-grey-600 mB-0">
+                            <i class="ti-clipboard mR-5"></i>
+                            @Model.Items.Count öğe
+                            @if (Model.Items.Any(i => i.IsChecked))
+                            {
+                                <span class="mL-10">
+                                    (@Model.Items.Count(i => i.IsChecked) tamamlandı)
+                                </span>
+                            }
+                        </p>
+                    </div>
+                    <div class="d-flex gap-10">
+                        <button type="button" class="btn btn-primary" onclick="window.print()">
+                            <i class="ti-printer mR-5"></i> Yazdır
+                        </button>
+                        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline" 
+                              onsubmit="return confirm('Bu listeyi silmek istediğinizden emin misiniz?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger">
+                                <i class="ti-trash mR-5"></i> Sil
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="shoppingListItems">
+                    @foreach (var item in Model.Items.OrderBy(i => i.IsChecked).ThenBy(i => i.DisplayOrder).ThenBy(i => i.Ingredient))
+                    {
+                        <div class="bd bgc-grey-50 p-15 mB-10 bdrs-3 shopping-item @(item.IsChecked ? "item-checked" : "")" data-item-id="@item.Id">
+                            <div class="d-flex align-items-center">
+                                <input type="checkbox" class="item-checkbox" 
+                                       data-list-id="@Model.Id" 
+                                       data-item-id="@item.Id" 
+                                       @(item.IsChecked ? "checked" : "")
+                                       onchange="toggleItemChecked(this)"
+                                       style="width: 20px; height: 20px; margin-right: 15px; cursor: pointer;">
+                                <div class="flex-grow-1">
+                                    <span class="fw-600 fsz-lg @(item.IsChecked ? "text-decoration-line-through c-grey-500" : "c-grey-900")">
+                                        @item.Ingredient
+                                    </span>
+                                    @if (!string.IsNullOrEmpty(item.Quantity))
+                                    {
+                                        <span class="c-grey-600 mL-10">
+                                            @item.Quantity @item.Unit
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (!Model.Items.Any())
+                {
+                    <div class="ta-c p-40">
+                        <i class="ti-shopping-cart c-grey-400" style="font-size: 64px;"></i>
+                        <h4 class="mT-20 mB-10 c-grey-600">Liste boş</h4>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.item-checked {
+    opacity: 0.6;
+    background-color: #e8f5e9 !important;
+}
+
+@@media print {
+    .btn, form, .no-print {
+        display: none !important;
+    }
+    
+    .bd {
+        border: 1px solid #ccc !important;
+    }
+    
+    .shopping-item {
+        page-break-inside: avoid;
+    }
+}
+</style>
+
+<script>
+async function toggleItemChecked(checkbox) {
+    const listId = checkbox.dataset.listId;
+    const itemId = checkbox.dataset.itemId;
+    const isChecked = checkbox.checked;
+    
+    const itemRow = checkbox.closest('.shopping-item');
+    
+    try {
+        const response = await fetch(`/ShoppingList/ToggleItemChecked?listId=${listId}&itemId=${itemId}&isChecked=${isChecked}`, {
+            method: 'POST',
+            headers: {
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            }
+        });
+        
+        if (response.ok) {
+            if (isChecked) {
+                itemRow.classList.add('item-checked');
+                itemRow.querySelector('.fw-600').classList.add('text-decoration-line-through', 'c-grey-500');
+                itemRow.querySelector('.fw-600').classList.remove('c-grey-900');
+            } else {
+                itemRow.classList.remove('item-checked');
+                itemRow.querySelector('.fw-600').classList.remove('text-decoration-line-through', 'c-grey-500');
+                itemRow.querySelector('.fw-600').classList.add('c-grey-900');
+            }
+        } else {
+            checkbox.checked = !isChecked;
+            alert('İşlem başarısız oldu. Lütfen tekrar deneyin.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        checkbox.checked = !isChecked;
+        alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+    }
+}
+</script>
+

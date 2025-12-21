@@ -1,0 +1,196 @@
+@using FrontendMvc.Data
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    ViewData["Title"] = "Profilim";
+    var user = await UserManager.GetUserAsync(User);
+}
+
+<div class="row gap-20">
+    <!-- Profil Bilgileri -->
+    <div class="col-12 col-lg-4">
+        <div class="bd bgc-white p-30">
+            <div class="ta-c">
+                <div class="mB-20">
+                    <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 48px; font-weight: bold; margin-bottom: 20px;">
+                        @if (user != null && !string.IsNullOrEmpty(user.FullName))
+                        {
+                            @user.FullName.Substring(0, 1).ToUpper()
+                        }
+                        else if (user != null && !string.IsNullOrEmpty(user.Email))
+                        {
+                            @user.Email.Substring(0, 1).ToUpper()
+                        }
+                        else
+                        {
+                            <i class="ti-user"></i>
+                        }
+                    </div>
+                </div>
+                <h4 class="mB-10">@(user?.FullName ?? user?.Email ?? "Kullanıcı")</h4>
+                <p class="c-grey-600 mB-20">@(user?.Email ?? "")</p>
+                <div class="fsz-sm c-grey-500">
+                    <i class="ti-calendar mR-5"></i>
+                    Üyelik Tarihi: @(user?.CreatedAt.ToString("dd.MM.yyyy") ?? DateTime.Now.ToString("dd.MM.yyyy"))
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İstatistikler -->
+    <div class="col-12 col-lg-8">
+        <div class="bd bgc-white p-30">
+            <h5 class="mB-20">
+                <i class="ti-bar-chart mR-8"></i> İstatistiklerim
+            </h5>
+            
+            <div id="statisticsContainer" style="min-height: 200px;">
+                <div class="text-center p-30">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Yükleniyor...</span>
+                    </div>
+                    <p class="mT-15 c-grey-600">İstatistikler yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Son Aktiviteler -->
+    <div class="col-12">
+        <div class="bd bgc-white p-30">
+            <h5 class="mB-20">
+                <i class="ti-time mR-8"></i> Son Aktivitelerim
+            </h5>
+            <div class="fsz-sm c-grey-600 ta-c p-20">
+                Bu bölüm yakında eklenecektir.
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stat-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        border-color: #667eea;
+    }
+
+    .stat-icon {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+
+    .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        const apiBaseUrl = window.API_BASE_URL || 'https://localhost:7016';
+
+        async function loadStatistics() {
+            const container = document.getElementById('statisticsContainer');
+            
+            try {
+                const response = await apiFetch(`${apiBaseUrl}/api/users/statistics`);
+                
+                if (!response.ok) {
+                    throw new Error('İstatistikler yüklenemedi');
+                }
+
+                const stats = await response.json();
+
+                container.innerHTML = `
+                    <div class="row gap-20">
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="stat-card">
+                                <div class="stat-icon c-red-500">
+                                    <i class="ti-heart"></i>
+                                </div>
+                                <div class="stat-value">${stats.likedRecipesCount || 0}</div>
+                                <div class="stat-label">Beğenilen Tarif</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="stat-card">
+                                <div class="stat-icon c-blue-500">
+                                    <i class="ti-bookmark"></i>
+                                </div>
+                                <div class="stat-value">${stats.collectionCount || 0}</div>
+                                <div class="stat-label">Koleksiyon</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="stat-card">
+                                <div class="stat-icon c-green-500">
+                                    <i class="ti-star"></i>
+                                </div>
+                                <div class="stat-value">${stats.ratedRecipesCount || 0}</div>
+                                <div class="stat-label">Puan Verilen Tarif</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="stat-card">
+                                <div class="stat-icon c-purple-500">
+                                    <i class="ti-comment"></i>
+                                </div>
+                                <div class="stat-value">${stats.commentCount || 0}</div>
+                                <div class="stat-label">Yorum</div>
+                            </div>
+                        </div>
+                    </div>
+                    ${stats.averageGivenRating ? `
+                    <div class="mT-30 p-20 bgc-grey-50 bdrs-8">
+                        <div class="peers fxw-nw ai-c jc-sb">
+                            <div>
+                                <h6 class="mB-5">Ortalama Verdiğim Puan</h6>
+                                <p class="fsz-sm c-grey-600 mB-0">${stats.ratedRecipesCount} tarife verdiğiniz puanların ortalaması</p>
+                            </div>
+                            <div class="ta-r">
+                                <div style="font-size: 36px; font-weight: bold; color: #667eea;">
+                                    ${stats.averageGivenRating.toFixed(1)}
+                                </div>
+                                <div class="fsz-sm c-grey-600">/ 5.0</div>
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+                `;
+            } catch (error) {
+                console.error('Statistics load error:', error);
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="ti-alert mR-5"></i>
+                        İstatistikler yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatistics();
+        });
+    </script>
+}
+

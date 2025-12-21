@@ -73,6 +73,32 @@ public class RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger
         return new PagedResult<RecipeResponseDto>(dtoItems, totalCount, pageNumber, pageSize);
     }
 
+    public async Task<PagedResult<RecipeResponseDto>> SearchWithFiltersAsync(DTOs.RecipeFilterDto filter, int pageNumber, int pageSize)
+    {
+        var (items, totalCount) = await Repository.SearchWithFiltersAsync(
+            filter.SearchTerm,
+            filter.CategoryId,
+            filter.Difficulty,
+            filter.MaxPrepTime,
+            filter.MaxCookingTime,
+            filter.MaxTotalTime,
+            filter.MinServings,
+            filter.MaxServings,
+            filter.Ingredient,
+            filter.Ingredients,
+            filter.ExcludedIngredients,
+            filter.DietType,
+            filter.IsFeatured,
+            filter.MinRating,
+            filter.MinRatingCount,
+            filter.SortBy,
+            filter.SortDescending,
+            pageNumber,
+            pageSize);
+        var dtoItems = await MapRecipesWithRealTimeRatingsAsync(items);
+        return new PagedResult<RecipeResponseDto>(dtoItems, totalCount, pageNumber, pageSize);
+    }
+
     public async Task<RecipeResponseDto> CreateAsync(Recipe recipe)
     {
         try

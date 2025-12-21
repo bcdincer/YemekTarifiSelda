@@ -1,0 +1,77 @@
+@model List<FrontendMvc.Models.MealPlan.ShoppingListViewModel>
+
+@{
+    ViewData["Title"] = "Alışveriş Listelerim";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="bd bgc-white p-20 mB-20">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="mB-0">
+                        <i class="ti-shopping-cart c-green-500"></i> Alışveriş Listelerim
+                    </h2>
+                </div>
+            </div>
+
+            @if (Model.Any())
+            {
+                <div class="row">
+                    @foreach (var shoppingList in Model)
+                    {
+                        <div class="col-md-6 col-lg-4 mB-20">
+                            <div class="bd bgc-white p-20 bdrs-3" style="height: 100%;">
+                                <h4 class="mB-10">
+                                    <a asp-action="Details" asp-route-id="@shoppingList.Id" class="c-grey-900">
+                                        @shoppingList.Name
+                                    </a>
+                                </h4>
+                                <p class="fsz-sm c-grey-600 mB-15">
+                                    <i class="ti-clipboard mR-5"></i>
+                                    @shoppingList.Items.Count öğe
+                                </p>
+                                @if (shoppingList.IsCompleted)
+                                {
+                                    <span class="badge bgc-green-500 c-white mB-15">
+                                        <i class="ti-check mR-5"></i> Tamamlandı
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bgc-orange-500 c-white mB-15">
+                                        <i class="ti-time mR-5"></i> Devam Ediyor
+                                    </span>
+                                }
+                                <div class="d-flex gap-10">
+                                    <a asp-action="Details" asp-route-id="@shoppingList.Id" class="btn btn-sm btn-primary">
+                                        <i class="ti-eye mR-5"></i> Görüntüle
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@shoppingList.Id" method="post" class="d-inline" 
+                                          onsubmit="return confirm('Bu listeyi silmek istediğinizden emin misiniz?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="ti-trash mR-5"></i> Sil
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="bd bgc-white p-40 ta-c">
+                    <i class="ti-shopping-cart c-grey-400" style="font-size: 64px;"></i>
+                    <h4 class="mT-20 mB-10 c-grey-600">Henüz alışveriş listeniz yok</h4>
+                    <p class="c-grey-500 mB-20">Yemek planınızdan otomatik olarak alışveriş listesi oluşturabilirsiniz.</p>
+                    <a asp-controller="MealPlan" asp-action="Index" class="btn btn-primary">
+                        <i class="ti-calendar mR-5"></i> Yemek Planlarına Git
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

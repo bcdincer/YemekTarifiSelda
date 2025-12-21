@@ -6,6 +6,14 @@ public interface IUnitOfWork : IDisposable
     ICategoryRepository Categories { get; }
     IRatingRepository Ratings { get; }
     ILikeRepository Likes { get; }
+    ICollectionRepository Collections { get; }
+    ICollectionRecipeRepository CollectionRecipes { get; }
+    ICommentRepository Comments { get; }
+    ICommentLikeRepository CommentLikes { get; }
+    IMealPlanRepository MealPlans { get; }
+    IMealPlanItemRepository MealPlanItems { get; }
+    IShoppingListRepository ShoppingLists { get; }
+    IShoppingListItemRepository ShoppingListItems { get; }
 
     /// <summary>
     /// Tüm değişiklikleri kaydeder ve transaction'ı commit eder

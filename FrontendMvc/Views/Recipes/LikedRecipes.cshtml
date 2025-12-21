@@ -1,17 +1,13 @@
-@model IEnumerable<FrontendMvc.Models.Recipes.RecipeViewModel>
-
 @{
     ViewData["Title"] = "Beğendiğim Tarifler";
-    var categories = ViewBag.Categories as List<FrontendMvc.Models.Recipes.CategoryViewModel> ?? new();
     var searchTerm = ViewBag.SearchTerm as string;
-    var hasSearch = !string.IsNullOrWhiteSpace(searchTerm);
 }
 
-<div class="row gap-20">
+<div>
     <div class="col-12">
-        <div class="bd bgc-white p-20">
+        <div class="bd bgc-white p-20 liked-recipes-main-container">
             <div class="layers">
-                <div class="layer w-100 mB-20">
+                <div class="layer w-100 mB-20" style="flex-shrink: 0;">
                     <div class="peers fxw-nw ai-c">
                         <div class="peer peer-greed">
                             <h4 class="lh-1 mB-0">
@@ -23,7 +19,7 @@
                 </div>
                 
                 <!-- Arama Formu -->
-                <div class="layer w-100 mB-20">
+                <div class="layer w-100 mB-20" style="flex-shrink: 0;">
                     <form asp-controller="Recipes" asp-action="LikedRecipes" method="get" id="searchForm">
                         <div class="d-flex" style="gap: 8px;">
                             <div class="search-input-wrapper" style="flex: 1; position: relative;">
@@ -33,180 +29,84 @@
                             <button type="submit" class="btn btn-primary" style="color: white; white-space: nowrap; padding: 8px 20px;">
                                 <i class="ti-search mR-5"></i> Ara
                             </button>
-                            @if (hasSearch)
-                            {
-                                <a asp-controller="Recipes" asp-action="LikedRecipes" class="btn btn-outline-secondary" style="white-space: nowrap; padding: 8px 20px;">
-                                    <i class="ti-close mR-5"></i> Temizle
-                                </a>
-                            }
+                            <button type="button" class="btn btn-outline-secondary" id="clearSearchBtn" style="white-space: nowrap; padding: 8px 20px; display: none;" onclick="clearSearch()">
+                                <i class="ti-close mR-5"></i> Temizle
+                            </button>
                         </div>
                     </form>
                 </div>
                 
-                @if (hasSearch)
-                {
-                    <div class="layer w-100 mB-15">
-                        <div class="bd bgc-grey-100 p-8 bdrs-3" style="display: inline-flex; align-items: center; gap: 8px;">
-                            <span class="fw-600" style="font-size: 12px; color: #666;">Arama:</span>
-                            <span style="font-size: 14px;">"@searchTerm"</span>
-                            <a asp-controller="Recipes" asp-action="LikedRecipes" class="c-grey-600 cH-red td-n" style="margin-left: 5px;">
-                                <i class="ti-close" style="font-size: 14px;"></i>
-                            </a>
-                        </div>
+                <div id="searchResultInfo" class="layer w-100 mB-15" style="display: none; flex-shrink: 0;">
+                    <div class="bd bgc-grey-100 p-8 bdrs-3" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <span class="fw-600" style="font-size: 12px; color: #666;">Arama:</span>
+                        <span id="searchTermDisplay" style="font-size: 14px;"></span>
+                        <a href="/Recipes/LikedRecipes" class="c-grey-600 cH-red td-n" style="margin-left: 5px;">
+                            <i class="ti-close" style="font-size: 14px;"></i>
+                        </a>
                     </div>
-                }
+                </div>
                 
-                @if (Model == null || !Model.Any())
-                {
-                    <div class="layer w-100">
-                        <div class="ta-c p-40">
-                            @if (hasSearch)
-                            {
-                                <i class="ti-search fsz-xxl c-grey-400 mB-20"></i>
-                                <h5 class="c-grey-600 mB-10">Arama sonucu bulunamadı</h5>
-                                <p class="c-grey-500 mB-20">"@searchTerm" için beğendiğiniz tarifler arasında sonuç bulunamadı.</p>
-                                <a asp-controller="Recipes" asp-action="LikedRecipes" class="btn btn-primary" style="color: white;">
-                                    <i class="ti-arrow-left mR-5"></i> Tüm Beğenilen Tarifler
-                                </a>
-                            }
-                            else
-                            {
-                                <i class="ti-heart-broken fsz-xxl c-grey-400 mB-20"></i>
-                                <h5 class="c-grey-600 mB-10">Henüz beğendiğiniz tarif yok</h5>
-                                <p class="c-grey-500 mB-20">Beğenmek istediğiniz tariflerin kalp ikonuna tıklayabilirsiniz.</p>
-                                <a asp-controller="Home" asp-action="Index" class="btn btn-primary" style="color: white;">
-                                    <i class="ti-arrow-left mR-5"></i> Ana Sayfaya Dön
-                                </a>
-                            }
+                <div class="layer w-100 liked-recipes-content-layer">
+                    <div id="recipeCountInfo" class="c-grey-600 mB-20" style="display: none;"></div>
+                    <div class="row gap-20 justify-content-center liked-recipes-scrollable" id="recipesContainer">
+                        <div class="col-12 ta-c p-40">
+                            <i class="ti-reload c-grey-400" style="font-size: 24px; animation: spin 1s linear infinite;"></i>
+                            <p class="mT-10 c-grey-600">Tarifler yükleniyor...</p>
                         </div>
                     </div>
-                }
-                else
-                {
-                    <div class="layer w-100">
-                        <p class="c-grey-600 mB-20">
-                            @if (hasSearch)
-                            {
-                                <text>"@searchTerm" için @Model.Count() sonuç bulundu.</text>
-                            }
-                            else
-                            {
-                                <text>@Model.Count() tarif beğenmişsiniz.</text>
-                            }
-                        </p>
-                    </div>
-                    
-                    <div class="row gap-20 justify-content-center" id="recipesContainer">
-                        @foreach (var recipe in Model)
-                        {
-                            <div class="col-md-6 col-lg-3 mb-3 recipe-item">
-                                <a asp-controller="Recipes" asp-action="Details" asp-route-id="@recipe.Id" class="recipe-card-link" style="text-decoration: none; display: block; height: 100%;">
-                                    <div class="bd bgc-white bdrs-3 ov-h recipe-card" style="transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; height: 100%;">
-                                        @if (!string.IsNullOrEmpty(recipe.ImageUrl))
-                                        {
-                                            <div class="recipe-card-image-wrapper" style="position: relative; overflow: hidden;">
-                                                <img src="@recipe.ImageUrl" alt="@recipe.Title" class="w-100" style="height: 200px; object-fit: cover; transition: transform 0.3s ease;" loading="lazy" decoding="async">
-                                                <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: flex-end; padding: 15px;">
-                                                    <span class="c-white fw-600" style="font-size: 14px;">
-                                                        <i class="ti-eye mR-5"></i> Detayları Gör
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <div class="w-100 bgc-grey-200" style="height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
-                                                <i class="ti-image fsz-xxl c-grey-400"></i>
-                                                <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: center; justify-content: center;">
-                                                    <span class="c-white fw-600">
-                                                        <i class="ti-eye mR-5"></i> Detayları Gör
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        }
-                                        <div class="p-20" style="flex: 1; display: flex; flex-direction: column;">
-                                            <h6 class="mB-10 c-grey-800" style="transition: color 0.3s ease; min-height: 48px; line-height: 1.4;">
-                                                @recipe.Title
-                                            </h6>
-                                            <p class="fsz-sm c-grey-600 mB-10" style="min-height: 40px; line-height: 1.4;">
-                                                @(recipe.Description.Length > 100 ? recipe.Description.Substring(0, 100) + "..." : recipe.Description)
-                                            </p>
-                                            <div class="peers fxw-nw ai-c fsz-sm c-grey-600 mB-10" style="min-height: 24px; flex-shrink: 0;">
-                                                <div class="peer mR-15">
-                                                    <i class="ti-time"></i> @recipe.CookingTimeMinutes dk
-                                                </div>
-                                                <div class="peer mR-15">
-                                                    <i class="ti-user"></i> @recipe.Servings kişilik
-                                                </div>
-                                                @if (recipe.Category != null)
-                                                {
-                                                    <div class="peer">
-                                                        <i class="@recipe.Category.Icon"></i> @recipe.Category.Name
-                                                    </div>
-                                                }
-                                            </div>
-                                            <div class="peers fxw-nw ai-c mT-10 gap-10" style="min-height: 32px; flex-shrink: 0; margin-top: auto; align-items: center;">
-                                                <div class="peer" style="min-width: 120px;">
-                                                    @if (recipe.AverageRating.HasValue)
-                                                    {
-                                                        <div class="peers fxw-nw ai-c">
-                                                            <div class="peer" style="display: inline-flex; align-items: center; gap: 2px;">
-                                                                @{
-                                                                    double visualRating = recipe.AverageRating.Value * 2; // 1-5 -> 2-10
-                                                                }
-                                                                @for (int i = 0; i < 5; i++)
-                                                                {
-                                                                    int starValue = (i + 1) * 2; // 2, 4, 6, 8, 10
-                                                                    int starStart = i * 2; // 0, 2, 4, 6, 8
-                                                                    
-                                                                    if (visualRating >= starValue)
-                                                                    {
-                                                                        <i class="ti-star c-yellow-500" style="font-size: 14px;"></i>
-                                                                    }
-                                                                    else if (visualRating > starStart && visualRating < starValue)
-                                                                    {
-                                                                        double fractionalPart = (visualRating - starStart) / (starValue - starStart);
-                                                                        double fillPercentage = fractionalPart * 100;
-                                                                        <div style="position: relative; display: inline-block; width: 14px; height: 14px; line-height: 1;">
-                                                                            <i class="ti-star c-grey-300" style="font-size: 14px; position: absolute; left: 0; top: 0; z-index: 1;"></i>
-                                                                            <div style="position: absolute; left: 0; top: 0; width: @(fillPercentage.ToString("F1", System.Globalization.CultureInfo.InvariantCulture))%; height: 14px; overflow: hidden; z-index: 2;">
-                                                                                <i class="ti-star c-yellow-500" style="font-size: 14px; position: absolute; left: 0; top: 0; width: 14px; height: 14px; display: block;"></i>
-                                                                            </div>
-                                                                        </div>
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <i class="ti-star c-grey-300" style="font-size: 14px;"></i>
-                                                                    }
-                                                                }
-                                                            </div>
-                                                            <div class="peer mL-5 fsz-sm c-grey-600">
-                                                                <span class="fw-600">@recipe.AverageRating.Value.ToString("F1")</span> (@recipe.RatingCount)
-                                                            </div>
-                                                        </div>
-                                                    }
-                                                </div>
-                                                <div class="peer" style="min-width: 50px;">
-                                                    @if (recipe.LikeCount > 0)
-                                                    {
-                                                        <i class="ti-heart c-red-500"></i>
-                                                        <span class="fsz-sm c-grey-600 mL-3">@recipe.LikeCount</span>
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        }
-                    </div>
-                }
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <style>
+    /* Liked Recipes container için tam yükseklik */
+    .liked-recipes-main-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 150px);
+        min-height: 600px;
+    }
+    
+    .liked-recipes-main-container .layers {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .liked-recipes-content-layer {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        min-height: 0;
+    }
+    
+    /* Scrollbar styling */
+    .liked-recipes-content-layer::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .liked-recipes-content-layer::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .liked-recipes-content-layer::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+    
+    .liked-recipes-content-layer::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+    
+    /* Gap-20 overflow özelliğini override et */
+    #recipesContainer.liked-recipes-scrollable {
+        overflow: visible !important;
+    }
+    
     /* Recipe Card Hover Effects */
     .recipe-card-link {
         text-decoration: none !important;
@@ -279,30 +179,279 @@
             max-width: calc(50% - 10px);
         }
     }
+    
+    @@keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
 </style>
 
 @section Scripts {
     <script>
-        // Submit form on Enter key
-        const searchInput = document.getElementById('searchInput');
-        const searchForm = document.getElementById('searchForm');
-        if (searchInput && searchForm) {
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    searchForm.submit();
+        const apiBaseUrl = window.API_BASE_URL || 'https://localhost:7016';
+        const initialSearchTerm = '@(searchTerm ?? "")';
+        
+        // apiFetch fonksiyonunu tanımla (eğer tanımlı değilse)
+        if (typeof apiFetch === 'undefined') {
+            window.apiFetch = async function(url, options = {}) {
+                const token = getCookie('authToken');
+                const defaultOptions = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                };
+                
+                if (token) {
+                    defaultOptions.headers['Authorization'] = `Bearer ${token}`;
                 }
-            });
+                
+                const mergedOptions = {
+                    ...defaultOptions,
+                    ...options,
+                    headers: {
+                        ...defaultOptions.headers,
+                        ...(options.headers || {})
+                    }
+                };
+                
+                return await fetch(url, mergedOptions);
+            };
         }
         
-        // Kayıt sayısına göre container'a class ekle
-        document.addEventListener('DOMContentLoaded', function() {
+        // Cookie okuma fonksiyonu
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+        
+        // Beğenilen tarifleri yükle
+        async function loadLikedRecipes(searchQuery = '') {
             const container = document.getElementById('recipesContainer');
-            if (container) {
+            const countInfo = document.getElementById('recipeCountInfo');
+            if (!container) return;
+            
+            // Loading state
+            container.innerHTML = `
+                <div class="col-12 ta-c p-40">
+                    <i class="ti-reload c-grey-400" style="font-size: 24px; animation: spin 1s linear infinite;"></i>
+                    <p class="mT-10 c-grey-600">Tarifler yükleniyor...</p>
+                </div>
+            `;
+            if (countInfo) countInfo.style.display = 'none';
+            
+            try {
+                let url;
+                if (searchQuery) {
+                    url = `${apiBaseUrl}/api/users/liked-recipes/search?q=${encodeURIComponent(searchQuery)}`;
+                } else {
+                    url = `${apiBaseUrl}/api/users/liked-recipes`;
+                }
+                
+                const response = await apiFetch(url);
+                
+                if (response.status === 401) {
+                    container.innerHTML = `
+                        <div class="col-12 ta-c p-40">
+                            <i class="ti-lock c-grey-400" style="font-size: 24px;"></i>
+                            <h4 class="c-grey-600 mB-10">Giriş yapmanız gerekiyor</h4>
+                            <p class="c-grey-600 mB-30">Beğendiğiniz tarifleri görmek için lütfen giriş yapın.</p>
+                            <a href="/Account/Login" class="btn btn-primary">Giriş Yap</a>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error('Tarifler yüklenemedi');
+                }
+                
+                const recipes = await response.json();
+                
+                if (recipes.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-12 ta-c p-40">
+                            <i class="ti-heart fsz-xxl c-grey-400 d-b mB-20"></i>
+                            <h4 class="c-grey-600 mB-10">${searchQuery ? 'Arama sonucu bulunamadı' : 'Henüz beğendiğiniz tarif yok'}</h4>
+                            <p class="c-grey-600 mB-30">${searchQuery ? 'Farklı bir arama terimi deneyin.' : 'Beğendiğiniz tarifler burada görünecek.'}</p>
+                            ${!searchQuery ? '<a href="/" class="btn btn-primary">Ana Sayfaya Dön</a>' : ''}
+                        </div>
+                    `;
+                    if (countInfo) countInfo.style.display = 'none';
+                    return;
+                }
+                
+                // Tarifleri render et
+                container.innerHTML = '';
+                recipes.forEach(recipe => {
+                    const recipeCard = createRecipeCard(recipe);
+                    container.appendChild(recipeCard);
+                });
+                
+                // Count info göster
+                if (countInfo) {
+                    countInfo.textContent = searchQuery 
+                        ? `"${searchQuery}" için ${recipes.length} sonuç bulundu.`
+                        : `${recipes.length} tarif beğenmişsiniz.`;
+                    countInfo.style.display = 'block';
+                }
+                
+                // Card count için class ekle
                 const recipeCount = container.querySelectorAll('.recipe-item').length;
+                container.classList.remove('recipe-count-1', 'recipe-count-2', 'recipe-count-3');
                 if (recipeCount > 0 && recipeCount < 4) {
                     container.classList.add('recipe-count-' + recipeCount);
                 }
+            } catch (error) {
+                console.error('Error loading liked recipes:', error);
+                container.innerHTML = `
+                    <div class="col-12 ta-c p-40">
+                        <i class="ti-alert c-red-500" style="font-size: 24px;"></i>
+                        <h4 class="c-red-500 mB-10">Hata</h4>
+                        <p class="c-grey-600">Tarifler yüklenirken bir hata oluştu.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Tarif kartı oluştur
+        function createRecipeCard(recipe) {
+            const col = document.createElement('div');
+            col.className = 'col-md-6 col-lg-3 mb-3 recipe-item';
+            
+            const visualRating = recipe.averageRating ? recipe.averageRating * 2 : 0;
+            let starsHtml = '';
+            for (let i = 0; i < 5; i++) {
+                const starValue = (i + 1) * 2;
+                const starStart = i * 2;
+                
+                if (visualRating >= starValue) {
+                    starsHtml += '<i class="ti-star c-yellow-500" style="font-size: 14px;"></i>';
+                } else if (visualRating > starStart && visualRating < starValue) {
+                    const fillPercentage = ((visualRating - starStart) / (starValue - starStart)) * 100;
+                    starsHtml += `
+                        <div style="position: relative; display: inline-block; width: 14px; height: 14px; line-height: 1;">
+                            <i class="ti-star c-grey-300" style="font-size: 14px; position: absolute; left: 0; top: 0; z-index: 1;"></i>
+                            <div style="position: absolute; left: 0; top: 0; width: ${fillPercentage}%; height: 14px; overflow: hidden; z-index: 2;">
+                                <i class="ti-star c-yellow-500" style="font-size: 14px; position: absolute; left: 0; top: 0; width: 14px; height: 14px; display: block;"></i>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    starsHtml += '<i class="ti-star c-grey-300" style="font-size: 14px;"></i>';
+                }
+            }
+            
+            col.innerHTML = `
+                <a href="/Recipes/Details/${recipe.id}" class="recipe-card-link" style="text-decoration: none; display: block; height: 100%;">
+                    <div class="bd bgc-white bdrs-3 ov-h recipe-card" style="transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; height: 100%;">
+                        ${recipe.imageUrl ? `
+                            <div class="recipe-card-image-wrapper" style="position: relative; overflow: hidden;">
+                                <img src="${recipe.imageUrl}" alt="${recipe.title}" class="w-100" style="height: 200px; object-fit: cover; transition: transform 0.3s ease;" loading="lazy" decoding="async">
+                                <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: flex-end; padding: 15px;">
+                                    <span class="c-white fw-600" style="font-size: 14px;">
+                                        <i class="ti-eye mR-5"></i> Detayları Gör
+                                    </span>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="w-100 bgc-grey-200" style="height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
+                                <i class="ti-image fsz-xxl c-grey-400"></i>
+                                <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: center; justify-content: center;">
+                                    <span class="c-white fw-600">
+                                        <i class="ti-eye mR-5"></i> Detayları Gör
+                                    </span>
+                                </div>
+                            </div>
+                        `}
+                        <div class="p-20" style="flex: 1; display: flex; flex-direction: column;">
+                            <h6 class="mB-10 c-grey-800" style="transition: color 0.3s ease; min-height: 48px; line-height: 1.4;">
+                                ${recipe.title}
+                            </h6>
+                            <p class="fsz-sm c-grey-600 mB-10" style="min-height: 40px; line-height: 1.4;">
+                                ${recipe.description && recipe.description.length > 100 ? recipe.description.substring(0, 100) + '...' : (recipe.description || '')}
+                            </p>
+                            <div class="peers fxw-nw ai-c fsz-sm c-grey-600 mB-10" style="min-height: 24px; flex-shrink: 0;">
+                                <div class="peer mR-15">
+                                    <i class="ti-time"></i> ${recipe.cookingTimeMinutes} dk
+                                </div>
+                                <div class="peer mR-15">
+                                    <i class="ti-user"></i> ${recipe.servings} kişilik
+                                </div>
+                                ${recipe.category ? `
+                                    <div class="peer">
+                                        <i class="${recipe.category.icon}"></i> ${recipe.category.name}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="peers fxw-nw ai-c mT-10 gap-10" style="min-height: 32px; flex-shrink: 0; margin-top: auto; align-items: center;">
+                                <div class="peer" style="min-width: 120px;">
+                                    ${recipe.averageRating ? `
+                                        <div class="peers fxw-nw ai-c">
+                                            <div class="peer" style="display: inline-flex; align-items: center; gap: 2px;">
+                                                ${starsHtml}
+                                            </div>
+                                            <div class="peer mL-5 fsz-sm c-grey-600">
+                                                <span class="fw-600">${recipe.averageRating.toFixed(1)}</span> (${recipe.ratingCount || 0})
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div class="peer" style="min-width: 50px;">
+                                    ${recipe.likeCount > 0 ? `
+                                        <i class="ti-heart c-red-500"></i>
+                                        <span class="fsz-sm c-grey-600 mL-3">${recipe.likeCount}</span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            `;
+            
+            return col;
+        }
+        
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.value = '';
+            loadLikedRecipes('');
+            document.getElementById('searchResultInfo').style.display = 'none';
+            document.getElementById('clearSearchBtn').style.display = 'none';
+            window.history.pushState({}, '', '/Recipes/LikedRecipes');
+        }
+        
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLikedRecipes(initialSearchTerm);
+            
+            // Arama formu
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchInput');
+            
+            if (searchForm) {
+                searchForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const query = searchInput.value.trim();
+                    if (query) {
+                        loadLikedRecipes(query);
+                        document.getElementById('searchTermDisplay').textContent = `"${query}"`;
+                        document.getElementById('searchResultInfo').style.display = 'block';
+                        document.getElementById('clearSearchBtn').style.display = 'inline-block';
+                        // URL'i güncelle (sayfa yenilemeden)
+                        window.history.pushState({}, '', `/Recipes/LikedRecipes?search=${encodeURIComponent(query)}`);
+                    } else {
+                        clearSearch();
+                    }
+                });
+            }
+            
+            if (initialSearchTerm) {
+                document.getElementById('searchTermDisplay').textContent = `"${initialSearchTerm}"`;
+                document.getElementById('searchResultInfo').style.display = 'block';
+                document.getElementById('clearSearchBtn').style.display = 'inline-block';
             }
         });
     </script>

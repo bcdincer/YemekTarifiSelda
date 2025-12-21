@@ -4,18 +4,41 @@
     ViewData["Title"] = Model.Title;
     ViewData["Description"] = string.IsNullOrEmpty(Model.Description) ? $"{Model.Title} tarifi. Hazırlık: {Model.PrepTimeMinutes} dk, Pişirme: {Model.CookingTimeMinutes} dk. {Model.Servings} kişilik." : Model.Description;
     ViewData["Keywords"] = $"{Model.Title}, {Model.Category?.Name}, yemek tarifi, {Model.Difficulty} tarif, {Model.CookingTimeMinutes} dakika";
+    var httpContext = ViewContext.HttpContext;
     if (!string.IsNullOrEmpty(Model.ImageUrl))
     {
-        ViewData["OgImage"] = Model.ImageUrl.StartsWith("http") ? Model.ImageUrl : $"{Context.Request.Scheme}://{Context.Request.Host}{Model.ImageUrl}";
+        ViewData["OgImage"] = Model.ImageUrl.StartsWith("http") ? Model.ImageUrl : $"{httpContext.Request.Scheme}://{httpContext.Request.Host}{Model.ImageUrl}";
     }
     var categories = ViewBag.Categories as List<FrontendMvc.Models.Recipes.CategoryViewModel> ?? new();
-    var recipeUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+    var recipeUrl = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}{httpContext.Request.Path}";
 }
 
 <style>
     /* Details sayfası için sadece gerekli optimizasyonlar */
     #mainContent {
         max-width: 100%;
+    }
+    
+    /* Dark mode için tarif detay sayfası özel stilleri */
+    [data-theme="dark"] {
+        /* Inline style'lı bgc-grey-50 alanları için dark mode override */
+        .bd.bgc-grey-50[style*="background"],
+        button.bd.bgc-grey-50[style*="background"] {
+            background-color: color-mix(in srgb, var(--c-bkg-card) 85%, var(--c-bkg-body)) !important;
+            border-color: var(--c-border) !important;
+        }
+        
+        .bd.bgc-grey-50[style*="background"]:hover,
+        button.bd.bgc-grey-50[style*="background"]:hover {
+            background-color: color-mix(in srgb, var(--c-bkg-card) 75%, var(--c-bkg-body)) !important;
+        }
+        
+        /* Malzemeler ve Yapılış bölümleri */
+        .bd.bgc-grey-50.p-20,
+        .bd.bgc-grey-50.p-15 {
+            background-color: color-mix(in srgb, var(--c-bkg-card) 85%, var(--c-bkg-body)) !important;
+            border-color: var(--c-border) !important;
+        }
     }
 
     /* Sadece bu sayfadaki row'u optimize et */
@@ -49,6 +72,160 @@
             box-shadow: none !important;
         }
     }
+
+    /* Collection Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal.show {
+        display: block;
+    }
+
+    .modal-dialog {
+        position: relative;
+        width: auto;
+        max-width: 500px;
+        margin: 50px auto;
+    }
+
+    .modal-content {
+        position: relative;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .modal-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .modal-header .close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #999;
+    }
+
+    .modal-header .close:hover {
+        color: #333;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    /* Share Modal Styles */
+    .share-options-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .share-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        color: #333;
+        text-decoration: none;
+    }
+
+    .share-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .share-btn-whatsapp {
+        border-color: #25D366;
+        color: #25D366;
+    }
+
+    .share-btn-whatsapp:hover {
+        background: #25D366;
+        color: white;
+    }
+
+    .share-btn-telegram {
+        border-color: #0088cc;
+        color: #0088cc;
+    }
+
+    .share-btn-telegram:hover {
+        background: #0088cc;
+        color: white;
+    }
+
+    .share-btn-facebook {
+        border-color: #1877F2;
+        color: #1877F2;
+    }
+
+    .share-btn-facebook:hover {
+        background: #1877F2;
+        color: white;
+    }
+
+    .share-btn-twitter {
+        border-color: #1DA1F2;
+        color: #1DA1F2;
+    }
+
+    .share-btn-twitter:hover {
+        background: #1DA1F2;
+        color: white;
+    }
+
+    .share-btn-copy {
+        border-color: #6c757d;
+        color: #6c757d;
+    }
+
+    .share-btn-copy:hover {
+        background: #6c757d;
+        color: white;
+    }
+
+    #qrcode {
+        display: inline-block;
+    }
+
+    #qrcode canvas, #qrcode img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    @@media (max-width: 576px) {
+        .share-options-container {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
 <!-- Schema.org Recipe Structured Data -->
@@ -58,7 +235,7 @@
       "@@type": "Recipe",
       "name": "@Html.Raw(Json.Serialize(Model.Title))",
       "description": "@Html.Raw(Json.Serialize(Model.Description ?? ""))",
-      "image": "@(string.IsNullOrEmpty(Model.ImageUrl) ? "" : (Model.ImageUrl.StartsWith("http") ? Model.ImageUrl : $"{Context.Request.Scheme}://{Context.Request.Host}{Model.ImageUrl}"))",
+      "image": "@(string.IsNullOrEmpty(Model.ImageUrl) ? "" : (Model.ImageUrl.StartsWith("http") ? Model.ImageUrl : $"{ViewContext.HttpContext.Request.Scheme}://{ViewContext.HttpContext.Request.Host}{Model.ImageUrl}"))",
       "author": {
         "@@type": "Organization",
         "name": "Tarif Sitesi"
@@ -133,8 +310,16 @@
                                         <div class="fsz-xs c-grey-600" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; line-height: 1.2;">Zorluk</div>
                                         <div class="fw-600 fsz-xs c-grey-800" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">@Model.Difficulty</div>
                                     </div>
+                                    <!-- Collection Button -->
+                                    @if (User.Identity?.IsAuthenticated == true)
+                                    {
+                                        <button type="button" id="addToCollectionBtn" class="bd bgc-grey-50 ta-c bdrs-3" style="width: 70px; height: 70px; min-width: 70px; max-width: 70px; min-height: 70px; max-height: 70px; flex-shrink: 0; flex-grow: 0; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px 4px; border: 1px solid #e0e0e0; background: #f5f5f5; cursor: pointer; transition: all 0.2s;" onclick="openCollectionModal()" title="Koleksiyona Ekle" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
+                                            <i class="ti-bookmark c-grey-700" style="font-size: 16px; margin-bottom: 4px;"></i>
+                                            <div class="fsz-xs c-grey-600" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">Kaydet</div>
+                                        </button>
+                                    }
                                     <!-- Share Buttons -->
-                                    <button type="button" class="bd bgc-grey-50 ta-c bdrs-3" style="width: 70px; height: 70px; min-width: 70px; max-width: 70px; min-height: 70px; max-height: 70px; flex-shrink: 0; flex-grow: 0; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px 4px; border: 1px solid #e0e0e0; background: #f5f5f5; cursor: pointer; transition: all 0.2s;" onclick="shareRecipe()" title="Paylaş" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
+                                    <button type="button" class="bd bgc-grey-50 ta-c bdrs-3" style="width: 70px; height: 70px; min-width: 70px; max-width: 70px; min-height: 70px; max-height: 70px; flex-shrink: 0; flex-grow: 0; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px 4px; border: 1px solid #e0e0e0; background: #f5f5f5; cursor: pointer; transition: all 0.2s;" onclick="openShareModal()" title="Paylaş" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
                                         <i class="ti-share c-grey-700" style="font-size: 16px; margin-bottom: 4px;"></i>
                                         <div class="fsz-xs c-grey-600" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">Paylaş</div>
                                     </button>
@@ -285,6 +470,108 @@
                         </div>
                     </div>
 
+                    <!-- Share Modal -->
+                    <div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="shareModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="shareModalLabel">Tarifi Paylaş</h5>
+                                    <button type="button" class="close" onclick="closeShareModal()" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="share-options-container">
+                                        <!-- WhatsApp Share -->
+                                        <button type="button" class="share-btn share-btn-whatsapp" onclick="shareToWhatsApp()">
+                                            <i class="ti-mobile" style="font-size: 24px; margin-right: 10px;"></i>
+                                            <span>WhatsApp</span>
+                                        </button>
+                                        
+                                        <!-- Telegram Share -->
+                                        <button type="button" class="share-btn share-btn-telegram" onclick="shareToTelegram()">
+                                            <i class="ti-comment" style="font-size: 24px; margin-right: 10px;"></i>
+                                            <span>Telegram</span>
+                                        </button>
+                                        
+                                        <!-- Facebook Share -->
+                                        <button type="button" class="share-btn share-btn-facebook" onclick="shareToFacebook()">
+                                            <i class="ti-facebook" style="font-size: 24px; margin-right: 10px;"></i>
+                                            <span>Facebook</span>
+                                        </button>
+                                        
+                                        <!-- Twitter Share -->
+                                        <button type="button" class="share-btn share-btn-twitter" onclick="shareToTwitter()">
+                                            <i class="ti-twitter" style="font-size: 24px; margin-right: 10px;"></i>
+                                            <span>Twitter</span>
+                                        </button>
+                                        
+                                        <!-- Copy Link -->
+                                        <button type="button" class="share-btn share-btn-copy" onclick="copyRecipeLink()">
+                                            <i class="ti-link" style="font-size: 24px; margin-right: 10px;"></i>
+                                            <span>Linki Kopyala</span>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- QR Code Section -->
+                                    <div class="qr-code-section" style="margin-top: 30px; padding-top: 30px; border-top: 1px solid #e0e0e0;">
+                                        <h6 class="mB-15" style="text-align: center;">QR Kod ile Paylaş</h6>
+                                        <div style="text-align: center;">
+                                            <div id="qrcode" style="display: inline-block; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e0e0e0;"></div>
+                                        </div>
+                                        <p class="fsz-sm c-grey-600 ta-c mT-15">QR kodu tarayarak tarife hızlıca erişebilirsiniz</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Collection Modal -->
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="modal fade" id="collectionModal" tabindex="-1" role="dialog" aria-labelledby="collectionModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="collectionModalLabel">Koleksiyona Ekle</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeCollectionModal()">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div id="collectionsList" style="max-height: 400px; overflow-y: auto;">
+                                            <div class="text-center p-20">
+                                                <div class="spinner-border" role="status">
+                                                    <span class="sr-only">Yükleniyor...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mT-20">
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="showCreateCollectionForm()">
+                                                <i class="ti-plus mR-5"></i> Yeni Koleksiyon Oluştur
+                                            </button>
+                                        </div>
+                                        <div id="createCollectionForm" style="display: none;" class="mT-20 p-15 bgc-grey-50 bdrs-3">
+                                            <h6 class="mB-10">Yeni Koleksiyon</h6>
+                                            <div class="form-group">
+                                                <label for="newCollectionName">Koleksiyon Adı *</label>
+                                                <input type="text" class="form-control" id="newCollectionName" placeholder="Örn: Hafta Sonu Kahvaltıları">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="newCollectionDescription">Açıklama</label>
+                                                <textarea class="form-control" id="newCollectionDescription" rows="2" placeholder="İsteğe bağlı açıklama"></textarea>
+                                            </div>
+                                            <div class="d-flex gap-10">
+                                                <button type="button" class="btn btn-primary btn-sm" onclick="createCollection()">Oluştur</button>
+                                                <button type="button" class="btn btn-secondary btn-sm" onclick="hideCreateCollectionForm()">İptal</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
                     <!-- Püf Noktaları -->
                     @if (!string.IsNullOrEmpty(Model.Tips))
                     {
@@ -310,6 +597,114 @@
                             </div>
                         </div>
                     }
+
+                    <!-- Beslenme Bilgileri -->
+                    @if (!string.IsNullOrEmpty(Model.NutritionInfo))
+                    {
+                        <div class="layer w-100 mB-30">
+                            <h5 class="mB-15">
+                                <i class="ti-pie-chart c-green-500"></i> Beslenme Bilgileri
+                            </h5>
+                            <div class="bd bgc-green-50 p-20 bdrs-3">
+                                @{
+                                    try
+                                    {
+                                        // JSON formatında olabilir, parse etmeyi dene
+                                        var nutritionData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(Model.NutritionInfo);
+                                        if (nutritionData != null && nutritionData.Any())
+                                        {
+                                            <div class="row gap-10">
+                                                @foreach (var item in nutritionData)
+                                                {
+                                                    <div class="col-6 col-md-4 col-lg-3">
+                                                        <div class="nutrition-item" style="text-align: center; padding: 10px;">
+                                                            <div class="fw-600 c-grey-800" style="font-size: 18px; margin-bottom: 5px;">
+                                                                @(item.Value?.ToString() ?? "-")
+                                                            </div>
+                                                            <div class="fsz-sm c-grey-600" style="text-transform: capitalize;">
+                                                                @item.Key
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <p class="m-0 fsz-sm">@Model.NutritionInfo</p>
+                                        }
+                                    }
+                                    catch
+                                    {
+                                        // JSON değilse direkt göster
+                                        <p class="m-0 fsz-sm">@Model.NutritionInfo</p>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Yorumlar Bölümü -->
+                    <div class="layer w-100 mB-30">
+                        <div class="d-flex justify-content-between align-items-center mB-20">
+                            <h5 class="mB-0">
+                                <i class="ti-comment-alt c-blue-500"></i> Yorumlar
+                                <span id="commentCount" class="badge bgc-grey-200 c-grey-600 mL-10">0</span>
+                            </h5>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary active" id="sortNewest" onclick="sortComments('newest')">
+                                    <i class="ti-time mR-5"></i> En Yeni
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="sortLiked" onclick="sortComments('liked')">
+                                    <i class="ti-heart mR-5"></i> En Beğenilen
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Yorum Ekleme Formu -->
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <div class="bd bgc-white p-20 bdrs-3 mB-20">
+                                <div class="form-group mB-15">
+                                    <textarea id="commentContent" class="form-control" rows="3" placeholder="Yorumunuzu yazın... (Maksimum 1000 karakter)"></textarea>
+                                    <small class="text-muted">
+                                        <span id="commentCharCount">0</span>/1000 karakter
+                                    </small>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm" id="submitCommentBtn" onclick="submitComment()">
+                                    <i class="ti-check mR-5"></i> Yorum Yap
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="bd bgc-grey-50 p-20 bdrs-3 mB-20 ta-c">
+                                <p class="m-0 c-grey-600">
+                                    <a asp-controller="Account" asp-action="Login" class="c-blue-500">Giriş yapın</a> veya 
+                                    <a asp-controller="Account" asp-action="Register" class="c-blue-500">kayıt olun</a> 
+                                    yorum yapmak için.
+                                </p>
+                            </div>
+                        }
+
+                        <!-- Yorumlar Listesi -->
+                        <div id="commentsList" class="comments-container">
+                            <!-- Yorumlar buraya yüklenecek -->
+                            <div class="ta-c p-20">
+                                <i class="ti-reload c-grey-400" style="font-size: 24px;"></i>
+                                <p class="mT-10 c-grey-600">Yorumlar yükleniyor...</p>
+                            </div>
+                        </div>
+
+                        <!-- Daha Fazla Yorum Yükle (Infinite Scroll için gizli) -->
+                        <div id="loadMoreComments" class="ta-c mT-20" style="display: none;">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="loadMoreComments()">
+                                <i class="ti-reload mR-5"></i> Daha Fazla Yorum Yükle
+                            </button>
+                        </div>
+                        <!-- Infinite Scroll Trigger -->
+                        <div id="infiniteScrollTrigger" style="height: 20px;"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -360,6 +755,83 @@
         box-shadow: none !important;
     }
 
+    /* Yorum Sistemi Stilleri */
+    .comments-container {
+        max-height: none;
+    }
+
+    .comment-item {
+        transition: all 0.2s ease;
+    }
+
+    .comment-item:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .like-comment-btn,
+    .reply-comment-btn {
+        text-decoration: none !important;
+        border: none !important;
+        background: none !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        color: #6c757d;
+    }
+
+    .like-comment-btn:hover,
+    .reply-comment-btn:hover {
+        background-color: #f5f5f5;
+        color: #258cfb;
+        transform: translateY(-1px);
+    }
+
+    .like-comment-btn:hover i,
+    .reply-comment-btn:hover i {
+        transform: scale(1.1);
+    }
+
+    .like-comment-btn i,
+    .reply-comment-btn i {
+        font-size: 16px;
+        transition: all 0.2s ease;
+    }
+
+    .like-comment-btn.liked i {
+        animation: heartBeat 0.3s ease;
+    }
+
+    .like-comment-btn.liked {
+        color: #dc3545;
+    }
+
+    @@keyframes heartBeat {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+    .dropdown-menu {
+        min-width: 150px;
+    }
+
+    .comment-content textarea {
+        resize: vertical;
+    }
+
+    @@keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .btn.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
         #likeButtonStat:hover,
         #likeButtonStat:focus,
         #likeButtonStat:active {
@@ -394,13 +866,15 @@
 </style>
 
 @section Scripts {
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    
     @if (User.Identity?.IsAuthenticated == true)
     {
         var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
         <script>
             const recipeId = @Model.Id;
-            const userId = '@currentUserId';
-            const apiBaseUrl = 'https://localhost:7016';
+            const apiBaseUrl = window.API_BASE_URL || 'https://localhost:7016';
 
             // Rating sistemi
             let currentUserRating = null;
@@ -408,7 +882,7 @@
             // Kullanıcının mevcut puanını yükle (sadece currentUserRating'ı set et, yıldızları güncelleme)
             async function loadUserRating() {
                 try {
-                    const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/rating/user/${encodeURIComponent(userId)}`);
+                    const response = await apiFetch(`${apiBaseUrl}/api/recipes/${recipeId}/rating/user`);
                     if (response.ok) {
                         const data = await response.json();
                         // Kullanıcının puanı varsa sadece currentUserRating'ı set et
@@ -571,6 +1045,12 @@
                     }
 
                     if (starIndex >= 0) {
+                        // Anonymous kullanıcı kontrolü
+                        if (!isAuthenticated()) {
+                            showToast('Puan vermek için giriş yapmanız gerekiyor.', 'warning');
+                            return;
+                        }
+                        
                         const clickRating = starIndex + 1; // 1, 2, 3, 4, 5
                         
                         // Confirm mesajı
@@ -584,7 +1064,7 @@
                         }
                         
                         try {
-                            const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/rate?rating=${clickRating}&userId=${encodeURIComponent(userId)}`, {
+                            const response = await apiFetch(`${apiBaseUrl}/api/recipes/${recipeId}/rate?rating=${clickRating}`, {
                                 method: 'POST'
                             });
 
@@ -596,14 +1076,14 @@
                                 // updateRatingStats içinde ortalama puan güncelleniyor ve yıldızlar güncelleniyor
                                 await updateRatingStats();
                             } else {
-                                alert('Puan verilirken bir hata oluştu.');
+                                showToast('Puan verilirken bir hata oluştu.', 'error');
                                 // Hata durumunda ortalama puana dön
                                 const initialRating = parseFloat(starRatingContainer.getAttribute('data-initial-rating')) || 0;
                                 updateStarDisplay(initialRating, false);
                             }
                         } catch (error) {
                             console.error('Puan verilirken hata:', error);
-                            alert('Puan verilirken bir hata oluştu.');
+                            showToast('Puan verilirken bir hata oluştu.', 'error');
                             // Hata durumunda ortalama puana dön
                             const initialRating = parseFloat(starRatingContainer.getAttribute('data-initial-rating')) || 0;
                             updateStarDisplay(initialRating, false);
@@ -729,7 +1209,7 @@
 
             async function loadLikeStatus() {
                 try {
-                    const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/like?userId=${encodeURIComponent(userId)}`);
+                    const response = await apiFetch(`${apiBaseUrl}/api/recipes/${recipeId}/like`);
                     if (response.ok) {
                         const data = await response.json();
                         isLiked = data.isLiked;
@@ -767,8 +1247,14 @@
 
             // Like işlemi fonksiyonu
             async function toggleLike() {
+                // Anonymous kullanıcı kontrolü
+                if (!isAuthenticated()) {
+                    showToast('Beğenmek için giriş yapmanız gerekiyor.', 'warning');
+                    return;
+                }
+                
                 try {
-                    const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/like?userId=${encodeURIComponent(userId)}`, {
+                    const response = await apiFetch(`${apiBaseUrl}/api/recipes/${recipeId}/like`, {
                         method: 'POST'
                     });
 
@@ -784,11 +1270,11 @@
                             likeCountElement.textContent = data.likeCount;
                         }
                     } else {
-                        alert('Beğeni işlemi sırasında bir hata oluştu.');
+                        showToast('Beğeni işlemi sırasında bir hata oluştu.', 'error');
                     }
                 } catch (error) {
                     console.error('Beğeni işlemi sırasında hata:', error);
-                    alert('Beğeni işlemi sırasında bir hata oluştu.');
+                    showToast('Beğeni işlemi sırasında bir hata oluştu.', 'error');
                 }
             }
 
@@ -805,27 +1291,145 @@
                 });
             }
 
-            // Share Recipe Function
-            function shareRecipe() {
-                const recipeUrl = window.location.href;
-                const recipeTitle = '@Html.Raw(Json.Serialize(Model.Title))';
+            // Share Modal Functions
+            const recipeUrl = '@Html.Raw(recipeUrl)';
+            const recipeTitle = '@Html.Raw(Json.Serialize(Model.Title))';
+            const recipeDescription = '@Html.Raw(Json.Serialize((Model.Description ?? "").Length > 100 ? (Model.Description ?? "").Substring(0, 100) + "..." : (Model.Description ?? "")))';
 
-                if (navigator.share) {
-                    // Web Share API (modern browsers)
-                    navigator.share({
-                        title: recipeTitle,
-                        text: '@Html.Raw(Json.Serialize(Model.Description ?? ""))',
-                        url: recipeUrl
-                    }).catch(err => console.log('Share cancelled', err));
-                } else {
-                    // Fallback: Copy to clipboard
-                    navigator.clipboard.writeText(recipeUrl).then(() => {
-                        alert('Tarif linki kopyalandı!');
-                    }).catch(() => {
-                        // Fallback: Show URL in prompt
-                        prompt('Tarif linkini kopyalayın:', recipeUrl);
-                    });
+            function openShareModal() {
+                const modal = document.getElementById('shareModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    modal.classList.add('show');
+                    generateQRCode();
                 }
+            }
+
+            function closeShareModal() {
+                const modal = document.getElementById('shareModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    modal.classList.remove('show');
+                }
+            }
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('shareModal');
+                if (event.target === modal) {
+                    closeShareModal();
+                }
+            });
+
+            // Generate QR Code
+            function generateQRCode() {
+                const qrContainer = document.getElementById('qrcode');
+                if (!qrContainer) return;
+
+                // Clear previous QR code
+                qrContainer.innerHTML = '';
+
+                // Check if QRCode library is loaded
+                if (typeof QRCode !== 'undefined') {
+                    // Create a canvas element
+                    const canvas = document.createElement('canvas');
+                    QRCode.toCanvas(canvas, recipeUrl, {
+                        width: 200,
+                        margin: 2,
+                        color: {
+                            dark: '#000000',
+                            light: '#FFFFFF'
+                        }
+                    }, function (error) {
+                        if (error) {
+                            console.error('QR Code generation error:', error);
+                            qrContainer.innerHTML = '<p class="c-grey-600">QR kod oluşturulamadı</p>';
+                        } else {
+                            qrContainer.appendChild(canvas);
+                        }
+                    });
+                } else {
+                    // Fallback: Show message if QRCode library not loaded
+                    qrContainer.innerHTML = '<p class="c-grey-600">QR kod yükleniyor...</p>';
+                    // Retry after a short delay
+                    setTimeout(() => {
+                        if (typeof QRCode !== 'undefined') {
+                            generateQRCode();
+                        }
+                    }, 500);
+                }
+            }
+
+            // Share to WhatsApp
+            function shareToWhatsApp() {
+                const text = encodeURIComponent(`${recipeTitle}\n\n${recipeUrl}`);
+                const whatsappUrl = `https://wa.me/?text=${text}`;
+                window.open(whatsappUrl, '_blank');
+            }
+
+            // Share to Telegram
+            function shareToTelegram() {
+                const text = encodeURIComponent(`${recipeTitle}\n\n${recipeUrl}`);
+                const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(recipeUrl)}&text=${text}`;
+                window.open(telegramUrl, '_blank');
+            }
+
+            // Share to Facebook
+            function shareToFacebook() {
+                const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(recipeUrl)}`;
+                window.open(facebookUrl, '_blank', 'width=600,height=400');
+            }
+
+            // Share to Twitter
+            function shareToTwitter() {
+                const text = encodeURIComponent(`${recipeTitle} - ${recipeDescription}`);
+                const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(recipeUrl)}&text=${text}`;
+                window.open(twitterUrl, '_blank', 'width=600,height=400');
+            }
+
+            // Copy Recipe Link
+            function copyRecipeLink() {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(recipeUrl).then(() => {
+                        showToast('Tarif linki kopyalandı!', 'success');
+                        closeShareModal();
+                    }).catch(() => {
+                        fallbackCopyTextToClipboard(recipeUrl);
+                    });
+                } else {
+                    fallbackCopyTextToClipboard(recipeUrl);
+                }
+            }
+
+            // Fallback copy function for older browsers
+            function fallbackCopyTextToClipboard(text) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.top = '0';
+                textArea.style.left = '0';
+                textArea.style.width = '2em';
+                textArea.style.height = '2em';
+                textArea.style.padding = '0';
+                textArea.style.border = 'none';
+                textArea.style.outline = 'none';
+                textArea.style.boxShadow = 'none';
+                textArea.style.background = 'transparent';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        showToast('Tarif linki kopyalandı!', 'success');
+                        closeShareModal();
+                    } else {
+                        prompt('Linki kopyalamak için Ctrl+C kullanın:', text);
+                    }
+                } catch (err) {
+                    prompt('Linki kopyalamak için Ctrl+C kullanın:', text);
+                }
+                document.body.removeChild(textArea);
             }
 
             // Servings Calculator
@@ -860,10 +1464,958 @@
                 });
             }
 
-            // Sayfa yüklendiğinde
-            initServingsCalculator();
-            loadUserRating();
-            loadLikeStatus();
+            // Collection System
+            let userCollections = [];
+            let recipeCollectionIds = [];
+
+            async function loadCollections() {
+                // Anonymous kullanıcı kontrolü
+                if (!isAuthenticated()) {
+                    return; // Koleksiyonlar sadece giriş yapmış kullanıcılar için
+                }
+                
+                try {
+                    const response = await apiFetch(`${apiBaseUrl}/api/users/collections`);
+                    if (response.ok) {
+                        userCollections = await response.json();
+                        renderCollectionsList();
+                    }
+                } catch (error) {
+                    console.error('Error loading collections:', error);
+                }
+            }
+
+            async function loadRecipeCollections() {
+                try {
+                    const response = await apiFetch(`${apiBaseUrl}/api/recipes/${recipeId}/collections`);
+                    if (response.ok) {
+                        recipeCollectionIds = await response.json();
+                    }
+                } catch (error) {
+                    console.error('Error loading recipe collections:', error);
+                }
+            }
+
+            function renderCollectionsList() {
+                const container = document.getElementById('collectionsList');
+                if (!container) return;
+
+                if (userCollections.length === 0) {
+                    container.innerHTML = '<p class="text-center p-20 c-grey-600">Henüz koleksiyonunuz yok. Yeni bir koleksiyon oluşturun!</p>';
+                    return;
+                }
+
+                container.innerHTML = userCollections.map(collection => {
+                    const isInCollection = recipeCollectionIds.includes(collection.id);
+                    return `
+                        <div class="d-flex ai-c jc-sb p-10 bd bdrs-3 mB-10" style="cursor: pointer; transition: all 0.2s;" 
+                             onmouseover="this.style.backgroundColor='#f5f5f5'" 
+                             onmouseout="this.style.backgroundColor='transparent'"
+                             onclick="toggleRecipeInCollection(${collection.id})">
+                            <div>
+                                <h6 class="mB-5">${escapeHtml(collection.name)}</h6>
+                                ${collection.description ? `<p class="fsz-xs c-grey-600 mB-0">${escapeHtml(collection.description)}</p>` : ''}
+                                <span class="fsz-xs c-grey-500">${collection.recipeCount} tarif</span>
+                            </div>
+                            <div>
+                                <i class="ti-check c-green-500" style="font-size: 20px; ${isInCollection ? '' : 'display: none;'}" id="checkIcon_${collection.id}"></i>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            async function toggleRecipeInCollection(collectionId) {
+                // Anonymous kullanıcı kontrolü
+                if (!isAuthenticated()) {
+                    showToast('Koleksiyona eklemek için giriş yapmanız gerekiyor.', 'warning');
+                    return;
+                }
+                
+                const isInCollection = recipeCollectionIds.includes(collectionId);
+                const checkIcon = document.getElementById(`checkIcon_${collectionId}`);
+
+                try {
+                    if (isInCollection) {
+                        // Remove from collection
+                        const response = await apiFetch(`${apiBaseUrl}/api/users/collections/${collectionId}/recipes/${recipeId}`, {
+                            method: 'DELETE'
+                        });
+                        if (response.ok) {
+                            recipeCollectionIds = recipeCollectionIds.filter(id => id !== collectionId);
+                            if (checkIcon) checkIcon.style.display = 'none';
+                        }
+                    } else {
+                        // Add to collection
+                        const response = await apiFetch(`${apiBaseUrl}/api/users/collections/${collectionId}/recipes/${recipeId}`, {
+                            method: 'POST'
+                        });
+                        if (response.ok) {
+                            recipeCollectionIds.push(collectionId);
+                            if (checkIcon) checkIcon.style.display = 'block';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error toggling recipe in collection:', error);
+                    alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+                }
+            }
+
+            function openCollectionModal() {
+                // Anonymous kullanıcı kontrolü
+                if (!isAuthenticated()) {
+                    showToast('Koleksiyona eklemek için giriş yapmanız gerekiyor.', 'warning');
+                    return;
+                }
+                
+                document.getElementById('collectionModal').style.display = 'block';
+                document.getElementById('collectionModal').classList.add('show');
+                loadCollections();
+                loadRecipeCollections().then(() => {
+                    setTimeout(() => renderCollectionsList(), 100);
+                });
+            }
+
+            function closeCollectionModal() {
+                document.getElementById('collectionModal').style.display = 'none';
+                document.getElementById('collectionModal').classList.remove('show');
+                hideCreateCollectionForm();
+            }
+
+            function showCreateCollectionForm() {
+                document.getElementById('createCollectionForm').style.display = 'block';
+                document.getElementById('newCollectionName').focus();
+            }
+
+            function hideCreateCollectionForm() {
+                document.getElementById('createCollectionForm').style.display = 'none';
+                document.getElementById('newCollectionName').value = '';
+                document.getElementById('newCollectionDescription').value = '';
+            }
+
+            async function createCollection() {
+                // Anonymous kullanıcı kontrolü
+                if (!isAuthenticated()) {
+                    showToast('Koleksiyon oluşturmak için giriş yapmanız gerekiyor.', 'warning');
+                    return;
+                }
+                
+                const name = document.getElementById('newCollectionName').value.trim();
+                const description = document.getElementById('newCollectionDescription').value.trim();
+
+                if (!name) {
+                    showToast('Koleksiyon adı gereklidir.', 'warning');
+                    return;
+                }
+
+                try {
+                    const response = await apiFetch(`${apiBaseUrl}/api/users/collections`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            name: name,
+                            description: description || null
+                        })
+                    });
+
+                    if (response.ok) {
+                        const newCollection = await response.json();
+                        userCollections.push(newCollection);
+                        renderCollectionsList();
+                        hideCreateCollectionForm();
+                        showToast('Koleksiyon oluşturuldu!', 'success');
+                        // Otomatik olarak yeni koleksiyona ekle
+                        await toggleRecipeInCollection(newCollection.id);
+                    } else {
+                        const error = await response.json();
+                        showToast(error.error || 'Koleksiyon oluşturulurken bir hata oluştu.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error creating collection:', error);
+                    showToast('Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                }
+            }
+
+            // Modal dışına tıklanınca kapat
+            window.onclick = function(event) {
+                const modal = document.getElementById('collectionModal');
+                if (event.target === modal) {
+                    closeCollectionModal();
+                }
+            }
+
+            // Yorum Sistemi
+            let currentCommentPage = 0;
+            const commentsPerPage = 10;
+            let allCommentsLoaded = false;
+            let currentSort = 'newest'; // 'newest' veya 'liked'
+            let isLoadingComments = false;
+            let allComments = []; // Tüm yorumları tutmak için
+
+            // Karakter sayacı
+            const commentContent = document.getElementById('commentContent');
+            const commentCharCount = document.getElementById('commentCharCount');
+            const submitCommentBtn = document.getElementById('submitCommentBtn');
+            if (commentContent && commentCharCount && submitCommentBtn) {
+                commentContent.addEventListener('input', function() {
+                    const length = this.value.trim().length;
+                    commentCharCount.textContent = length;
+                    if (length > 1000) {
+                        commentCharCount.style.color = '#dc3545';
+                        submitCommentBtn.disabled = true;
+                        submitCommentBtn.classList.add('disabled');
+                    } else if (length === 0) {
+                        commentCharCount.style.color = '#6c757d';
+                        submitCommentBtn.disabled = true;
+                        submitCommentBtn.classList.add('disabled');
+                    } else {
+                        commentCharCount.style.color = '#6c757d';
+                        submitCommentBtn.disabled = false;
+                        submitCommentBtn.classList.remove('disabled');
+                    }
+                });
+                // İlk yüklemede butonu disable et
+                submitCommentBtn.disabled = true;
+                submitCommentBtn.classList.add('disabled');
+            }
+
+            // Yorumları yükle
+            async function loadComments(reset = false) {
+                if (isLoadingComments) return;
+                
+                if (reset) {
+                    currentCommentPage = 0;
+                    allCommentsLoaded = false;
+                    allComments = [];
+                }
+
+                if (allCommentsLoaded && !reset) return;
+
+                isLoadingComments = true;
+                const commentsList = document.getElementById('commentsList');
+                const loadMoreBtn = document.getElementById('loadMoreComments');
+                const commentCount = document.getElementById('commentCount');
+
+                // Loading state göster
+                if (reset && commentsList) {
+                    commentsList.innerHTML = `
+                        <div class="ta-c p-20">
+                            <i class="ti-reload c-grey-400" style="font-size: 24px; animation: spin 1s linear infinite;"></i>
+                            <p class="mT-10 c-grey-600">Yorumlar yükleniyor...</p>
+                        </div>
+                    `;
+                }
+
+                try {
+                    const skip = currentCommentPage * commentsPerPage;
+                    const url = `${apiBaseUrl}/api/recipes/${recipeId}/comments?skip=${skip}&take=${commentsPerPage}`;
+
+                    console.log('Loading comments from:', url); // Debug log
+                    const response = await apiFetch(url);
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Comments API error:', response.status, response.statusText, errorText);
+                        throw new Error('Yorumlar yüklenemedi');
+                    }
+
+                    const data = await response.json();
+                    console.log('Comments API response:', data); // Debug log
+                    console.log('Comments array:', data.comments); // Debug log
+                    console.log('Total count:', data.totalCount); // Debug log
+                    const comments = data.comments || [];
+                    const totalCount = data.totalCount || 0;
+
+                    if (commentCount) {
+                        commentCount.textContent = totalCount;
+                    }
+
+                    if (reset) {
+                        allComments = [];
+                        commentsList.innerHTML = '';
+                    }
+
+                    if (comments.length === 0 && reset) {
+                        commentsList.innerHTML = `
+                            <div class="ta-c p-20">
+                                <i class="ti-comment-alt c-grey-400" style="font-size: 24px;"></i>
+                                <p class="mT-10 c-grey-600">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
+                            </div>
+                        `;
+                        isLoadingComments = false;
+                        return;
+                    }
+
+                    // Yorumları listeye ekle
+                    allComments = allComments.concat(comments);
+                    
+                    // Sıralama uygula
+                    renderComments();
+
+                    if (comments.length < commentsPerPage || skip + comments.length >= totalCount) {
+                        allCommentsLoaded = true;
+                        if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+                    } else {
+                        if (loadMoreBtn) loadMoreBtn.style.display = 'block';
+                    }
+
+                    currentCommentPage++;
+                } catch (error) {
+                    console.error('Error loading comments:', error);
+                    commentsList.innerHTML = `
+                        <div class="ta-c p-20">
+                            <i class="ti-alert c-red-500" style="font-size: 24px;"></i>
+                            <p class="mT-10 c-red-500">Yorumlar yüklenirken bir hata oluştu.</p>
+                        </div>
+                    `;
+                    showToast('Yorumlar yüklenirken bir hata oluştu.', 'error');
+                } finally {
+                    isLoadingComments = false;
+                }
+            }
+
+            // Yorumları render et (sıralama ile)
+            function renderComments() {
+                const commentsList = document.getElementById('commentsList');
+                if (!commentsList) return;
+
+                let sortedComments = [...allComments];
+                
+                if (currentSort === 'liked') {
+                    sortedComments.sort((a, b) => b.likeCount - a.likeCount);
+                } else {
+                    // En yeni (zaten backend'den sıralı geliyor)
+                    sortedComments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                }
+
+                commentsList.innerHTML = '';
+                sortedComments.forEach(comment => {
+                    commentsList.appendChild(createCommentElement(comment));
+                });
+            }
+
+            // Yorum sıralama
+            function sortComments(sortType) {
+                currentSort = sortType;
+                
+                // Buton durumlarını güncelle
+                document.getElementById('sortNewest')?.classList.toggle('active', sortType === 'newest');
+                document.getElementById('sortLiked')?.classList.toggle('active', sortType === 'liked');
+                
+                // Yorumları yeniden render et
+                renderComments();
+            }
+
+            // Yorum elementi oluştur
+            function createCommentElement(comment, isReply = false) {
+                const div = document.createElement('div');
+                div.className = `bd bgc-white p-20 bdrs-3 mB-15 comment-item ${isReply ? 'comment-reply' : ''}`;
+                div.setAttribute('data-comment-id', comment.id);
+                if (isReply) {
+                    div.style.marginLeft = '40px';
+                    div.style.borderLeft = '3px solid #e0e0e0';
+                }
+
+                // Property isimleri artık camelCase olacak
+                const createdAt = comment.createdAt;
+                const updatedAt = comment.updatedAt;
+                const userName = comment.userName || 'Anonim';
+                const content = comment.content || '';
+                const likeCount = comment.likeCount || 0;
+                const isLikedByUser = comment.isLikedByUser || false;
+                const canEdit = comment.canEdit || false;
+                const canDelete = comment.canDelete || false;
+                const replies = comment.replies || [];
+                const replyCount = comment.replyCount || replies.length;
+                
+                const timeAgo = getTimeAgo(new Date(createdAt));
+                const isEdited = updatedAt && updatedAt !== createdAt;
+
+                div.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start mB-10">
+                        <div class="d-flex align-items-center">
+                            <div class="w-40 h-40 bdrs-50p bgc-blue-500 d-flex ai-c jc-c mR-10" style="min-width: 40px; min-height: 40px;">
+                                <span class="c-white fw-600">${userName.charAt(0).toUpperCase()}</span>
+                            </div>
+                            <div>
+                                <h6 class="m-0 fw-600">${escapeHtml(userName)}</h6>
+                                <small class="c-grey-600">${timeAgo}${isEdited ? ' (düzenlendi)' : ''}</small>
+                            </div>
+                        </div>
+                        ${canEdit || canDelete ? `
+                            <div class="dropdown">
+                                <button class="btn btn-link p-0" type="button" data-bs-toggle="dropdown">
+                                    <i class="ti-more-vertical c-grey-600"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    ${canEdit ? `<li><a class="dropdown-item" href="#" onclick="editComment(${comment.id}); return false;"><i class="ti-pencil mR-5"></i> Düzenle</a></li>` : ''}
+                                    ${canDelete ? `<li><a class="dropdown-item text-danger" href="#" onclick="deleteComment(${comment.id}); return false;"><i class="ti-trash mR-5"></i> Sil</a></li>` : ''}
+                                </ul>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="comment-content mB-10">
+                        <p class="m-0" id="comment-text-${comment.id}">${escapeHtml(content)}</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-10" style="gap: 12px;">
+                        <button class="like-comment-btn ${isLikedByUser ? 'liked' : ''}" 
+                                onclick="toggleCommentLike(${comment.id})" 
+                                data-comment-id="${comment.id}">
+                            <i class="ti-heart"></i>
+                            <span class="like-count-${comment.id}">${likeCount}</span>
+                        </button>
+                        ${!isReply && isAuthenticated() ? `
+                            <button class="reply-comment-btn" 
+                                    onclick="showReplyForm(${comment.id})" 
+                                    data-comment-id="${comment.id}"
+                                    title="Yanıtla">
+                                <i class="ti-comment"></i>
+                                ${replyCount > 0 ? `<span>${replyCount}</span>` : ''}
+                            </button>
+                        ` : ''}
+                    </div>
+                ${!isReply && replies && replies.length > 0 ? `
+                    <div class="comment-replies mT-15" id="replies-${comment.id}">
+                        ${replies.map(reply => createCommentElement(reply, true).outerHTML).join('')}
+                    </div>
+                    ` : ''}
+                    ${!isReply && isAuthenticated() ? `
+                        <div class="reply-form-container mT-15" id="reply-form-${comment.id}" style="display: none;">
+                            <div class="bd bgc-grey-50 p-15 bdrs-3">
+                                <textarea class="form-control mB-10" id="reply-content-${comment.id}" rows="2" placeholder="Yanıtınızı yazın..." maxlength="1000"></textarea>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="c-grey-600">
+                                        <span id="reply-char-count-${comment.id}">0</span>/1000
+                                    </small>
+                                    <div>
+                                        <button class="btn btn-sm btn-secondary" onclick="hideReplyForm(${comment.id})">İptal</button>
+                                        <button class="btn btn-sm btn-primary mL-5" onclick="submitReply(${comment.id})">Yanıtla</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+
+                return div;
+            }
+
+            // Yorum ekle
+            async function submitComment() {
+                const content = commentContent?.value.trim();
+                if (!content) {
+                    showToast('Lütfen yorum yazın.', 'warning');
+                    return;
+                }
+                if (content.length > 1000) {
+                    showToast('Yorum en fazla 1000 karakter olabilir.', 'warning');
+                    return;
+                }
+
+                if (!isAuthenticated()) {
+                    showToast('Yorum yapmak için giriş yapmanız gerekiyor.', 'warning');
+                    return;
+                }
+
+                // Optimistic update - Yorumu hemen ekle (geçici, backend'den gerçek veri gelecek)
+                const tempComment = {
+                    id: 'temp-' + Date.now(),
+                    userId: '',
+                    userName: 'Yükleniyor...',
+                    content: content,
+                    likeCount: 0,
+                    isLikedByUser: false,
+                    createdAt: new Date().toISOString(),
+                    canEdit: true,
+                    canDelete: true
+                };
+                const commentsList = document.getElementById('commentsList');
+                if (commentsList && commentsList.querySelector('.ta-c')) {
+                    commentsList.innerHTML = '';
+                }
+                commentsList?.insertBefore(createCommentElement(tempComment), commentsList.firstChild);
+
+                try {
+                    const response = await apiFetch(`${apiBaseUrl}/api/recipes/${recipeId}/comments`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            content: content,
+                            parentCommentId: null // Ana yorum
+                        })
+                    });
+
+                    if (response.ok) {
+                        commentContent.value = '';
+                        commentCharCount.textContent = '0';
+                        commentCharCount.style.color = '#6c757d';
+                        showToast('Yorumunuz başarıyla eklendi!', 'success');
+                        await loadComments(true); // Yorumları yeniden yükle
+                    } else {
+                        // Optimistic update'i geri al
+                        const tempElement = document.querySelector(`[data-comment-id="${tempComment.id}"]`);
+                        tempElement?.remove();
+                        const error = await response.json();
+                        showToast(error.errors?.Content?.[0] || error.error || 'Yorum eklenirken bir hata oluştu.', 'error');
+                    }
+                } catch (error) {
+                    // Optimistic update'i geri al
+                    const tempElement = document.querySelector(`[data-comment-id="${tempComment.id}"]`);
+                    tempElement?.remove();
+                    console.error('Error submitting comment:', error);
+                    showToast('Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                }
+            }
+
+            // Yorum düzenle
+            let editingCommentId = null;
+            async function editComment(commentId) {
+                const commentItem = document.querySelector(`[data-comment-id="${commentId}"]`);
+                const commentText = commentItem.querySelector(`#comment-text-${commentId}`);
+                const currentText = commentText.textContent;
+
+                if (editingCommentId === commentId) {
+                    // İptal et
+                    editingCommentId = null;
+                    commentText.textContent = currentText;
+                    return;
+                }
+
+                editingCommentId = commentId;
+                const textarea = document.createElement('textarea');
+                textarea.className = 'form-control';
+                textarea.value = currentText;
+                textarea.rows = 3;
+                textarea.maxLength = 1000;
+
+                const saveBtn = document.createElement('button');
+                saveBtn.className = 'btn btn-primary btn-sm mT-10 mR-5';
+                saveBtn.innerHTML = '<i class="ti-check mR-5"></i> Kaydet';
+                saveBtn.onclick = async () => {
+                    await updateComment(commentId, textarea.value.trim());
+                };
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn btn-secondary btn-sm mT-10';
+                cancelBtn.innerHTML = '<i class="ti-close mR-5"></i> İptal';
+                cancelBtn.onclick = () => {
+                    editingCommentId = null;
+                    commentText.textContent = currentText;
+                    textarea.replaceWith(commentText);
+                    saveBtn.remove();
+                    cancelBtn.remove();
+                };
+
+                commentText.replaceWith(textarea);
+                commentItem.querySelector('.comment-content').appendChild(saveBtn);
+                commentItem.querySelector('.comment-content').appendChild(cancelBtn);
+            }
+
+            // Yorum güncelle
+            async function updateComment(commentId, newContent) {
+                if (!newContent) {
+                    showToast('Yorum içeriği boş olamaz.', 'warning');
+                    return;
+                }
+                if (newContent.length > 1000) {
+                    showToast('Yorum en fazla 1000 karakter olabilir.', 'warning');
+                    return;
+                }
+
+                const userId = '@(User.Identity?.IsAuthenticated == true ? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value : null)';
+
+                // Optimistic update
+                const commentItem = document.querySelector(`[data-comment-id="${commentId}"]`);
+                const commentText = commentItem?.querySelector(`#comment-text-${commentId}`);
+                const oldText = commentText?.textContent;
+
+                try {
+                    const response = await apiFetch(`${apiBaseUrl}/api/comments/${commentId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            content: newContent
+                        })
+                    });
+
+                    if (response.ok) {
+                        editingCommentId = null;
+                        showToast('Yorumunuz güncellendi!', 'success');
+                        await loadComments(true); // Yorumları yeniden yükle
+                    } else {
+                        // Geri al
+                        if (commentText && oldText) {
+                            commentText.textContent = oldText;
+                        }
+                        const error = await response.json();
+                        showToast(error.errors?.Content?.[0] || error.error || 'Yorum güncellenirken bir hata oluştu.', 'error');
+                    }
+                } catch (error) {
+                    // Geri al
+                    if (commentText && oldText) {
+                        commentText.textContent = oldText;
+                    }
+                    console.error('Error updating comment:', error);
+                    showToast('Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                }
+            }
+
+            // Yorum sil
+            async function deleteComment(commentId) {
+                if (!confirm('Bu yorumu silmek istediğinize emin misiniz?')) {
+                    return;
+                }
+
+                if (!isAuthenticated()) {
+                    showToast('Yorum silmek için giriş yapmanız gerekiyor.', 'warning');
+                    return;
+                }
+
+                // Optimistic update
+                const commentItem = document.querySelector(`[data-comment-id="${commentId}"]`);
+                const originalDisplay = commentItem?.style.display;
+                if (commentItem) {
+                    commentItem.style.opacity = '0.5';
+                    commentItem.style.pointerEvents = 'none';
+                }
+
+                try {
+                    const response = await apiFetch(`${apiBaseUrl}/api/comments/${commentId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        if (commentItem) {
+                            commentItem.style.transition = 'opacity 0.3s';
+                            commentItem.style.opacity = '0';
+                            setTimeout(() => commentItem.remove(), 300);
+                        }
+                        showToast('Yorumunuz silindi.', 'success');
+                        // Yorum sayısını güncelle
+                        const commentCount = document.getElementById('commentCount');
+                        if (commentCount) {
+                            const currentCount = parseInt(commentCount.textContent) || 0;
+                            commentCount.textContent = Math.max(0, currentCount - 1);
+                        }
+                    } else {
+                        // Geri al
+                        if (commentItem) {
+                            commentItem.style.opacity = '1';
+                            commentItem.style.pointerEvents = 'auto';
+                        }
+                        const error = await response.json();
+                        showToast(error.error || 'Yorum silinirken bir hata oluştu.', 'error');
+                    }
+                } catch (error) {
+                    // Geri al
+                    if (commentItem) {
+                        commentItem.style.opacity = '1';
+                        commentItem.style.pointerEvents = 'auto';
+                    }
+                    console.error('Error deleting comment:', error);
+                    showToast('Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                }
+            }
+
+            // Yorum beğen/beğenme
+            async function toggleCommentLike(commentId) {
+                if (!isAuthenticated()) {
+                    showToast('Beğenmek için giriş yapmanız gerekiyor.', 'warning');
+                    return;
+                }
+
+                const likeBtn = document.querySelector(`.like-comment-btn[data-comment-id="${commentId}"]`);
+                const likeIcon = likeBtn?.querySelector('i');
+                const likeCountSpan = document.querySelector(`.like-count-${commentId}`);
+
+                // Optimistic update
+                const currentCount = parseInt(likeCountSpan?.textContent || '0');
+                const isCurrentlyLiked = likeIcon?.classList.contains('c-red-500');
+                const newCount = isCurrentlyLiked ? currentCount - 1 : currentCount + 1;
+                const newIsLiked = !isCurrentlyLiked;
+
+                if (likeCountSpan) {
+                    likeCountSpan.textContent = Math.max(0, newCount);
+                }
+                if (likeIcon) {
+                    if (newIsLiked) {
+                        likeIcon.classList.remove('c-grey-400');
+                        likeIcon.classList.add('c-red-500');
+                        likeBtn.classList.add('liked');
+                    } else {
+                        likeIcon.classList.remove('c-red-500');
+                        likeIcon.classList.add('c-grey-400');
+                        likeBtn.classList.remove('liked');
+                    }
+                }
+
+                try {
+                    const response = await apiFetch(`${apiBaseUrl}/api/comments/${commentId}/like`, {
+                        method: 'POST'
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (likeCountSpan) {
+                            likeCountSpan.textContent = data.likeCount || 0;
+                        }
+                        if (likeIcon) {
+                            if (data.isLiked) {
+                                likeIcon.classList.remove('c-grey-400');
+                                likeIcon.classList.add('c-red-500');
+                                likeBtn.classList.add('liked');
+                            } else {
+                                likeIcon.classList.remove('c-red-500');
+                                likeIcon.classList.add('c-grey-400');
+                                likeBtn.classList.remove('liked');
+                            }
+                        }
+                    } else {
+                        // Geri al
+                        if (likeCountSpan) {
+                            likeCountSpan.textContent = currentCount;
+                        }
+                        if (likeIcon) {
+                            if (isCurrentlyLiked) {
+                                likeIcon.classList.remove('c-grey-400');
+                                likeIcon.classList.add('c-red-500');
+                                likeBtn.classList.add('liked');
+                            } else {
+                                likeIcon.classList.remove('c-red-500');
+                                likeIcon.classList.add('c-grey-400');
+                                likeBtn.classList.remove('liked');
+                            }
+                        }
+                        const error = await response.json();
+                        showToast(error.error || 'Beğeni işlemi sırasında bir hata oluştu.', 'error');
+                    }
+                } catch (error) {
+                    // Geri al
+                    if (likeCountSpan) {
+                        likeCountSpan.textContent = currentCount;
+                    }
+                    if (likeIcon) {
+                        if (isCurrentlyLiked) {
+                            likeIcon.classList.remove('c-grey-400');
+                            likeIcon.classList.add('c-red-500');
+                            likeBtn.classList.add('liked');
+                        } else {
+                            likeIcon.classList.remove('c-red-500');
+                            likeIcon.classList.add('c-grey-400');
+                            likeBtn.classList.remove('liked');
+                        }
+                    }
+                    console.error('Error toggling comment like:', error);
+                    showToast('Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                }
+            }
+
+            // Yanıt verme fonksiyonları
+            function showReplyForm(commentId) {
+                if (!isAuthenticated()) {
+                    showToast('Yanıt vermek için giriş yapmanız gerekiyor.', 'warning');
+                    return;
+                }
+                
+                const replyForm = document.getElementById(`reply-form-${commentId}`);
+                const replyTextarea = document.getElementById(`reply-content-${commentId}`);
+                const replyCharCount = document.getElementById(`reply-char-count-${commentId}`);
+                
+                if (replyForm) {
+                    replyForm.style.display = 'block';
+                    if (replyTextarea) {
+                        replyTextarea.focus();
+                        
+                        // Karakter sayacı
+                        replyTextarea.addEventListener('input', function() {
+                            const length = this.value.trim().length;
+                            if (replyCharCount) {
+                                replyCharCount.textContent = length;
+                                replyCharCount.style.color = length > 1000 ? '#dc3545' : '#6c757d';
+                            }
+                        });
+                    }
+                }
+            }
+
+            function hideReplyForm(commentId) {
+                const replyForm = document.getElementById(`reply-form-${commentId}`);
+                const replyTextarea = document.getElementById(`reply-content-${commentId}`);
+                if (replyForm) {
+                    replyForm.style.display = 'none';
+                }
+                if (replyTextarea) {
+                    replyTextarea.value = '';
+                    const replyCharCount = document.getElementById(`reply-char-count-${commentId}`);
+                    if (replyCharCount) {
+                        replyCharCount.textContent = '0';
+                        replyCharCount.style.color = '#6c757d';
+                    }
+                }
+            }
+
+            async function submitReply(parentCommentId) {
+                const replyTextarea = document.getElementById(`reply-content-${parentCommentId}`);
+                const content = replyTextarea?.value.trim();
+                
+                if (!content) {
+                    showToast('Lütfen yanıt yazın.', 'warning');
+                    return;
+                }
+                if (content.length > 1000) {
+                    showToast('Yanıt en fazla 1000 karakter olabilir.', 'warning');
+                    return;
+                }
+
+                if (!isAuthenticated()) {
+                    showToast('Yanıt vermek için giriş yapmanız gerekiyor.', 'warning');
+                    return;
+                }
+
+                try {
+                    const response = await apiFetch(`${apiBaseUrl}/api/recipes/${recipeId}/comments`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            content: content,
+                            parentCommentId: parentCommentId
+                        })
+                    });
+
+                    if (response.ok) {
+                        hideReplyForm(parentCommentId);
+                        showToast('Yanıtınız başarıyla eklendi!', 'success');
+                        await loadComments(true); // Yorumları yeniden yükle
+                    } else {
+                        const error = await response.json();
+                        showToast(error.errors?.Content?.[0] || error.error || 'Yanıt eklenirken bir hata oluştu.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error submitting reply:', error);
+                    showToast('Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                }
+            }
+
+            // Daha fazla yorum yükle
+            function loadMoreComments() {
+                loadComments(false);
+            }
+
+            // Infinite Scroll
+            let intersectionObserver = null;
+            function setupInfiniteScroll() {
+                const trigger = document.getElementById('infiniteScrollTrigger');
+                if (!trigger) return;
+
+                // Intersection Observer API kullan
+                if ('IntersectionObserver' in window) {
+                    intersectionObserver = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting && !isLoadingComments && !allCommentsLoaded) {
+                                loadComments(false);
+                            }
+                        });
+                    }, {
+                        root: null,
+                        rootMargin: '100px',
+                        threshold: 0.1
+                    });
+
+                    intersectionObserver.observe(trigger);
+                } else {
+                    // Fallback: Scroll event
+                    window.addEventListener('scroll', () => {
+                        const triggerRect = trigger.getBoundingClientRect();
+                        if (triggerRect.top < window.innerHeight && !isLoadingComments && !allCommentsLoaded) {
+                            loadComments(false);
+                        }
+                    });
+                }
+            }
+
+            // Yardımcı fonksiyonlar
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function getTimeAgo(date) {
+                const now = new Date();
+                const diff = now - date;
+                const seconds = Math.floor(diff / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const hours = Math.floor(minutes / 60);
+                const days = Math.floor(hours / 24);
+
+                if (days > 0) return `${days} gün önce`;
+                if (hours > 0) return `${hours} saat önce`;
+                if (minutes > 0) return `${minutes} dakika önce`;
+                return 'Az önce';
+            }
+
+            // Anonymous kullanıcılar için buton/form gizleme
+            function checkAuthentication() {
+                const isAuth = isAuthenticated();
+                const starRating = document.querySelector('.star-rating');
+                const likeButton = document.getElementById('likeButtonStat');
+                const commentForm = document.getElementById('commentContent')?.closest('.bd');
+                
+                if (!isAuth) {
+                    // Rating yıldızlarını gizle (sadece görüntüleme için)
+                    if (starRating) {
+                        starRating.style.pointerEvents = 'none';
+                        starRating.style.opacity = '0.6';
+                    }
+                    // Like butonunu devre dışı bırak
+                    if (likeButton) {
+                        likeButton.style.pointerEvents = 'none';
+                        likeButton.style.opacity = '0.6';
+                    }
+                } else {
+                    // Giriş yapmış kullanıcılar için aktif et
+                    if (starRating) {
+                        starRating.style.pointerEvents = 'auto';
+                        starRating.style.opacity = '1';
+                    }
+                    if (likeButton) {
+                        likeButton.style.pointerEvents = 'auto';
+                        likeButton.style.opacity = '1';
+                    }
+                }
+            }
+            
+            // Sayfa yüklendiğinde - auth.js yüklendikten sonra çalışsın
+            document.addEventListener('DOMContentLoaded', function() {
+                // auth.js yüklendiğinden emin ol - fallback ekle
+                if (typeof isAuthenticated === 'undefined') {
+                    console.warn('auth.js yüklenmedi! Fallback kullanılıyor.');
+                    window.isAuthenticated = function() { return false; };
+                }
+                if (typeof apiFetch === 'undefined') {
+                    console.warn('apiFetch tanımlı değil! Fallback kullanılıyor.');
+                    window.apiFetch = async function(url, options = {}) {
+                        return await fetch(url, options);
+                    };
+                }
+                
+                initServingsCalculator();
+                checkAuthentication();
+                
+                // Sadece giriş yapmış kullanıcılar için yükle
+                if (isAuthenticated()) {
+                    loadUserRating();
+                    loadLikeStatus();
+                    loadCollections(); // Koleksiyonları yükle
+                } else {
+                    // Anonymous kullanıcılar için sadece görüntüleme verilerini yükle
+                    loadLikeStatus(); // Bu endpoint anonymous da çalışıyor (isLiked: false döner)
+                }
+                
+                loadComments(true); // Yorumları yükle (herkes görebilir)
+                setupInfiniteScroll(); // Infinite scroll'u başlat
+            });
         </script>
     }
 }

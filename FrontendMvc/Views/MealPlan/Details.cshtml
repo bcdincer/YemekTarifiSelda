@@ -1,0 +1,93 @@
+@model FrontendMvc.Models.MealPlan.MealPlanViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="bd bgc-white p-30">
+                <div class="d-flex justify-content-between align-items-center mB-20">
+                    <div>
+                        <h2 class="mB-5">@Model.Name</h2>
+                        <p class="fsz-sm c-grey-600 mB-0">
+                            <i class="ti-calendar mR-5"></i>
+                            @Model.StartDate.ToString("dd.MM.yyyy") - @Model.EndDate.ToString("dd.MM.yyyy")
+                        </p>
+                    </div>
+                    <div class="d-flex gap-10">
+                        <form asp-controller="ShoppingList" asp-action="CreateFromMealPlan" asp-route-mealPlanId="@Model.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success">
+                                <i class="ti-shopping-cart mR-5"></i> Alışveriş Listesi Oluştur
+                            </button>
+                        </form>
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-secondary">
+                            <i class="ti-pencil mR-5"></i> Düzenle
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline" 
+                              onsubmit="return confirm('Bu planı silmek istediğinizden emin misiniz?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger">
+                                <i class="ti-trash mR-5"></i> Sil
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                @{
+                    var groupedItems = Model.Items
+                        .OrderBy(i => i.Date)
+                        .ThenBy(i => i.MealType)
+                        .GroupBy(i => i.Date.Date);
+                }
+
+                @foreach (var dayGroup in groupedItems)
+                {
+                    <div class="bd bgc-grey-50 p-20 mB-20 bdrs-3">
+                        <h4 class="mB-15">
+                            <i class="ti-calendar c-blue-500 mR-5"></i>
+                            @dayGroup.Key.ToString("dddd, dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))
+                        </h4>
+                        <div class="row">
+                            @foreach (var item in dayGroup.OrderBy(i => i.MealType))
+                            {
+                                <div class="col-md-6 col-lg-4 mB-15">
+                                    <div class="bd bgc-white p-15 bdrs-3">
+                                        <div class="d-flex justify-content-between align-items-start mB-10">
+                                            <span class="badge bgc-blue-500 c-white fsz-xs">
+                                                @item.MealType
+                                            </span>
+                                            <span class="fsz-xs c-grey-600">
+                                                @item.Servings kişilik
+                                            </span>
+                                        </div>
+                                        @if (item.Recipe != null)
+                                        {
+                                            <h5 class="mB-10">
+                                                <a asp-controller="Recipes" asp-action="Details" asp-route-id="@item.RecipeId" class="c-grey-900">
+                                                    @item.Recipe.Title
+                                                </a>
+                                            </h5>
+                                            @if (!string.IsNullOrEmpty(item.Recipe.ImageUrl))
+                                            {
+                                                <img src="@item.Recipe.ImageUrl" alt="@item.Recipe.Title" 
+                                                     class="w-100 bdrs-3 mB-10" style="height: 150px; object-fit: cover;">
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <p class="c-grey-600">Tarif bulunamadı</p>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

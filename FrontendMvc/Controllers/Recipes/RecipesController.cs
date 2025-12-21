@@ -97,22 +97,13 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
             return RedirectToAction("Login", "Account");
         }
         
-        List<RecipeViewModel> likedRecipes;
+        // Token'ı header'a ekle (localStorage'dan JavaScript ile alınacak, şimdilik boş)
+        // Not: Server-side'da token yok, bu yüzden client-side API çağrıları kullanılmalı
+        // Şimdilik bu action sadece view'i render ediyor, gerçek veri JavaScript ile yüklenecek
         
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            // Arama yapılıyorsa
-            var searchUrl = $"/api/users/{userId}/liked-recipes/search?q={Uri.EscapeDataString(search)}";
-            likedRecipes = await client.GetFromJsonAsync<List<RecipeViewModel>>(searchUrl, JsonOptions) 
-                          ?? new List<RecipeViewModel>();
-            ViewBag.SearchTerm = search;
-        }
-        else
-        {
-            // Normal liste
-            likedRecipes = await client.GetFromJsonAsync<List<RecipeViewModel>>($"/api/users/{userId}/liked-recipes", JsonOptions) 
-                          ?? new List<RecipeViewModel>();
-        }
+        List<RecipeViewModel> likedRecipes = new List<RecipeViewModel>(); // Boş liste, JavaScript ile yüklenecek
+        
+        ViewBag.SearchTerm = search;
         
         // Kategorileri yükle ve DisplayOrder'a göre sırala
         var categories = await client.GetFromJsonAsync<List<CategoryViewModel>>("/api/categories") 
@@ -293,9 +284,111 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
         return Json(new { url = $"/images/recipes/{fileName}" });
     }
 
+    [Authorize]
+    public async Task<IActionResult> Collections()
+    {
+        try
+        {
+            var client = CreateApiClient();
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            
+            var response = await client.GetAsync("/api/users/collections");
+            
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                TempData["ErrorMessage"] = "Oturumunuz sona erdi. Lütfen tekrar giriş yapın.";
+                return RedirectToAction("Login", "Account");
+            }
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                TempData["ErrorMessage"] = $"Koleksiyonlar yüklenirken bir hata oluştu. (Status: {(int)response.StatusCode})";
+                return View(new List<CollectionViewModel>());
+            }
+            
+            var collections = await response.Content.ReadFromJsonAsync<List<CollectionViewModel>>(JsonOptions) 
+                             ?? new List<CollectionViewModel>();
+            
+            return View(collections);
+        }
+        catch (System.Net.Http.HttpRequestException ex) when (ex.Message.Contains("401"))
+        {
+            TempData["ErrorMessage"] = "Oturumunuz sona erdi. Lütfen tekrar giriş yapın.";
+            return RedirectToAction("Login", "Account");
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = "Koleksiyonlar yüklenirken bir hata oluştu.";
+            return View(new List<CollectionViewModel>());
+        }
+    }
+
+    [Authorize]
+    public async Task<IActionResult> CollectionDetail(int id)
+    {
+        var client = CreateApiClient();
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(userId))
+        {
+            return RedirectToAction("Login", "Account");
+        }
+        
+        // Token'ı header'a ekle
+        var token = HttpContext.Request.Cookies["authToken"] ?? 
+                    HttpContext.Session.GetString("authToken");
+        
+        if (!string.IsNullOrEmpty(token))
+        {
+            client.DefaultRequestHeaders.Authorization = 
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        }
+        
+        var collection = await client.GetFromJsonAsync<CollectionDetailViewModel>($"/api/users/collections/{id}/detail", JsonOptions);
+        
+        if (collection == null)
+        {
+            return NotFound();
+        }
+        
+        return View(collection);
+    }
+
     private HttpClient CreateApiClient()
     {
         var client = _httpClientFactory.CreateClient("BackendApi");
+        
+        // Token'ı cookie'den al
+        var token = HttpContext.Request.Cookies["authToken"];
+        
+        // Session yapılandırılmışsa ve cookie'de token yoksa session'dan al
+        if (string.IsNullOrEmpty(token))
+        {
+            try
+            {
+                if (HttpContext.Session != null && HttpContext.Session.IsAvailable)
+                {
+                    token = HttpContext.Session.GetString("authToken");
+                }
+            }
+            catch
+            {
+                // Session yapılandırılmamış, devam et
+            }
+        }
+        
+        if (!string.IsNullOrEmpty(token))
+        {
+            client.DefaultRequestHeaders.Authorization = 
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        }
+        
         return client;
     }
 }

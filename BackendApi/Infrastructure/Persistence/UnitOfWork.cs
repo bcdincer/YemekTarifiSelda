@@ -13,6 +13,14 @@ public class UnitOfWork : IUnitOfWork
     private ICategoryRepository? _categories;
     private IRatingRepository? _ratings;
     private ILikeRepository? _likes;
+    private ICollectionRepository? _collections;
+    private ICollectionRecipeRepository? _collectionRecipes;
+    private ICommentRepository? _comments;
+    private ICommentLikeRepository? _commentLikes;
+    private IMealPlanRepository? _mealPlans;
+    private IMealPlanItemRepository? _mealPlanItems;
+    private IShoppingListRepository? _shoppingLists;
+    private IShoppingListItemRepository? _shoppingListItems;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -48,6 +56,70 @@ public class UnitOfWork : IUnitOfWork
         get
         {
             return _likes ??= new LikeRepository(_context);
+        }
+    }
+
+    public ICollectionRepository Collections
+    {
+        get
+        {
+            return _collections ??= new CollectionRepository(_context);
+        }
+    }
+
+    public ICollectionRecipeRepository CollectionRecipes
+    {
+        get
+        {
+            return _collectionRecipes ??= new CollectionRecipeRepository(_context);
+        }
+    }
+
+    public ICommentRepository Comments
+    {
+        get
+        {
+            return _comments ??= new CommentRepository(_context);
+        }
+    }
+
+    public ICommentLikeRepository CommentLikes
+    {
+        get
+        {
+            return _commentLikes ??= new CommentLikeRepository(_context);
+        }
+    }
+
+    public IMealPlanRepository MealPlans
+    {
+        get
+        {
+            return _mealPlans ??= new MealPlanRepository(_context);
+        }
+    }
+
+    public IMealPlanItemRepository MealPlanItems
+    {
+        get
+        {
+            return _mealPlanItems ??= new MealPlanItemRepository(_context);
+        }
+    }
+
+    public IShoppingListRepository ShoppingLists
+    {
+        get
+        {
+            return _shoppingLists ??= new ShoppingListRepository(_context);
+        }
+    }
+
+    public IShoppingListItemRepository ShoppingListItems
+    {
+        get
+        {
+            return _shoppingListItems ??= new ShoppingListItemRepository(_context);
         }
     }
 

@@ -49,44 +49,239 @@
                         </div>
                     }
 
+                    <!-- Zorluk Seviyesi -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">Zorluk Seviyesi</label>
+                        <select name="difficulty" class="form-control">
+                            <option value="">Tümü</option>
+                            @if (ViewBag.Difficulty == "Kolay")
+                            {
+                                <option value="Kolay" selected>Kolay</option>
+                            }
+                            else
+                            {
+                                <option value="Kolay">Kolay</option>
+                            }
+                            @if (ViewBag.Difficulty == "Orta")
+                            {
+                                <option value="Orta" selected>Orta</option>
+                            }
+                            else
+                            {
+                                <option value="Orta">Orta</option>
+                            }
+                            @if (ViewBag.Difficulty == "Zor")
+                            {
+                                <option value="Zor" selected>Zor</option>
+                            }
+                            else
+                            {
+                                <option value="Zor">Zor</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Hazırlık Süresi -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">Maksimum Hazırlık Süresi (dk)</label>
+                        <input type="number" name="maxPrepTime" class="form-control" placeholder="örn: 30" value="@ViewBag.MaxPrepTime" min="1">
+                    </div>
+
+                    <!-- Pişirme Süresi -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">Maksimum Pişirme Süresi (dk)</label>
+                        <input type="number" name="maxCookingTime" class="form-control" placeholder="örn: 60" value="@ViewBag.MaxCookingTime" min="1">
+                    </div>
+
+                    <!-- Toplam Süre -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">Maksimum Toplam Süre (dk)</label>
+                        <input type="number" name="maxTotalTime" class="form-control" placeholder="örn: 90" value="@ViewBag.MaxTotalTime" min="1">
+                    </div>
+
+                    <!-- Porsiyon Sayısı -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">Porsiyon Sayısı</label>
+                        <div class="d-flex" style="gap: 8px;">
+                            <input type="number" name="minServings" class="form-control" placeholder="Min" value="@ViewBag.MinServings" min="1" style="flex: 1;">
+                            <span style="line-height: 38px;">-</span>
+                            <input type="number" name="maxServings" class="form-control" placeholder="Max" value="@ViewBag.MaxServings" min="1" style="flex: 1;">
+                        </div>
+                    </div>
+
+                    <!-- Malzeme Filtresi -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">Malzeme İçeren Tarifler</label>
+                        <input type="text" name="ingredient" class="form-control" placeholder="örn: domates, soğan..." value="@ViewBag.Ingredient">
+                    </div>
+
+                    <!-- Alerjen Filtresi -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">Hariç Tutulacak Malzemeler (Alerjenler)</label>
+                        <input type="text" name="excludedIngredients" class="form-control" placeholder="örn: fıstık, gluten..." value="@(ViewBag.ExcludedIngredients != null ? string.Join(", ", ViewBag.ExcludedIngredients) : "")">
+                        <small class="form-text text-muted">Virgülle ayırarak birden fazla malzeme girebilirsiniz</small>
+                    </div>
+
+                    <!-- Diyet Tipi -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">Diyet Tipi</label>
+                        <select name="dietType" class="form-control">
+                            <option value="">Tümü</option>
+                            @if (ViewBag.DietType == "vegan")
+                            {
+                                <option value="vegan" selected>Vegan</option>
+                            }
+                            else
+                            {
+                                <option value="vegan">Vegan</option>
+                            }
+                            @if (ViewBag.DietType == "vegetarian")
+                            {
+                                <option value="vegetarian" selected>Vejetaryen</option>
+                            }
+                            else
+                            {
+                                <option value="vegetarian">Vejetaryen</option>
+                            }
+                            @if (ViewBag.DietType == "gluten-free")
+                            {
+                                <option value="gluten-free" selected>Glütensiz</option>
+                            }
+                            else
+                            {
+                                <option value="gluten-free">Glütensiz</option>
+                            }
+                            @if (ViewBag.DietType == "dairy-free")
+                            {
+                                <option value="dairy-free" selected>Süt Ürünleri Yok</option>
+                            }
+                            else
+                            {
+                                <option value="dairy-free">Süt Ürünleri Yok</option>
+                            }
+                            @if (ViewBag.DietType == "nut-free")
+                            {
+                                <option value="nut-free" selected>Kuruyemiş Yok</option>
+                            }
+                            else
+                            {
+                                <option value="nut-free">Kuruyemiş Yok</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Minimum Puan -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">Minimum Puan</label>
+                        <select name="minRating" class="form-control">
+                            <option value="">Tümü</option>
+                            @if (ViewBag.MinRating != null && (double)ViewBag.MinRating == 4.0)
+                            {
+                                <option value="4.0" selected>4.0 ve üzeri</option>
+                            }
+                            else
+                            {
+                                <option value="4.0">4.0 ve üzeri</option>
+                            }
+                            @if (ViewBag.MinRating != null && (double)ViewBag.MinRating == 4.5)
+                            {
+                                <option value="4.5" selected>4.5 ve üzeri</option>
+                            }
+                            else
+                            {
+                                <option value="4.5">4.5 ve üzeri</option>
+                            }
+                            @if (ViewBag.MinRating != null && (double)ViewBag.MinRating == 3.0)
+                            {
+                                <option value="3.0" selected>3.0 ve üzeri</option>
+                            }
+                            else
+                            {
+                                <option value="3.0">3.0 ve üzeri</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Minimum Puan Sayısı -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">Minimum Puan Sayısı</label>
+                        <input type="number" name="minRatingCount" class="form-control" placeholder="örn: 5" value="@ViewBag.MinRatingCount" min="1">
+                    </div>
+
+                    <!-- Öne Çıkan Tarifler -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">
+                            @if (ViewBag.IsFeatured == true)
+                            {
+                                <input type="checkbox" name="isFeatured" value="true" checked style="margin-right: 8px;">
+                            }
+                            else
+                            {
+                                <input type="checkbox" name="isFeatured" value="true" style="margin-right: 8px;">
+                            }
+                            Sadece Öne Çıkan Tarifler
+                        </label>
+                    </div>
+
                     <!-- Sıralama -->
                     <div class="form-group mB-20">
                         <label class="fw-600 mB-8">Sıralama</label>
                         <select name="sortBy" class="form-control">
-                            @if (ViewBag.SortBy == null || ViewBag.SortBy == "")
+                            @if (ViewBag.SortBy == "newest" || ViewBag.SortBy == null)
                             {
-                                <option value="" selected>Varsayılan</option>
-                                <option value="rating">En Yüksek Puan</option>
-                                <option value="likes">En Çok Beğenilen</option>
-                                <option value="newest">En Yeni</option>
-                            }
-                            else if (ViewBag.SortBy == "rating")
-                            {
-                                <option value="">Varsayılan</option>
-                                <option value="rating" selected>En Yüksek Puan</option>
-                                <option value="likes">En Çok Beğenilen</option>
-                                <option value="newest">En Yeni</option>
-                            }
-                            else if (ViewBag.SortBy == "likes")
-                            {
-                                <option value="">Varsayılan</option>
-                                <option value="rating">En Yüksek Puan</option>
-                                <option value="likes" selected>En Çok Beğenilen</option>
-                                <option value="newest">En Yeni</option>
-                            }
-                            else if (ViewBag.SortBy == "newest")
-                            {
-                                <option value="">Varsayılan</option>
-                                <option value="rating">En Yüksek Puan</option>
-                                <option value="likes">En Çok Beğenilen</option>
                                 <option value="newest" selected>En Yeni</option>
                             }
                             else
                             {
-                                <option value="">Varsayılan</option>
-                                <option value="rating">En Yüksek Puan</option>
-                                <option value="likes">En Çok Beğenilen</option>
                                 <option value="newest">En Yeni</option>
+                            }
+                            @if (ViewBag.SortBy == "rating")
+                            {
+                                <option value="rating" selected>En Yüksek Puan</option>
+                            }
+                            else
+                            {
+                                <option value="rating">En Yüksek Puan</option>
+                            }
+                            @if (ViewBag.SortBy == "likes")
+                            {
+                                <option value="likes" selected>En Çok Beğenilen</option>
+                            }
+                            else
+                            {
+                                <option value="likes">En Çok Beğenilen</option>
+                            }
+                            @if (ViewBag.SortBy == "views")
+                            {
+                                <option value="views" selected>En Çok Görüntülenen</option>
+                            }
+                            else
+                            {
+                                <option value="views">En Çok Görüntülenen</option>
+                            }
+                            @if (ViewBag.SortBy == "prepTime")
+                            {
+                                <option value="prepTime" selected>Hazırlık Süresine Göre</option>
+                            }
+                            else
+                            {
+                                <option value="prepTime">Hazırlık Süresine Göre</option>
+                            }
+                            @if (ViewBag.SortBy == "cookingTime")
+                            {
+                                <option value="cookingTime" selected>Pişirme Süresine Göre</option>
+                            }
+                            else
+                            {
+                                <option value="cookingTime">Pişirme Süresine Göre</option>
+                            }
+                            @if (ViewBag.SortBy == "totaltime")
+                            {
+                                <option value="totaltime" selected>Toplam Süreye Göre</option>
+                            }
+                            else
+                            {
+                                <option value="totaltime">Toplam Süreye Göre</option>
                             }
                         </select>
                     </div>
@@ -94,6 +289,9 @@
                     <button type="submit" class="btn btn-primary w-100" style="color: white;">
                         <i class="ti-search mR-5"></i> Filtrele
                     </button>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary w-100 mT-10">
+                        <i class="ti-reload mR-5"></i> Filtreleri Temizle
+                    </a>
                 </form>
             </div>
         </div>
@@ -286,7 +484,19 @@
                                        asp-route-pageSize="@pagedResult.PageSize"
                                        asp-route-categoryId="@ViewBag.CategoryId"
                                        asp-route-search="@ViewBag.SearchTerm"
-                                       asp-route-sortBy="@ViewBag.SortBy">Önceki</a>
+                                       asp-route-sortBy="@ViewBag.SortBy"
+                                       asp-route-difficulty="@ViewBag.Difficulty"
+                                       asp-route-maxPrepTime="@ViewBag.MaxPrepTime"
+                                       asp-route-maxCookingTime="@ViewBag.MaxCookingTime"
+                                       asp-route-maxTotalTime="@ViewBag.MaxTotalTime"
+                                       asp-route-minServings="@ViewBag.MinServings"
+                                       asp-route-maxServings="@ViewBag.MaxServings"
+                                       asp-route-ingredient="@ViewBag.Ingredient"
+                                       asp-route-excludedIngredients="@ViewBag.ExcludedIngredients"
+                                       asp-route-dietType="@ViewBag.DietType"
+                                       asp-route-isFeatured="@ViewBag.IsFeatured"
+                                       asp-route-minRating="@ViewBag.MinRating"
+                                       asp-route-minRatingCount="@ViewBag.MinRatingCount">Önceki</a>
                                 </li>
                                 @for (int i = 1; i <= pagedResult.TotalPages; i++)
                                 {
@@ -296,7 +506,19 @@
                                            asp-route-pageSize="@pagedResult.PageSize"
                                            asp-route-categoryId="@ViewBag.CategoryId"
                                            asp-route-search="@ViewBag.SearchTerm"
-                                           asp-route-sortBy="@ViewBag.SortBy">@i</a>
+                                           asp-route-sortBy="@ViewBag.SortBy"
+                                           asp-route-difficulty="@ViewBag.Difficulty"
+                                           asp-route-maxPrepTime="@ViewBag.MaxPrepTime"
+                                           asp-route-maxCookingTime="@ViewBag.MaxCookingTime"
+                                           asp-route-maxTotalTime="@ViewBag.MaxTotalTime"
+                                           asp-route-minServings="@ViewBag.MinServings"
+                                           asp-route-maxServings="@ViewBag.MaxServings"
+                                           asp-route-ingredient="@ViewBag.Ingredient"
+                                           asp-route-excludedIngredients="@ViewBag.ExcludedIngredients"
+                                           asp-route-dietType="@ViewBag.DietType"
+                                           asp-route-isFeatured="@ViewBag.IsFeatured"
+                                           asp-route-minRating="@ViewBag.MinRating"
+                                           asp-route-minRatingCount="@ViewBag.MinRatingCount">@i</a>
                                     </li>
                                 }
                                 <li class="page-item @(pagedResult.HasNextPage ? "" : "disabled")">
@@ -305,7 +527,19 @@
                                        asp-route-pageSize="@pagedResult.PageSize"
                                        asp-route-categoryId="@ViewBag.CategoryId"
                                        asp-route-search="@ViewBag.SearchTerm"
-                                       asp-route-sortBy="@ViewBag.SortBy">Sonraki</a>
+                                       asp-route-sortBy="@ViewBag.SortBy"
+                                       asp-route-difficulty="@ViewBag.Difficulty"
+                                       asp-route-maxPrepTime="@ViewBag.MaxPrepTime"
+                                       asp-route-maxCookingTime="@ViewBag.MaxCookingTime"
+                                       asp-route-maxTotalTime="@ViewBag.MaxTotalTime"
+                                       asp-route-minServings="@ViewBag.MinServings"
+                                       asp-route-maxServings="@ViewBag.MaxServings"
+                                       asp-route-ingredient="@ViewBag.Ingredient"
+                                       asp-route-isFeatured="@ViewBag.IsFeatured"
+                                       asp-route-minRating="@ViewBag.MinRating"
+                                       asp-route-excludedIngredients="@ViewBag.ExcludedIngredients"
+                                       asp-route-dietType="@ViewBag.DietType"
+                                       asp-route-minRatingCount="@ViewBag.MinRatingCount">Sonraki</a>
                                 </li>
                             </ul>
                         </nav>
@@ -497,7 +731,19 @@ else
                                        asp-route-pageSize="@pagedResult.PageSize"
                                        asp-route-categoryId="@ViewBag.CategoryId"
                                        asp-route-search="@ViewBag.SearchTerm"
-                                       asp-route-sortBy="@ViewBag.SortBy">Önceki</a>
+                                       asp-route-sortBy="@ViewBag.SortBy"
+                                       asp-route-difficulty="@ViewBag.Difficulty"
+                                       asp-route-maxPrepTime="@ViewBag.MaxPrepTime"
+                                       asp-route-maxCookingTime="@ViewBag.MaxCookingTime"
+                                       asp-route-maxTotalTime="@ViewBag.MaxTotalTime"
+                                       asp-route-minServings="@ViewBag.MinServings"
+                                       asp-route-maxServings="@ViewBag.MaxServings"
+                                       asp-route-ingredient="@ViewBag.Ingredient"
+                                       asp-route-excludedIngredients="@ViewBag.ExcludedIngredients"
+                                       asp-route-dietType="@ViewBag.DietType"
+                                       asp-route-isFeatured="@ViewBag.IsFeatured"
+                                       asp-route-minRating="@ViewBag.MinRating"
+                                       asp-route-minRatingCount="@ViewBag.MinRatingCount">Önceki</a>
                                 </li>
                                 @for (int i = 1; i <= pagedResult.TotalPages; i++)
                                 {
@@ -507,7 +753,19 @@ else
                                            asp-route-pageSize="@pagedResult.PageSize"
                                            asp-route-categoryId="@ViewBag.CategoryId"
                                            asp-route-search="@ViewBag.SearchTerm"
-                                           asp-route-sortBy="@ViewBag.SortBy">@i</a>
+                                           asp-route-sortBy="@ViewBag.SortBy"
+                                           asp-route-difficulty="@ViewBag.Difficulty"
+                                           asp-route-maxPrepTime="@ViewBag.MaxPrepTime"
+                                           asp-route-maxCookingTime="@ViewBag.MaxCookingTime"
+                                           asp-route-maxTotalTime="@ViewBag.MaxTotalTime"
+                                           asp-route-minServings="@ViewBag.MinServings"
+                                           asp-route-maxServings="@ViewBag.MaxServings"
+                                           asp-route-ingredient="@ViewBag.Ingredient"
+                                           asp-route-excludedIngredients="@ViewBag.ExcludedIngredients"
+                                           asp-route-dietType="@ViewBag.DietType"
+                                           asp-route-isFeatured="@ViewBag.IsFeatured"
+                                           asp-route-minRating="@ViewBag.MinRating"
+                                           asp-route-minRatingCount="@ViewBag.MinRatingCount">@i</a>
                                     </li>
                                 }
                                 <li class="page-item @(pagedResult.HasNextPage ? "" : "disabled")">
@@ -516,7 +774,19 @@ else
                                        asp-route-pageSize="@pagedResult.PageSize"
                                        asp-route-categoryId="@ViewBag.CategoryId"
                                        asp-route-search="@ViewBag.SearchTerm"
-                                       asp-route-sortBy="@ViewBag.SortBy">Sonraki</a>
+                                       asp-route-sortBy="@ViewBag.SortBy"
+                                       asp-route-difficulty="@ViewBag.Difficulty"
+                                       asp-route-maxPrepTime="@ViewBag.MaxPrepTime"
+                                       asp-route-maxCookingTime="@ViewBag.MaxCookingTime"
+                                       asp-route-maxTotalTime="@ViewBag.MaxTotalTime"
+                                       asp-route-minServings="@ViewBag.MinServings"
+                                       asp-route-maxServings="@ViewBag.MaxServings"
+                                       asp-route-ingredient="@ViewBag.Ingredient"
+                                       asp-route-isFeatured="@ViewBag.IsFeatured"
+                                       asp-route-minRating="@ViewBag.MinRating"
+                                       asp-route-excludedIngredients="@ViewBag.ExcludedIngredients"
+                                       asp-route-dietType="@ViewBag.DietType"
+                                       asp-route-minRatingCount="@ViewBag.MinRatingCount">Sonraki</a>
                                 </li>
                             </ul>
                         </nav>

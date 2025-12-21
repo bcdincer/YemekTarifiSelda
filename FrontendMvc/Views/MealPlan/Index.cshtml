@@ -1,0 +1,127 @@
+@model List<FrontendMvc.Models.MealPlan.MealPlanViewModel>
+
+@{
+    ViewData["Title"] = "Yemek Planları";
+}
+
+<div>
+    <div class="col-12">
+        <div class="bd bgc-white p-20 meal-plans-main-container">
+            <div class="layers">
+                <div class="layer w-100 mB-20" style="flex-shrink: 0;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mB-0">
+                            <i class="ti-calendar c-blue-500 mR-10"></i> Yemek Planları
+                        </h2>
+                        <a asp-action="Create" class="btn btn-primary">
+                            <i class="ti-plus mR-5"></i> Yeni Plan Oluştur
+                        </a>
+                    </div>
+                </div>
+
+                <div class="layer w-100 meal-plans-content-layer">
+                    @if (Model.Any())
+                    {
+                        <div class="row gap-20 meal-plans-scrollable">
+                            @foreach (var mealPlan in Model)
+                            {
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="bd bgc-white p-20 bdrs-3" style="height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
+                                        <h4 class="mB-10">
+                                            <a asp-action="Details" asp-route-id="@mealPlan.Id" class="c-grey-900" style="text-decoration: none;">
+                                                @mealPlan.Name
+                                            </a>
+                                        </h4>
+                                        <p class="fsz-sm c-grey-600 mB-15">
+                                            <i class="ti-calendar mR-5"></i>
+                                            @mealPlan.StartDate.ToString("dd.MM.yyyy") - @mealPlan.EndDate.ToString("dd.MM.yyyy")
+                                        </p>
+                                        <p class="fsz-sm c-grey-600 mB-15">
+                                            <i class="ti-clipboard mR-5"></i>
+                                            @mealPlan.Items.Count öğün
+                                        </p>
+                                        <div class="d-flex gap-10">
+                                            <a asp-action="Details" asp-route-id="@mealPlan.Id" class="btn btn-sm btn-primary">
+                                                <i class="ti-eye mR-5"></i> Detaylar
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@mealPlan.Id" class="btn btn-sm btn-secondary">
+                                                <i class="ti-pencil mR-5"></i> Düzenle
+                                            </a>
+                                            <form asp-action="Delete" asp-route-id="@mealPlan.Id" method="post" class="d-inline" 
+                                                  onsubmit="return confirm('Bu planı silmek istediğinizden emin misiniz?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="ti-trash mR-5"></i> Sil
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center p-40">
+                            <i class="ti-calendar fsz-xxl c-grey-400 d-b mB-20"></i>
+                            <h4 class="c-grey-600 mB-10">Henüz yemek planınız yok</h4>
+                            <p class="c-grey-600 mB-30">Yeni bir yemek planı oluşturarak başlayın.</p>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="ti-plus mR-5"></i> İlk Planınızı Oluşturun
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Meal Plans container için tam yükseklik */
+    .meal-plans-main-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 150px);
+        min-height: 600px;
+    }
+    
+    .meal-plans-main-container .layers {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .meal-plans-content-layer {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        min-height: 0;
+    }
+    
+    /* Scrollbar styling */
+    .meal-plans-content-layer::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .meal-plans-content-layer::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .meal-plans-content-layer::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+    
+    .meal-plans-content-layer::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+    
+    /* Gap-20 overflow özelliğini override et */
+    .meal-plans-scrollable {
+        overflow: visible !important;
+    }
+</style>
+
