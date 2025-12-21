@@ -1,0 +1,25 @@
+@use '../../../settings/breakpoints' as *;
+@use 'mediaQueryCondition' as *;
+
+// Initialize global variable to avoid deprecation warning
+$breakpointAlias: null;
+
+// ---------------------------------------------------------
+// @Responsive Suffix Generator
+// ---------------------------------------------------------
+
+// Mixin used to generate responsive suffixes for classes (i.e. m-10@sm+).
+
+
+@mixin generateResponsive() {
+  @each $breakpoint in $breakpoints {
+    $breakpointAlias     : nth($breakpoint, 1) !global;
+    $breakpointCondition : nth($breakpoint, 2);
+
+    @include mediaQueryCondition($breakpointAlias) {
+      @content;
+    }
+
+    $breakpointAlias: null !global;
+  }
+}

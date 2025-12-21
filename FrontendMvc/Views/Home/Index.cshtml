@@ -1,0 +1,524 @@
+﻿@model IEnumerable<FrontendMvc.Models.Recipes.RecipeViewModel>
+
+@{
+    ViewData["Title"] = "Ana Sayfa";
+    ViewData["Description"] = "En lezzetli yemek tarifleri, pratik yemekler, tatlı tarifleri ve daha fazlası. Binlerce tarif arasından seçim yapın ve lezzetli yemekler pişirin.";
+    ViewData["Keywords"] = "yemek tarifleri, yemek, tarif, yemek kitabı, pratik yemek, tatlı tarifi, pasta tarifi, kolay yemek";
+    var categories = ViewBag.Categories as List<FrontendMvc.Models.Recipes.CategoryViewModel> ?? new();
+    var pagedResult = ViewBag.PagedResult as FrontendMvc.Models.Recipes.PagedResult<FrontendMvc.Models.Recipes.RecipeViewModel>;
+    var hasSearch = !string.IsNullOrWhiteSpace(ViewBag.SearchTerm as string);
+}
+
+@if (hasSearch)
+{
+    <!-- Arama Sonuçları Sayfası -->
+    <div class="row gap-20">
+        <!-- Sol Sidebar - Filtreler -->
+        <div class="col-lg-3 col-md-4">
+            <div class="bd bgc-white p-20" style="position: sticky; top: 20px;">
+                <h5 class="mB-20">
+                    <i class="ti-filter mR-8"></i> Filtrele
+                </h5>
+                
+                <form asp-controller="Home" asp-action="Index" method="get" id="filterForm">
+                    <!-- Arama Kelimesi -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">Arama Kelimesi</label>
+                        <input type="text" name="search" class="form-control" placeholder="Tarif ara..." value="@ViewBag.SearchTerm">
+                    </div>
+
+                    <!-- Kategori Filtresi -->
+                    @if (categories.Any())
+                    {
+                        <div class="form-group mB-20">
+                            <label class="fw-600 mB-8">Kategori</label>
+                            <select name="categoryId" class="form-control">
+                                <option value="">Tüm Kategoriler</option>
+                                @foreach (var category in categories.OrderBy(c => c.DisplayOrder).ThenBy(c => c.Name))
+                                {
+                                    if (ViewBag.CategoryId == category.Id)
+                                    {
+                                        <option value="@category.Id" selected>@category.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    }
+
+                    <!-- Sıralama -->
+                    <div class="form-group mB-20">
+                        <label class="fw-600 mB-8">Sıralama</label>
+                        <select name="sortBy" class="form-control">
+                            @if (ViewBag.SortBy == null || ViewBag.SortBy == "")
+                            {
+                                <option value="" selected>Varsayılan</option>
+                                <option value="rating">En Yüksek Puan</option>
+                                <option value="likes">En Çok Beğenilen</option>
+                                <option value="newest">En Yeni</option>
+                            }
+                            else if (ViewBag.SortBy == "rating")
+                            {
+                                <option value="">Varsayılan</option>
+                                <option value="rating" selected>En Yüksek Puan</option>
+                                <option value="likes">En Çok Beğenilen</option>
+                                <option value="newest">En Yeni</option>
+                            }
+                            else if (ViewBag.SortBy == "likes")
+                            {
+                                <option value="">Varsayılan</option>
+                                <option value="rating">En Yüksek Puan</option>
+                                <option value="likes" selected>En Çok Beğenilen</option>
+                                <option value="newest">En Yeni</option>
+                            }
+                            else if (ViewBag.SortBy == "newest")
+                            {
+                                <option value="">Varsayılan</option>
+                                <option value="rating">En Yüksek Puan</option>
+                                <option value="likes">En Çok Beğenilen</option>
+                                <option value="newest" selected>En Yeni</option>
+                            }
+                            else
+                            {
+                                <option value="">Varsayılan</option>
+                                <option value="rating">En Yüksek Puan</option>
+                                <option value="likes">En Çok Beğenilen</option>
+                                <option value="newest">En Yeni</option>
+                            }
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100" style="color: white;">
+                        <i class="ti-search mR-5"></i> Filtrele
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Ana İçerik Alanı -->
+        <div class="col-lg-9 col-md-8">
+            <!-- Arama Sonuçları Başlığı -->
+            <div class="bd bgc-white p-20 mB-20">
+                <h4 class="mB-15">
+                    <i class="ti-search mR-10"></i>
+                    "@ViewBag.SearchTerm" araması için 
+                    @if (pagedResult != null)
+                    {
+                        <span>@pagedResult.TotalCount sonuç bulundu.</span>
+                    }
+                </h4>
+
+                <!-- Aktif Arama Filtresi -->
+                @if (!string.IsNullOrWhiteSpace(ViewBag.SearchTerm as string))
+                {
+                    <div class="d-flex gap-10 fxw-w">
+                        <div class="bd bgc-grey-100 p-8 bdrs-3" style="display: flex; align-items: center; gap: 8px;">
+                            <span class="fw-600" style="font-size: 12px; color: #666;">Arama Kelimesi:</span>
+                            <span style="font-size: 14px;">@ViewBag.SearchTerm</span>
+                            <a href="@Url.Action("Index", "Home", new { categoryId = ViewBag.CategoryId, sortBy = ViewBag.SortBy })" 
+                               class="c-grey-600 cH-red td-n" style="margin-left: 5px;">
+                                <i class="ti-close" style="font-size: 14px;"></i>
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Sıralama Seçenekleri -->
+            <div class="bd bgc-white p-15 mB-20">
+                <div class="peers fxw-nw gap-10">
+                    <a href="@Url.Action("Index", "Home", new { categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm, sortBy = (string)null })" 
+                       class="btn btn-sm @(ViewBag.SortBy == null || ViewBag.SortBy == "" ? "btn-primary" : "btn-outline-secondary")" 
+                       style="color: @(ViewBag.SortBy == null || ViewBag.SortBy == "" ? "white" : "inherit");">
+                        Akıllı Sıralama
+                    </a>
+                    <a href="@Url.Action("Index", "Home", new { categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm, sortBy = "newest" })" 
+                       class="btn btn-sm @(ViewBag.SortBy == "newest" ? "btn-primary" : "btn-outline-secondary")" 
+                       style="color: @(ViewBag.SortBy == "newest" ? "white" : "inherit");">
+                        Tarihe Göre
+                    </a>
+                    <a href="@Url.Action("Index", "Home", new { categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm, sortBy = "rating" })" 
+                       class="btn btn-sm @(ViewBag.SortBy == "rating" ? "btn-primary" : "btn-outline-secondary")" 
+                       style="color: @(ViewBag.SortBy == "rating" ? "white" : "inherit");">
+                        En Yüksek Puan
+                    </a>
+                    <a href="@Url.Action("Index", "Home", new { categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm, sortBy = "likes" })" 
+                       class="btn btn-sm @(ViewBag.SortBy == "likes" ? "btn-primary" : "btn-outline-secondary")" 
+                       style="color: @(ViewBag.SortBy == "likes" ? "white" : "inherit");">
+                        En Çok Beğenilen
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tarifler Listesi -->
+            @if (!Model.Any())
+            {
+                <div class="bd bgc-white p-30 ta-c">
+                    <h5 class="c-grey-600">Tarif bulunamadı</h5>
+                    <p class="c-grey-500 mT-10">Arama kriterlerinizi değiştirerek tekrar deneyin.</p>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-controller="Recipes" asp-action="Create" class="btn btn-primary mT-20" style="color: white;">
+                            <i class="ti-plus"></i> İlk Tarifi Ekle
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="row gap-20">
+                    @foreach (var recipe in Model)
+                    {
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <a asp-controller="Recipes" asp-action="Details" asp-route-id="@recipe.Id" class="recipe-card-link" style="text-decoration: none; display: block; height: 100%;">
+                                <div class="bd bgc-white bdrs-3 ov-h recipe-card" style="transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; height: 100%;">
+                                    @if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                                    {
+                                        <div class="recipe-card-image-wrapper" style="position: relative; overflow: hidden;">
+                                            <img src="@recipe.ImageUrl" alt="@recipe.Title" class="w-100" style="height: 200px; object-fit: cover; transition: transform 0.3s ease;" loading="lazy" decoding="async">
+                                            <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: flex-end; padding: 15px;">
+                                                <span class="c-white fw-600" style="font-size: 14px;">
+                                                    <i class="ti-eye mR-5"></i> Detayları Gör
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="w-100 bgc-grey-200" style="height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
+                                            <i class="ti-image fsz-xxl c-grey-400"></i>
+                                            <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: center; justify-content: center;">
+                                                <span class="c-white fw-600">
+                                                    <i class="ti-eye mR-5"></i> Detayları Gör
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+                                    <div class="p-20" style="flex: 1; display: flex; flex-direction: column;">
+                                        <h6 class="mB-10 c-grey-800" style="transition: color 0.3s ease;">
+                                            @recipe.Title
+                                        </h6>
+                                        <p class="fsz-sm c-grey-600 mB-15">
+                                            @(recipe.Description.Length > 100 ? recipe.Description.Substring(0, 100) + "..." : recipe.Description)
+                                        </p>
+                                        <div class="peers fxw-nw ai-c fsz-sm c-grey-600 mB-10" style="flex-shrink: 0;">
+                                            <div class="peer mR-15">
+                                                <i class="ti-time"></i> @recipe.CookingTimeMinutes dk
+                                            </div>
+                                            <div class="peer mR-15">
+                                                <i class="ti-user"></i> @recipe.Servings kişilik
+                                            </div>
+                                            @if (recipe.Category != null)
+                                            {
+                                                <div class="peer">
+                                                    <i class="@recipe.Category.Icon"></i> @recipe.Category.Name
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="peers fxw-nw ai-c mT-10 gap-10" style="min-height: 32px; flex-shrink: 0; margin-top: auto; align-items: center;">
+                                            <div class="peer" style="min-width: 120px;">
+                                                @if (recipe.AverageRating.HasValue)
+                                                {
+                                                    <div class="peers fxw-nw ai-c">
+                                                        <div class="peer">
+                                                            @for (int i = 0; i < 5; i++)
+                                                            {
+                                                                <i class="ti-star @(i < (int)Math.Round(recipe.AverageRating.Value) ? "c-yellow-500" : "c-grey-300")" style="font-size: 14px;"></i>
+                                                            }
+                                                        </div>
+                                                        <div class="peer mL-5 fsz-sm c-grey-600">
+                                                            <span class="fw-600">@recipe.AverageRating.Value.ToString("F1")</span> (@recipe.RatingCount)
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="peer" style="min-width: 50px;">
+                                                @if (recipe.LikeCount > 0)
+                                                {
+                                                    <i class="ti-heart c-red-500"></i>
+                                                    <span class="fsz-sm c-grey-600 mL-3">@recipe.LikeCount</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (pagedResult != null && pagedResult.TotalPages > 1)
+                {
+                    <div class="bd bgc-white p-20 mT-20">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center mB-0">
+                                <li class="page-item @(pagedResult.HasPreviousPage ? "" : "disabled")">
+                                    <a class="page-link" asp-controller="Home" asp-action="Index" 
+                                       asp-route-pageNumber="@(pagedResult.PageNumber - 1)"
+                                       asp-route-pageSize="@pagedResult.PageSize"
+                                       asp-route-categoryId="@ViewBag.CategoryId"
+                                       asp-route-search="@ViewBag.SearchTerm"
+                                       asp-route-sortBy="@ViewBag.SortBy">Önceki</a>
+                                </li>
+                                @for (int i = 1; i <= pagedResult.TotalPages; i++)
+                                {
+                                    <li class="page-item @(i == pagedResult.PageNumber ? "active" : "")">
+                                        <a class="page-link" asp-controller="Home" asp-action="Index" 
+                                           asp-route-pageNumber="@i"
+                                           asp-route-pageSize="@pagedResult.PageSize"
+                                           asp-route-categoryId="@ViewBag.CategoryId"
+                                           asp-route-search="@ViewBag.SearchTerm"
+                                           asp-route-sortBy="@ViewBag.SortBy">@i</a>
+                                    </li>
+                                }
+                                <li class="page-item @(pagedResult.HasNextPage ? "" : "disabled")">
+                                    <a class="page-link" asp-controller="Home" asp-action="Index" 
+                                       asp-route-pageNumber="@(pagedResult.PageNumber + 1)"
+                                       asp-route-pageSize="@pagedResult.PageSize"
+                                       asp-route-categoryId="@ViewBag.CategoryId"
+                                       asp-route-search="@ViewBag.SearchTerm"
+                                       asp-route-sortBy="@ViewBag.SortBy">Sonraki</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+}
+else
+{
+    <!-- Ana Sayfa (Arama yoksa) -->
+    <div class="row gap-20">
+        <!-- Başlık ve Filtreler -->
+        <div class="col-12">
+            <div class="bd bgc-white p-20">
+                <div class="layers">
+                    <div class="layer w-100 mB-20">
+                        <div class="peers fxw-nw ai-c">
+                            <div class="peer peer-greed">
+                                <h4 class="lh-1 mB-0">Tarifler</h4>
+                            </div>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <div class="peer">
+                                    <a asp-controller="Recipes" asp-action="Create" class="btn btn-primary" style="color: white;">
+                                        <i class="ti-plus"></i> Yeni Tarif Ekle
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    
+               
+                    
+                    <!-- Arama -->
+                    <div class="layer w-100">
+                        <form asp-controller="Home" asp-action="Index" method="get" id="searchForm">
+                            @if (ViewBag.CategoryId != null)
+                            {
+                                <input type="hidden" name="categoryId" value="@ViewBag.CategoryId">
+                            }
+                            <div class="d-flex" style="gap: 8px;">
+                                <div class="search-input-wrapper" style="flex: 1; position: relative;">
+                                    <i class="ti-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999; font-size: 18px; pointer-events: none;"></i>
+                                    <input type="text" name="search" id="searchInput" class="form-control" placeholder="Tarif adı veya malzeme ara..." value="@ViewBag.SearchTerm" style="padding-left: 45px;">
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="color: white; white-space: nowrap; padding: 8px 20px;">
+                                    <i class="ti-search mR-5"></i> Ara
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarifler Listesi -->
+        @if (!Model.Any())
+        {
+            <div class="col-12">
+                <div class="bd bgc-white p-30 ta-c">
+                    <h5 class="c-grey-600">Tarif bulunamadı</h5>
+                    <p class="c-grey-500 mT-10">Arama kriterlerinizi değiştirerek tekrar deneyin.</p>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-controller="Recipes" asp-action="Create" class="btn btn-primary mT-20" style="color: white;">
+                            <i class="ti-plus"></i> Yeni Tarif Ekle
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var recipe in Model)
+            {
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <a asp-controller="Recipes" asp-action="Details" asp-route-id="@recipe.Id" class="recipe-card-link" style="text-decoration: none; display: block; height: 100%;">
+                        <div class="bd bgc-white bdrs-3 ov-h recipe-card" style="transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; height: 100%;">
+                            @if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                            {
+                                <div class="recipe-card-image-wrapper" style="position: relative; overflow: hidden;">
+                                    <img src="@recipe.ImageUrl" alt="@recipe.Title" class="w-100" style="height: 200px; object-fit: cover; transition: transform 0.3s ease;" loading="lazy" decoding="async">
+                                    <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: flex-end; padding: 15px;">
+                                        <span class="c-white fw-600" style="font-size: 14px;">
+                                            <i class="ti-eye mR-5"></i> Detayları Gör
+                                        </span>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="w-100 bgc-grey-200" style="height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
+                                    <i class="ti-image fsz-xxl c-grey-400"></i>
+                                    <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: center; justify-content: center;">
+                                        <span class="c-white fw-600">
+                                            <i class="ti-eye mR-5"></i> Detayları Gör
+                                        </span>
+                                    </div>
+                                </div>
+                            }
+                            <div class="p-20">
+                                <h6 class="mB-10 c-grey-800" style="transition: color 0.3s ease;">
+                                    @recipe.Title
+                                </h6>
+                                <p class="fsz-sm c-grey-600 mB-15">
+                                    @(recipe.Description.Length > 100 ? recipe.Description.Substring(0, 100) + "..." : recipe.Description)
+                                </p>
+                                <div class="peers fxw-nw ai-c fsz-sm c-grey-600 mB-10">
+                                    <div class="peer mR-15">
+                                        <i class="ti-time"></i> @recipe.CookingTimeMinutes dk
+                                    </div>
+                                    <div class="peer mR-15">
+                                        <i class="ti-user"></i> @recipe.Servings kişilik
+                                    </div>
+                                    @if (recipe.Category != null)
+                                    {
+                                        <div class="peer">
+                                            <i class="@recipe.Category.Icon"></i> @recipe.Category.Name
+                                        </div>
+                                    }
+                                </div>
+                                <div class="peers fxw-nw ai-c mT-10 gap-10" style="min-height: 32px; flex-shrink: 0; margin-top: auto; align-items: center;">
+                                    <div class="peer" style="min-width: 120px;">
+                                        @if (recipe.AverageRating.HasValue)
+                                        {
+                                            <div class="peers fxw-nw ai-c">
+                                                <div class="peer">
+                                                    @for (int i = 0; i < 5; i++)
+                                                    {
+                                                        <i class="ti-star @(i < (int)Math.Round(recipe.AverageRating.Value) ? "c-yellow-500" : "c-grey-300")" style="font-size: 14px;"></i>
+                                                    }
+                                                </div>
+                                                <div class="peer mL-5 fsz-sm c-grey-600">
+                                                    <span class="fw-600">@recipe.AverageRating.Value.ToString("F1")</span> (@recipe.RatingCount)
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="peer" style="min-width: 50px;">
+                                        @if (recipe.LikeCount > 0)
+                                        {
+                                            <i class="ti-heart c-red-500"></i>
+                                            <span class="fsz-sm c-grey-600 mL-3">@recipe.LikeCount</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+
+            <!-- Pagination -->
+            @if (pagedResult != null && pagedResult.TotalPages > 1)
+            {
+                <div class="col-12">
+                    <div class="bd bgc-white p-20">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center mB-0">
+                                <li class="page-item @(pagedResult.HasPreviousPage ? "" : "disabled")">
+                                    <a class="page-link" asp-controller="Home" asp-action="Index" 
+                                       asp-route-pageNumber="@(pagedResult.PageNumber - 1)"
+                                       asp-route-pageSize="@pagedResult.PageSize"
+                                       asp-route-categoryId="@ViewBag.CategoryId"
+                                       asp-route-search="@ViewBag.SearchTerm"
+                                       asp-route-sortBy="@ViewBag.SortBy">Önceki</a>
+                                </li>
+                                @for (int i = 1; i <= pagedResult.TotalPages; i++)
+                                {
+                                    <li class="page-item @(i == pagedResult.PageNumber ? "active" : "")">
+                                        <a class="page-link" asp-controller="Home" asp-action="Index" 
+                                           asp-route-pageNumber="@i"
+                                           asp-route-pageSize="@pagedResult.PageSize"
+                                           asp-route-categoryId="@ViewBag.CategoryId"
+                                           asp-route-search="@ViewBag.SearchTerm"
+                                           asp-route-sortBy="@ViewBag.SortBy">@i</a>
+                                    </li>
+                                }
+                                <li class="page-item @(pagedResult.HasNextPage ? "" : "disabled")">
+                                    <a class="page-link" asp-controller="Home" asp-action="Index" 
+                                       asp-route-pageNumber="@(pagedResult.PageNumber + 1)"
+                                       asp-route-pageSize="@pagedResult.PageSize"
+                                       asp-route-categoryId="@ViewBag.CategoryId"
+                                       asp-route-search="@ViewBag.SearchTerm"
+                                       asp-route-sortBy="@ViewBag.SortBy">Sonraki</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+}
+
+<style>
+    /* Recipe Card Hover Effects */
+    .recipe-card-link {
+        text-decoration: none !important;
+    }
+    
+    .recipe-card {
+        transition: all 0.3s ease;
+    }
+    
+    .recipe-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important;
+    }
+    
+    .recipe-card:hover .recipe-card-image-wrapper img {
+        transform: scale(1.05);
+    }
+    
+    .recipe-card:hover .recipe-card-overlay {
+        opacity: 1 !important;
+    }
+    
+    .recipe-card:hover h6 {
+        color: #007bff !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Submit form on Enter key
+        const searchInput = document.getElementById('searchInput');
+        const searchForm = document.getElementById('searchForm');
+        if (searchInput && searchForm) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchForm.submit();
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,47 @@
+@{
+    ViewData["Title"] = "Yeni Rol Ekle";
+}
+
+<div class="row gap-20">
+    <div class="col-md-6">
+        <div class="bd bgc-white p-30">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <h4 class="lh-1 mB-0">Yeni Rol Ekle</h4>
+                </div>
+
+                <form asp-action="CreateRole" method="post">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="layer w-100 mB-20">
+                        <label for="roleName" class="form-label fw-600">Rol Adı</label>
+                        <input type="text" id="roleName" name="roleName" class="form-control" required placeholder="Örn: Üye, Editör, vb." />
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty] != null)
+                        {
+                            @foreach (var error in ViewData.ModelState[string.Empty].Errors)
+                            {
+                                <span class="text-danger fsz-sm">@error.ErrorMessage</span>
+                            }
+                        }
+                    </div>
+
+                    <div class="layer w-100">
+                        <div class="peers fxw-nw gap-10">
+                            <div class="peer">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="ti-save mR-5"></i> Kaydet
+                                </button>
+                            </div>
+                            <div class="peer">
+                                <a asp-action="Roles" class="btn btn-secondary">
+                                    <i class="ti-close mR-5"></i> İptal
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

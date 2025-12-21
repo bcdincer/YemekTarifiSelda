@@ -1,0 +1,95 @@
+@model IEnumerable<FrontendMvc.Models.Admin.RoleViewModel>
+
+@{
+    ViewData["Title"] = "Rol Yönetimi";
+}
+
+<div class="row gap-20">
+    <div class="col-12">
+        <div class="bd bgc-white p-30">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <div class="peers fxw-nw ai-c">
+                        <div class="peer peer-greed">
+                            <h4 class="lh-1 mB-0">Rol Yönetimi</h4>
+                        </div>
+                        <div class="peer">
+                            <a asp-action="CreateRole" class="btn btn-primary">
+                                <i class="ti-plus mR-5"></i> Yeni Rol Ekle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="layer w-100 mB-15">
+                        <div class="alert alert-success">
+                            @TempData["SuccessMessage"]
+                        </div>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="layer w-100 mB-15">
+                        <div class="alert alert-danger">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    </div>
+                }
+
+                @if (!Model.Any())
+                {
+                    <div class="layer w-100 ta-c p-30">
+                        <h5 class="c-grey-600">Henüz rol yok</h5>
+                    </div>
+                }
+                else
+                {
+                    <div class="layer w-100">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Rol Adı</th>
+                                        <th>Kullanıcı Sayısı</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var role in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-primary fsz-md">@role.Name</span>
+                                            </td>
+                                            <td>@role.UserCount</td>
+                                            <td>
+                                                @if (role.Name != "Admin")
+                                                {
+                                                    <form asp-action="DeleteRole" method="post" class="d-inline" onsubmit="return confirm('Bu rolü silmek istediğinizden emin misiniz?');">
+                                                        <input type="hidden" name="id" value="@role.Id" />
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                            <i class="ti-trash mR-5"></i> Sil
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <span class="c-grey-600 fsz-sm">Admin rolü silinemez</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

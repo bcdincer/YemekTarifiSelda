@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "Erişim Reddedildi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="bd bgc-white p-30 bdrs-3 mT-50 ta-c">
+            <h4 class="mB-30 c-red-500">
+                <i class="ti-close"></i> Erişim Reddedildi
+            </h4>
+            <p class="c-grey-600 mB-20">
+                Bu sayfaya erişim yetkiniz bulunmamaktadır.
+            </p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary" style="color: white;">
+                <i class="ti-home"></i> Ana Sayfaya Dön
+            </a>
+        </div>
+    </div>
+</div>
+

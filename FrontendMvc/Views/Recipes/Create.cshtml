@@ -1,0 +1,391 @@
+@model FrontendMvc.Models.Recipes.RecipeViewModel
+
+@{
+    ViewData["Title"] = "Yeni Tarif Ekle";
+    var categories = ViewBag.Categories as List<FrontendMvc.Models.Recipes.CategoryViewModel> ?? new();
+}
+
+<style>
+    /* Üst bilgi satırı için stil */
+    .quick-info-bar {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        padding: 18px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .quick-info-bar .quick-info-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 1 auto;
+        min-width: 0;
+    }
+
+    .quick-info-bar .quick-info-item > label {
+        margin-bottom: 0;
+        margin-right: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #495057;
+        white-space: nowrap;
+        cursor: default;
+        display: flex;
+        align-items: center;
+    }
+
+    .quick-info-bar .quick-info-item input[type="number"],
+    .quick-info-bar .quick-info-item select {
+        width: auto;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    /* Hazırlık ve Pişirme süreleri için daha küçük input */
+    .quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
+    .quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
+        width: 60px;
+        min-width: 60px;
+        max-width: 60px;
+        text-align: center;
+    }
+
+    .quick-info-bar .quick-info-item select[name="Difficulty"] {
+        min-width: 100px;
+    }
+
+    .quick-info-bar .form-check {
+        display: flex;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+    }
+
+    .quick-info-bar .form-check-input {
+        margin-top: 0;
+        margin-right: 6px;
+        flex-shrink: 0;
+    }
+
+    .quick-info-bar .form-check-label {
+        margin-bottom: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: #495057;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+
+    /* Validation mesajı için */
+    .quick-info-bar .quick-info-item {
+        position: relative;
+    }
+
+    .quick-info-bar .text-danger {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        white-space: nowrap;
+        font-size: 11px;
+        margin-top: 2px;
+    }
+
+    /* Responsive */
+    @@media (max-width: 1200px) {
+        .quick-info-bar {
+            gap: 12px;
+            padding: 15px;
+        }
+
+        .quick-info-bar .quick-info-item > label {
+            font-size: 12px;
+            margin-right: 6px;
+        }
+
+        .quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
+        .quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
+            width: 55px;
+            min-width: 55px;
+            max-width: 55px;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .quick-info-bar {
+            gap: 10px;
+            padding: 12px 15px;
+        }
+
+        .quick-info-bar .quick-info-item > label {
+            font-size: 11px;
+            margin-right: 5px;
+        }
+
+        .quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
+        .quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
+            width: 50px;
+            min-width: 50px;
+            max-width: 50px;
+            font-size: 12px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .quick-info-bar {
+            justify-content: flex-start;
+            gap: 12px;
+            padding: 15px;
+        }
+
+        .quick-info-bar .quick-info-item {
+            flex: 0 1 calc(50% - 6px);
+            min-width: 0;
+            justify-content: flex-start;
+        }
+
+        .quick-info-bar .quick-info-item > label {
+            font-size: 12px;
+        }
+
+        .quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
+        .quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
+            width: 55px;
+            min-width: 55px;
+            max-width: 55px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .quick-info-bar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            padding: 15px;
+        }
+
+        .quick-info-bar .quick-info-item {
+            flex: 1 1 auto;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .quick-info-bar .quick-info-item > label {
+            flex-shrink: 0;
+        }
+
+        .quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
+        .quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
+            width: 60px;
+            min-width: 60px;
+            max-width: 60px;
+        }
+    }
+</style>
+
+<div class="row gap-20">
+    <div class="col-md-12">
+        <div class="bd bgc-white p-30">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <div class="layer w-100 mB-15">
+                        <h4 class="lh-1 mB-0">Yeni Tarif Ekle</h4>
+                    </div>
+                
+
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <!-- Quick Info Bar -->
+                    <div class="quick-info-bar">
+                        <div class="quick-info-item">
+                            <div class="form-check">
+                                <input asp-for="IsFeatured" class="form-check-input" type="checkbox" id="IsFeaturedTop" />
+                                <label class="form-check-label" for="IsFeaturedTop">
+                                    <i class="ti-star mR-5"></i> Öne Çıkan
+                                </label>
+                            </div>
+                        </div>
+                        <div class="quick-info-item">
+                            <label asp-for="PrepTimeMinutes" class="mB-5">
+                                <i class="ti-timer mR-5"></i> Hazırlık (dk):
+                            </label>
+                            <input asp-for="PrepTimeMinutes" class="form-control form-control-sm d-inline-block" type="number" min="0" value="0" placeholder="0" />
+                        </div>
+                        <div class="quick-info-item">
+                            <label asp-for="CookingTimeMinutes" class="mB-0">
+                                <i class="ti-time mR-5"></i> Pişirme (dk) *:
+                            </label>
+                            <input asp-for="CookingTimeMinutes" class="form-control form-control-sm d-inline-block" type="number" min="1" required placeholder="30" />
+                            <span asp-validation-for="CookingTimeMinutes" class="text-danger fsz-xs"></span>
+                        </div>
+                        <div class="quick-info-item">
+                            <label asp-for="Servings" class="mB-0">
+                                <i class="ti-user mR-5"></i> Kaç Kişilik:
+                            </label>
+                            <input asp-for="Servings" class="form-control form-control-sm d-inline-block" type="number" min="1" value="4" placeholder="4" style="width: 60px;" />
+                        </div>
+                        <div class="quick-info-item">
+                            <label asp-for="Difficulty" class="mB-0">
+                                <i class="ti-bar-chart mR-5"></i> Zorluk:
+                            </label>
+                            <select asp-for="Difficulty" class="form-control form-control-sm d-inline-block">
+                                <option value="Kolay">Kolay</option>
+                                <option value="Orta" selected>Orta</option>
+                                <option value="Zor">Zor</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row gap-20">
+                        <!-- Sol Kolon -->
+                        <div class="col-md-8">
+                            <div class="layers">
+                                <div class="layer w-100 mB-15">
+                                    <label asp-for="Title" class="form-label fw-600">Tarif Adı *</label>
+                                    <input asp-for="Title" class="form-control" required />
+                                    <span asp-validation-for="Title" class="text-danger fsz-sm"></span>
+                                </div>
+
+                                <div class="layer w-100 mB-15">
+                                    <label asp-for="Description" class="form-label fw-600">Kısa Açıklama</label>
+                                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger fsz-sm"></span>
+                                </div>
+
+                                <div class="layer w-100 mB-15">
+                                    <label asp-for="Ingredients" class="form-label fw-600">Malzemeler *</label>
+                                    <textarea asp-for="Ingredients" class="form-control" rows="6" required 
+                                              placeholder="Her malzemeyi ayrı satıra yazın veya virgülle ayırın"></textarea>
+                                    <span asp-validation-for="Ingredients" class="text-danger fsz-sm"></span>
+                                </div>
+
+                                <div class="layer w-100 mB-15">
+                                    <label asp-for="Steps" class="form-label fw-600">Yapılış *</label>
+                                    <textarea asp-for="Steps" class="form-control" rows="8" required 
+                                              placeholder="Adım adım yapılışını yazın"></textarea>
+                                    <span asp-validation-for="Steps" class="text-danger fsz-sm"></span>
+                                </div>
+
+                                <div class="layer w-100 mB-15">
+                                    <label asp-for="Tips" class="form-label fw-600">
+                                        <i class="ti-light-bulb mR-5"></i> Püf Noktaları
+                                    </label>
+                                    <textarea asp-for="Tips" class="form-control" rows="3" 
+                                              placeholder="Tarifin püf noktalarını yazın"></textarea>
+                                </div>
+
+                                <div class="layer w-100 mB-15">
+                                    <label asp-for="AlternativeIngredients" class="form-label fw-600">
+                                        <i class="ti-exchange-vertical mR-5"></i> Alternatif Malzemeler
+                                    </label>
+                                    <textarea asp-for="AlternativeIngredients" class="form-control" rows="2" 
+                                              placeholder="Varsa alternatif malzemeleri yazın"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sağ Kolon -->
+                        <div class="col-md-4">
+                            <div class="layers">
+                                <div class="layer w-100 mB-15">
+                                    <label asp-for="CategoryId" class="form-label fw-600">Kategori</label>
+                                    <select asp-for="CategoryId" class="form-control">
+                                        <option value="">Kategori Seçin</option>
+                                        @foreach (var category in categories)
+                                        {
+                                            <option value="@category.Id">@category.Name</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="layer w-100 mB-15">
+                                    <label class="form-label fw-600">Tarif Görseli</label>
+                                    <div class="d-flex gap-10 ai-c" style="flex-wrap: wrap;">
+                                        <input type="file" name="imageFile" id="imageFile" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="form-control" style="flex: 1; min-width: 200px;" />
+                                        <span class="c-grey-600" style="white-space: nowrap;">veya</span>
+                                        <input asp-for="ImageUrl" class="form-control" type="text" 
+                                               placeholder="https://example.com/image.jpg" id="imageUrl" style="flex: 1; min-width: 200px;" />
+                                    </div>
+                                    <small class="c-grey-600 d-block mT-5">JPG, PNG, GIF veya WebP formatında, maksimum 5MB</small>
+                                    
+                                    <!-- Görsel önizleme -->
+                                    <div id="imagePreview" class="mT-10" style="display: none;">
+                                        <img id="previewImg" src="" alt="Önizleme" class="bdrs-3" style="max-width: 100%; max-height: 200px; object-fit: cover;" />
+                                        <button type="button" id="removeImage" class="btn btn-sm btn-danger mT-5">
+                                            <i class="ti-close"></i> Görseli Kaldır
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mT-20">
+                        <div class="col-12">
+                            <div class="bd-top pT-15">
+                                <div class="peers fxw-nw gap-10" style="justify-content: flex-end;">
+                                    <div class="peer">
+                                        <button type="submit" class="btn btn-primary" style="color: white;">
+                                            <i class="ti-save mR-5"></i> Kaydet
+                                        </button>
+                                    </div>
+                                    <div class="peer">
+                                        <a asp-controller="Recipes" asp-action="Index" class="btn btn-secondary" style="color: white;">
+                                            <i class="ti-close mR-5"></i> İptal
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const imageFileInput = document.getElementById('imageFile');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const removeImageBtn = document.getElementById('removeImage');
+        const imageUrlInput = document.getElementById('imageUrl');
+
+        // Dosya seçildiğinde önizleme göster
+        imageFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    imageUrlInput.value = ''; // URL input'unu temizle
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Görseli kaldır
+        removeImageBtn.addEventListener('click', function() {
+            imageFileInput.value = '';
+            imagePreview.style.display = 'none';
+            previewImg.src = '';
+        });
+
+        // URL input'u değiştiğinde dosya input'unu temizle
+        imageUrlInput.addEventListener('input', function() {
+            if (this.value) {
+                imageFileInput.value = '';
+                imagePreview.style.display = 'none';
+            }
+        });
+    </script>
+}

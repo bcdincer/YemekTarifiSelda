@@ -1,0 +1,117 @@
+@model IEnumerable<FrontendMvc.Models.Recipes.RecipeViewModel>
+
+@{
+    ViewData["Title"] = "Tarif Yönetimi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var categories = ViewBag.Categories as List<FrontendMvc.Models.Recipes.CategoryViewModel> ?? new();
+}
+
+<div class="row gap-20">
+    <div class="col-12">
+        <div class="bd bgc-white p-30">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <div class="peers fxw-nw ai-c">
+                        <div class="peer peer-greed">
+                            <h4 class="lh-1 mB-0">Tarif Yönetimi</h4>
+                        </div>
+                        <div class="peer">
+                            <a asp-controller="Recipes" asp-action="Create" class="btn btn-primary" style="color: white;">
+                                <i class="ti-plus"></i> Yeni Tarif Ekle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtreler -->
+                <div class="layer w-100 mB-20">
+                    <div class="row gap-10">
+                        <div class="col-md-3">
+                            <a asp-action="Recipes" class="btn @(ViewBag.CategoryId == null ? "btn-primary" : "btn-outline-primary")" style="@(ViewBag.CategoryId == null ? "color: white;" : "")">
+                                Tümü
+                            </a>
+                            @foreach (var category in categories)
+                            {
+                                <a asp-action="Recipes" asp-route-categoryId="@category.Id" 
+                                   class="btn @(ViewBag.CategoryId == category.Id ? "btn-primary" : "btn-outline-primary")" 
+                                   style="@(ViewBag.CategoryId == category.Id ? "color: white;" : "")">
+                                    @category.Name
+                                </a>
+                            }
+                        </div>
+                        <div class="col-md-9">
+                            <form asp-action="Recipes" method="get" class="d-flex" style="gap: 8px;">
+                                @if (ViewBag.CategoryId != null)
+                                {
+                                    <input type="hidden" name="categoryId" value="@ViewBag.CategoryId">
+                                }
+                                <input type="text" name="search" class="form-control flex-grow-1" placeholder="Tarif ara..." value="@ViewBag.SearchTerm">
+                                <button type="submit" class="btn btn-primary btn-sm" style="color: white;">
+                                    <i class="ti-search"></i> Ara
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarif Listesi -->
+                <div class="layer w-100">
+                    @if (!Model.Any())
+                    {
+                        <div class="ta-c p-30">
+                            <h5 class="c-grey-600">Tarif bulunamadı</h5>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Başlık</th>
+                                        <th>Kategori</th>
+                                        <th>Zorluk</th>
+                                        <th>Görüntülenme</th>
+                                        <th>Tarih</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var recipe in Model)
+                                    {
+                                        <tr>
+                                            <td>@recipe.Id</td>
+                                            <td>@recipe.Title</td>
+                                            <td>@(recipe.Category?.Name ?? "-")</td>
+                                            <td>@recipe.Difficulty</td>
+                                            <td>@recipe.ViewCount</td>
+                                            <td>@recipe.CreatedAt.ToString("dd.MM.yyyy")</td>
+                                            <td>
+                                                <div class="peers fxw-nw gap-5">
+                                                    <a asp-controller="Recipes" asp-action="Details" asp-route-id="@recipe.Id" class="btn btn-sm btn-info" style="color: white;">
+                                                        <i class="ti-eye"></i>
+                                                    </a>
+                                                    <a asp-action="EditRecipe" asp-route-id="@recipe.Id" class="btn btn-sm btn-primary" style="color: white;">
+                                                        <i class="ti-pencil"></i>
+                                                    </a>
+                                                    <form asp-action="DeleteRecipe" asp-route-id="@recipe.Id" method="post" class="d-inline" onsubmit="return confirm('Bu tarifi silmek istediğinize emin misiniz?');">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                            <i class="ti-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

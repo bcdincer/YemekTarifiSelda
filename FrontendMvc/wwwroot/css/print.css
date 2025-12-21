@@ -1,0 +1,74 @@
+/* Print-friendly styles for recipes */
+@media print {
+    /* Hide navigation and non-essential elements */
+    .sidebar,
+    .header,
+    .no-print,
+    button,
+    .btn,
+    .star-rating,
+    .breadcrumb,
+    #likeButton {
+        display: none !important;
+    }
+    
+    /* Full width for print */
+    body {
+        background: white !important;
+        font-size: 12pt;
+        line-height: 1.5;
+    }
+    
+    .recipe-details-container,
+    .page-container,
+    .main-content {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Remove borders and shadows */
+    .bd {
+        border: none !important;
+        box-shadow: none !important;
+        background: white !important;
+    }
+    
+    /* Optimize spacing */
+    .p-30, .p-20, .p-15 {
+        padding: 10pt !important;
+    }
+    
+    .mB-20, .mB-30 {
+        margin-bottom: 15pt !important;
+    }
+    
+    /* Ensure images print well */
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+        page-break-inside: avoid;
+    }
+    
+    /* Page breaks */
+    h1, h2, h3 {
+        page-break-after: avoid;
+    }
+    
+    .recipe-section {
+        page-break-inside: avoid;
+    }
+    
+    /* Print URLs after links */
+    a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+        color: #666;
+    }
+    
+    a[href^="#"]::after,
+    a[href^="javascript:"]::after {
+        content: "";
+    }
+}
+

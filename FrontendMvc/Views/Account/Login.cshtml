@@ -1,0 +1,53 @@
+@model FrontendMvc.Models.Account.LoginViewModel
+
+@{
+    ViewData["Title"] = "Giriş Yap";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="bd bgc-white p-30 bdrs-3 mT-50">
+            <h4 class="mB-30 c-grey-900">Giriş Yap</h4>
+            
+            <form asp-action="Login" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mB-20"></div>
+                
+                <div class="form-group mB-20">
+                    <label asp-for="Email" class="form-label fw-600"></label>
+                    <input asp-for="Email" class="form-control" placeholder="E-posta adresiniz" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group mB-20">
+                    <label asp-for="Password" class="form-label fw-600"></label>
+                    <input asp-for="Password" class="form-control" placeholder="Şifreniz" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                
+                <div class="form-check mB-20">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label"></label>
+                </div>
+                
+                <div class="peers fxw-nw gap-10">
+                    <div class="peer">
+                        <button type="submit" class="btn btn-primary" style="color: white;">
+                            <i class="ti-key"></i> Giriş Yap
+                        </button>
+                    </div>
+                    <div class="peer">
+                        <a asp-action="Register" class="btn btn-outline-primary">
+                            <i class="ti-user"></i> Kayıt Ol
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

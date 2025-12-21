@@ -1,0 +1,71 @@
+@model IEnumerable<FrontendMvc.Models.Admin.UserViewModel>
+
+@{
+    ViewData["Title"] = "Kullanıcı Yönetimi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row gap-20">
+    <div class="col-12">
+        <div class="bd bgc-white p-30">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <h4 class="lh-1 mB-0">Kullanıcı Yönetimi</h4>
+                </div>
+
+                @if (!Model.Any())
+                {
+                    <div class="layer w-100 ta-c p-30">
+                        <h5 class="c-grey-600">Henüz kullanıcı yok</h5>
+                    </div>
+                }
+                else
+                {
+                    <div class="layer w-100">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Ad Soyad</th>
+                                        <th>E-posta</th>
+                                        <th>Roller</th>
+                                        <th>Kayıt Tarihi</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in Model)
+                                    {
+                                        <tr>
+                                            <td>@user.Id</td>
+                                            <td>@user.FullName</td>
+                                            <td>@user.Email</td>
+                                            <td>
+                                                @foreach (var role in user.Roles)
+                                                {
+                                                    <span class="badge bg-primary mR-5">@role</span>
+                                                }
+                                                @if (!user.Roles.Any())
+                                                {
+                                                    <span class="badge bg-secondary">Rol Yok</span>
+                                                }
+                                            </td>
+                                            <td>@user.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                            <td>
+                                                <a asp-action="AssignRole" asp-route-userId="@user.Id" class="btn btn-sm btn-primary">
+                                                    <i class="ti-settings mR-5"></i> Rol Ata
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

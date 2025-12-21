@@ -1,0 +1,268 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+/* Outline butonlar için renk düzeltmesi */
+a.btn.btn-outline-primary {
+  color: #0d6efd !important;
+}
+
+a.btn.btn-outline-primary:hover {
+  color: #fff !important;
+}
+
+/* Kategori tag'leri için stil */
+.category-tag {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 20px;
+  background-color: #e8dcc6;
+  color: #5c4a37;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.category-tag:hover {
+  background-color: #d4c4a8;
+  color: #5c4a37;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Theme toggle sıralaması - Giriş Yap butonundan önce görünsün */
+.nav-right {
+  display: flex !important;
+}
+
+.nav-right .theme-toggle {
+  order: 2 !important;
+}
+
+.nav-right li.login-button {
+  order: 1 !important;
+}
+
+/* Sticky Header */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Main Navigation Menu */
+.main-navbar {
+  background-color: #fff;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.main-navbar-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.main-nav-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  gap: 0;
+}
+
+.main-nav-menu > li {
+  position: relative;
+}
+
+.main-nav-menu > li > a {
+  display: block;
+  padding: 15px 20px;
+  color: #333;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.main-nav-menu > li > a:hover,
+.main-nav-menu > li > a.active {
+  color: #ff6600;
+  border-bottom-color: #ff6600;
+  background-color: #f9f9f9;
+}
+
+/* Dropdown Navigation */
+.dropdown-nav-item {
+  position: relative;
+}
+
+.dropdown-nav-link {
+  cursor: pointer;
+}
+
+.dropdown-nav-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #fff;
+  min-width: 200px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+  z-index: 1001;
+  padding: 10px 0;
+}
+
+.dropdown-nav-item:hover .dropdown-nav-menu {
+  display: block;
+}
+
+.dropdown-nav-item-link {
+  display: block;
+  padding: 10px 20px;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-nav-item-link:hover {
+  background-color: #f5f5f5;
+  color: #ff6600;
+}
+
+/* Tarif Ekle button in navigation menu */
+.main-nav-menu > li > a.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin: 0 5px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.main-nav-menu > li > a.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Recipe Card Hover Effects */
+.recipe-card-link {
+  text-decoration: none !important;
+}
+
+.recipe-card {
+  transition: all 0.3s ease;
+}
+
+.recipe-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important;
+}
+
+.recipe-card:hover .recipe-card-image-wrapper img {
+  transform: scale(1.05);
+}
+
+.recipe-card:hover .recipe-card-overlay {
+  opacity: 1 !important;
+}
+
+.recipe-card:hover h6 {
+  color: #007bff !important;
+}
+
+/* Search Type Dropdown */
+.search-type-dropdown {
+  position: relative;
+}
+
+.search-type-btn:hover {
+  color: #007bff !important;
+}
+
+.search-type-option:hover {
+  background-color: #f8f9fa;
+  color: #007bff !important;
+}
+
+.search-type-option.active {
+  background-color: #e7f3ff;
+  color: #007bff !important;
+  font-weight: 600;
+}
+
+/* Sort Dropdown Styles */
+.sort-dropdown {
+  position: relative;
+}
+
+.sort-dropdown-btn {
+  transition: all 0.2s ease;
+}
+
+.sort-dropdown-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.sort-dropdown-btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.sort-option {
+  transition: all 0.2s ease;
+}
+
+.sort-option:hover {
+  background-color: #f8f9fa;
+  color: #007bff !important;
+}
+
+.sort-option.active {
+  background-color: #e7f3ff;
+  color: #007bff !important;
+  font-weight: 600;
+}

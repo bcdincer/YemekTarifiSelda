@@ -1,0 +1,52 @@
+@model IEnumerable<FrontendMvc.Models.Admin.ImageInfo>
+
+@{
+    ViewData["Title"] = "Görsel Yönetimi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row gap-20">
+    <div class="col-12">
+        <div class="bd bgc-white p-30">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <h4 class="lh-1 mB-0">Görsel Yönetimi</h4>
+                </div>
+
+                @if (!Model.Any())
+                {
+                    <div class="layer w-100 ta-c p-30">
+                        <h5 class="c-grey-600">Henüz görsel yok</h5>
+                    </div>
+                }
+                else
+                {
+                    <div class="layer w-100">
+                        <div class="row gap-20">
+                            @foreach (var image in Model)
+                            {
+                                <div class="col-md-3">
+                                    <div class="bd bgc-grey-50 bdrs-3 ov-h">
+                                        <img src="@image.Url" alt="@image.FileName" class="w-100" style="height: 200px; object-fit: cover;" />
+                                        <div class="p-15">
+                                            <h6 class="mB-5 fsz-sm">@image.FileName</h6>
+                                            <p class="fsz-xs c-grey-600 mB-10">@image.SizeFormatted - @image.CreatedAt.ToString("dd.MM.yyyy")</p>
+                                            <form asp-action="DeleteImage" method="post" onsubmit="return confirm('Bu görseli silmek istediğinize emin misiniz?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="fileName" value="@image.FileName" />
+                                                <button type="submit" class="btn btn-sm btn-danger w-100">
+                                                    <i class="ti-trash"></i> Sil
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

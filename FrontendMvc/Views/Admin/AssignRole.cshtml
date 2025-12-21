@@ -1,0 +1,66 @@
+@model FrontendMvc.Models.Admin.AssignRoleViewModel
+
+@{
+    ViewData["Title"] = "Rol Ata";
+}
+
+<div class="row gap-20">
+    <div class="col-md-8">
+        <div class="bd bgc-white p-30">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <h4 class="lh-1 mB-0">Rol Ata</h4>
+                    <p class="c-grey-600 mT-5">Kullanıcı: <strong>@Model.UserFullName</strong> (@Model.UserEmail)</p>
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="layer w-100 mB-15">
+                        <div class="alert alert-success">
+                            @TempData["SuccessMessage"]
+                        </div>
+                    </div>
+                }
+
+                <form asp-action="AssignRole" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="UserId" />
+                    
+                    <div class="layer w-100 mB-20">
+                        <label class="form-label fw-600">Kullanılabilir Roller</label>
+                        <div class="bd bgc-grey-50 p-20 bdrs-3">
+                            @foreach (var role in Model.AvailableRoles)
+                            {
+                                <div class="form-check mB-10">
+                                    <input class="form-check-input" type="checkbox" 
+                                           name="selectedRoles" value="@role" 
+                                           id="role_@role"
+                                           @(Model.UserRoles.Contains(role) ? "checked" : "") />
+                                    <label class="form-check-label" for="role_@role">
+                                        <span class="badge bg-primary">@role</span>
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="layer w-100">
+                        <div class="peers fxw-nw gap-10">
+                            <div class="peer">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="ti-save mR-5"></i> Kaydet
+                                </button>
+                            </div>
+                            <div class="peer">
+                                <a asp-action="Users" class="btn btn-secondary">
+                                    <i class="ti-close mR-5"></i> İptal
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

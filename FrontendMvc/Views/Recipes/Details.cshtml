@@ -1,0 +1,601 @@
+@model FrontendMvc.Models.Recipes.RecipeViewModel
+
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["Description"] = string.IsNullOrEmpty(Model.Description) ? $"{Model.Title} tarifi. Hazırlık: {Model.PrepTimeMinutes} dk, Pişirme: {Model.CookingTimeMinutes} dk. {Model.Servings} kişilik." : Model.Description;
+    ViewData["Keywords"] = $"{Model.Title}, {Model.Category?.Name}, yemek tarifi, {Model.Difficulty} tarif, {Model.CookingTimeMinutes} dakika";
+    if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        ViewData["OgImage"] = Model.ImageUrl.StartsWith("http") ? Model.ImageUrl : $"{Context.Request.Scheme}://{Context.Request.Host}{Model.ImageUrl}";
+    }
+    var categories = ViewBag.Categories as List<FrontendMvc.Models.Recipes.CategoryViewModel> ?? new();
+    var recipeUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+}
+
+<style>
+    /* Details sayfası için sadece gerekli optimizasyonlar */
+    #mainContent {
+        max-width: 100%;
+    }
+    
+    /* Sadece bu sayfadaki row'u optimize et */
+    .recipe-details-container .row {
+        margin-left: -8px;
+        margin-right: -8px;
+    }
+    
+    .recipe-details-container [class*="col-"] {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+    
+    /* Print Styles */
+    @@media print {
+        .sidebar, .header, .no-print, button, .btn, #likeButton, .star-rating {
+            display: none !important;
+        }
+        .recipe-details-container {
+            max-width: 100% !important;
+            margin: 0 !important;
+        }
+        body {
+            background: white !important;
+        }
+        .bd {
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+</style>
+
+<!-- Schema.org Recipe Structured Data -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org/",
+  "@@type": "Recipe",
+  "name": "@Html.Raw(Json.Serialize(Model.Title))",
+  "description": "@Html.Raw(Json.Serialize(Model.Description ?? ""))",
+  "image": "@(string.IsNullOrEmpty(Model.ImageUrl) ? "" : (Model.ImageUrl.StartsWith("http") ? Model.ImageUrl : $"{Context.Request.Scheme}://{Context.Request.Host}{Model.ImageUrl}"))",
+  "author": {
+    "@@type": "Organization",
+    "name": "Tarif Sitesi"
+  },
+  "prepTime": "PT@(Model.PrepTimeMinutes)M",
+  "cookTime": "PT@(Model.CookingTimeMinutes)M",
+  "totalTime": "PT@(Model.PrepTimeMinutes + Model.CookingTimeMinutes)M",
+  "recipeYield": "@Model.Servings",
+  "recipeIngredient": @Html.Raw(Json.Serialize(Model.Ingredients.Split(new[] { '\n', '\r', ',' }, StringSplitOptions.RemoveEmptyEntries).Select(i => i.Trim()).Where(i => !string.IsNullOrEmpty(i)).ToList())),
+  "recipeInstructions": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Steps.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Select(s => new Dictionary<string, object> { { "@type", "HowToStep" }, { "text", s.Trim() } }).Where(s => !string.IsNullOrEmpty(s["text"]?.ToString())).ToList())),
+  @if (Model.AverageRating.HasValue)
+  {
+  <text>
+  "aggregateRating": {
+    "@@type": "AggregateRating",
+    "ratingValue": "@Model.AverageRating.Value.ToString("F1")",
+    "reviewCount": "@Model.RatingCount"
+  },
+  </text>
+  }
+  "recipeCategory": "@(Model.Category?.Name ?? "")",
+  "recipeCuisine": "Turkish",
+  "difficulty": "@Model.Difficulty"
+}
+</script>
+
+<!-- Breadcrumbs -->
+<nav aria-label="breadcrumb" class="mB-20 no-print">
+    <ol class="breadcrumb" style="background: transparent; padding: 0; margin: 0;">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Ana Sayfa</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Recipes" asp-action="Index">Tarifler</a></li>
+        @if (Model.Category != null)
+        {
+            <li class="breadcrumb-item"><a asp-controller="Recipes" asp-action="Index" asp-route-categoryId="@Model.Category.Id">@Model.Category.Name</a></li>
+        }
+        <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+    </ol>
+</nav>
+
+<div class="recipe-details-container">
+    <div class="row gap-20">
+        <!-- Ana İçerik -->
+        <div class="col-12">
+            <div class="bd bgc-white p-30">
+                <!-- Başlık ve Görsel -->
+                <div class="layers">
+                    <div class="layer w-100 mB-20">
+                        <div class="peers fxw-nw ai-c mB-10">
+                            <div class="peer peer-greed">
+                                <h1 class="lh-1 mB-0" style="font-size: 2rem;">@Model.Title</h1>
+                            </div>
+                            <div class="peer no-print">
+                                <div class="d-flex gap-10" style="gap: 8px;">
+                                    <!-- Share Buttons -->
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="shareRecipe()" title="Paylaş">
+                                        <i class="ti-share"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.print()" title="Yazdır">
+                                        <i class="ti-printer"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        @if (Model.Category != null)
+                        {
+                            <span class="badge bgc-blue-50 c-blue-700 p-10 lh-0 tt-c rounded-pill">
+                                <i class="@Model.Category.Icon"></i> @Model.Category.Name
+                            </span>
+                        }
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <div class="layer w-100 mB-20">
+                            <img id="recipeImage" src="@Model.ImageUrl" alt="@Model.Title" class="w-100 bdrs-3" style="max-height: 500px; object-fit: cover; cursor: pointer;" title="Beğenmek için çift tıklayın">
+                        </div>
+                        
+                        <!-- İstatistikler ve Etkileşim (Fotoğrafın altında) -->
+                        <div class="layer w-100 mB-30">
+                            <div class="bd bgc-grey-50 p-20 bdrs-3">
+                                <!-- İstatistikler -->
+                                <div class="row mB-20">
+                                    <div class="col-md-3 col-6 pY-10">
+                                        <div class="ta-c">
+                                            <i class="ti-eye c-blue-500 fsz-lg d-b mB-5"></i>
+                                            <div class="fsz-sm c-grey-600">Görüntüleme</div>
+                                            <div class="fw-600">@Model.ViewCount</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 pY-10">
+                                        <div class="ta-c">
+                                            <i class="ti-star c-yellow-500 fsz-lg d-b mB-5"></i>
+                                            <div class="fsz-sm c-grey-600">Puan</div>
+                                            <div class="fw-600" id="ratingStats">
+                                                @if (Model.AverageRating.HasValue)
+                                                {
+                                                    <span>@Model.AverageRating.Value.ToString("F1")</span><text> / 5.0</text>
+                                                    <div class="fsz-xs c-grey-600">(@Model.RatingCount)</div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="c-grey-600">-</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 pY-10">
+                                        <div class="ta-c">
+                                            <i class="ti-heart c-red-500 fsz-lg d-b mB-5"></i>
+                                            <div class="fsz-sm c-grey-600">Beğeni</div>
+                                            <div class="fw-600" id="likeCount">@Model.LikeCount</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6 pY-10">
+                                        <div class="ta-c">
+                                            <i class="ti-calendar c-grey-500 fsz-lg d-b mB-5"></i>
+                                            <div class="fsz-sm c-grey-600">Tarih</div>
+                                            <div class="fw-600 fsz-xs">@Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy")</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bdT pT-20">
+                                    @if (User.Identity?.IsAuthenticated == true)
+                                    {
+                                        <!-- Rating Yıldızları -->
+                                        <div class="ta-c mB-15">
+                                            <div class="mB-10">
+                                                <span class="fsz-sm c-grey-600">Bu tarifi puanlayın:</span>
+                                            </div>
+                                            <div class="star-rating" data-recipe-id="@Model.Id">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <i class="ti-star star-icon" data-rating="@i" style="font-size: 28px; cursor: pointer; color: #ddd; margin: 0 3px;"></i>
+                                                }
+                                            </div>
+                                            <div class="mT-5">
+                                                <span class="fsz-xs c-grey-600" id="userRatingText"></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Like Butonu -->
+                                        <div class="ta-c">
+                                            <button id="likeButton" class="btn btn-outline-danger" data-recipe-id="@Model.Id" style="min-width: 150px;">
+                                                <i class="ti-heart" id="likeIcon"></i> <span id="likeButtonText">Beğen</span>
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="ta-c">
+                                            <p class="fsz-sm c-grey-600 mB-10">Bu tarifi puanlamak ve beğenmek için lütfen giriş yapın.</p>
+                                            <a asp-controller="Account" asp-action="Login" class="btn btn-primary">
+                                                <i class="ti-user mR-5"></i> Giriş Yap
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    
+                    <!-- Açıklama -->
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        <div class="layer w-100 mB-20">
+                            <p class="fsz-md c-grey-700">@Model.Description</p>
+                        </div>
+                    }
+                    
+                    <!-- Bilgi Kartları -->
+                    <div class="layer w-100 mB-30">
+                        <div class="row gap-10">
+                            <div class="col-md-3">
+                                <div class="bd bgc-grey-50 p-15 ta-c bdrs-3">
+                                    <i class="ti-time fsz-xl c-blue-500 d-b mB-5"></i>
+                                    <div class="fsz-sm c-grey-600">Pişirme</div>
+                                    <div class="fw-600">@Model.CookingTimeMinutes dk</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="bd bgc-grey-50 p-15 ta-c bdrs-3">
+                                    <i class="ti-timer fsz-xl c-green-500 d-b mB-5"></i>
+                                    <div class="fsz-sm c-grey-600">Hazırlık</div>
+                                    <div class="fw-600">@Model.PrepTimeMinutes dk</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="bd bgc-grey-50 p-15 ta-c bdrs-3">
+                                    <i class="ti-user fsz-xl c-orange-500 d-b mB-5"></i>
+                                    <div class="fsz-sm c-grey-600">Kişilik</div>
+                                    <div class="fw-600">@Model.Servings</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="bd bgc-grey-50 p-15 ta-c bdrs-3">
+                                    <i class="ti-settings fsz-xl c-purple-500 d-b mB-5"></i>
+                                    <div class="fsz-sm c-grey-600">Zorluk</div>
+                                    <div class="fw-600">@Model.Difficulty</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Malzemeler -->
+                    <div class="layer w-100 mB-30 recipe-section">
+                        <div class="peers fxw-nw ai-c mB-15">
+                            <div class="peer peer-greed">
+                                <h5 class="mB-0">
+                                    <i class="ti-shopping-cart c-blue-500"></i> Malzemeler
+                                </h5>
+                            </div>
+                            <div class="peer">
+                                <div class="d-flex ai-c gap-10" style="gap: 8px;">
+                                    <label class="fsz-sm c-grey-600 mB-0" for="servingsMultiplier">Kişi sayısı:</label>
+                                    <input type="number" id="servingsMultiplier" min="1" max="20" value="@Model.Servings" class="form-control form-control-sm" style="width: 70px; text-align: center;" onchange="adjustServings(this.value)">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetServings()" title="Sıfırla">
+                                        <i class="ti-reload"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bd bgc-grey-50 p-20 bdrs-3">
+                            <ul class="list-group" id="ingredientsList" style="list-style: none; padding: 0; margin: 0;">
+                                @foreach (var ingredient in Model.Ingredients.Split(new[] { '\n', '\r', ',' }, StringSplitOptions.RemoveEmptyEntries).Where(i => !string.IsNullOrWhiteSpace(i)))
+                                {
+                                    <li class="pY-5" data-original="@ingredient.Trim()" style="border-bottom: 1px solid #e0e0e0; padding: 8px 0;">@ingredient.Trim()</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Yapılış -->
+                    <div class="layer w-100 mB-30">
+                        <h5 class="mB-15">
+                            <i class="ti-list c-green-500"></i> Yapılış
+                        </h5>
+                        <div class="bd bgc-grey-50 p-20 bdrs-3">
+                            <pre class="m-0 fsz-sm" style="white-space: pre-wrap; font-family: inherit;">@Model.Steps</pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Püf Noktaları -->
+                    @if (!string.IsNullOrEmpty(Model.Tips))
+                    {
+                        <div class="layer w-100 mB-30">
+                            <h5 class="mB-15">
+                                <i class="ti-light-bulb c-yellow-500"></i> Püf Noktaları
+                            </h5>
+                            <div class="bd bgc-yellow-50 p-20 bdrs-3">
+                                <p class="m-0 fsz-sm">@Model.Tips</p>
+                            </div>
+                        </div>
+                    }
+                    
+                    <!-- Alternatif Malzemeler -->
+                    @if (!string.IsNullOrEmpty(Model.AlternativeIngredients))
+                    {
+                        <div class="layer w-100 mB-30">
+                            <h5 class="mB-15">
+                                <i class="ti-reload c-orange-500"></i> Alternatif Malzemeler
+                            </h5>
+                            <div class="bd bgc-orange-50 p-20 bdrs-3">
+                                <p class="m-0 fsz-sm">@Model.AlternativeIngredients</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .star-rating .star-icon {
+        transition: color 0.2s;
+    }
+    
+    .star-rating .star-icon:hover,
+    .star-rating .star-icon.active {
+        color: #ffc107 !important;
+    }
+    
+    .star-rating .star-icon.rated {
+        color: #ffc107 !important;
+    }
+    
+    #likeButton.liked {
+        background-color: #dc3545;
+        color: white;
+        border-color: #dc3545;
+    }
+    
+    #likeButton.liked:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+</style>
+
+@section Scripts {
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+        <script>
+            const recipeId = @Model.Id;
+            const userId = '@currentUserId';
+            const apiBaseUrl = 'https://localhost:7016';
+            
+            // Rating sistemi
+            const starIcons = document.querySelectorAll('.star-icon');
+            let currentUserRating = null;
+            
+            // Kullanıcının mevcut puanını yükle
+            async function loadUserRating() {
+                try {
+                    const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/rating/user/${encodeURIComponent(userId)}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.rating) {
+                            currentUserRating = data.rating;
+                            updateStarDisplay(data.rating);
+                            const userRatingText = document.getElementById('userRatingText');
+                            if (userRatingText) {
+                                userRatingText.textContent = `Puanınız: ${data.rating}/5`;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Rating yüklenirken hata:', error);
+                }
+            }
+            
+            function updateStarDisplay(rating) {
+                starIcons.forEach((star, index) => {
+                    if (index < rating) {
+                        star.classList.add('rated', 'active');
+                    } else {
+                        star.classList.remove('rated', 'active');
+                    }
+                });
+            }
+            
+            // Rating ve Like bilgilerini güncelle (sayfa yenilemeden)
+            async function updateRatingStats() {
+                try {
+                    const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/rating`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        // İstatistikler bölümündeki rating bilgisini güncelle
+                        const ratingDisplay = document.getElementById('ratingStats');
+                        if (ratingDisplay) {
+                            if (data.averageRating !== null && data.averageRating !== undefined) {
+                                ratingDisplay.innerHTML = `<span>${data.averageRating.toFixed(1)}</span> / 5.0 <div class="fsz-xs c-grey-600">(${data.ratingCount})</div>`;
+                            } else {
+                                ratingDisplay.innerHTML = `<span class="c-grey-600">-</span>`;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Rating istatistikleri güncellenirken hata:', error);
+                }
+            }
+            
+            starIcons.forEach((star, index) => {
+                star.addEventListener('mouseenter', () => {
+                    updateStarDisplay(index + 1);
+                });
+                
+                star.addEventListener('mouseleave', () => {
+                    updateStarDisplay(currentUserRating || 0);
+                });
+                
+                star.addEventListener('click', async () => {
+                    const rating = index + 1;
+                    try {
+                        const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/rate?rating=${rating}&userId=${encodeURIComponent(userId)}`, {
+                            method: 'POST'
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            currentUserRating = rating;
+                            updateStarDisplay(rating);
+                            const userRatingText = document.getElementById('userRatingText');
+                            if (userRatingText) {
+                                userRatingText.textContent = `Puanınız: ${rating}/5`;
+                            }
+                            
+                            // Rating istatistiklerini güncelle (sayfa yenilemeden)
+                            if (data.averageRating !== undefined && data.ratingCount !== undefined) {
+                                const ratingDisplay = document.getElementById('ratingStats');
+                                if (ratingDisplay) {
+                                    if (data.averageRating !== null) {
+                                        ratingDisplay.innerHTML = `<span>${data.averageRating.toFixed(1)}</span> / 5.0 <div class="fsz-xs c-grey-600">(${data.ratingCount})</div>`;
+                                    } else {
+                                        ratingDisplay.innerHTML = `<span class="c-grey-600">-</span>`;
+                                    }
+                                }
+                            } else {
+                                // Eğer response'da yoksa ayrı bir istek yap
+                                await updateRatingStats();
+                            }
+                        } else {
+                            alert('Puan verilirken bir hata oluştu.');
+                        }
+                    } catch (error) {
+                        console.error('Puan verilirken hata:', error);
+                        alert('Puan verilirken bir hata oluştu.');
+                    }
+                });
+            });
+            
+            // Like sistemi
+            const likeButton = document.getElementById('likeButton');
+            let isLiked = false;
+            
+            async function loadLikeStatus() {
+                try {
+                    const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/like?userId=${encodeURIComponent(userId)}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        isLiked = data.isLiked;
+                        updateLikeButton();
+                    }
+                } catch (error) {
+                    console.error('Like durumu yüklenirken hata:', error);
+                }
+            }
+            
+            function updateLikeButton() {
+                if (likeButton) {
+                    if (isLiked) {
+                        likeButton.classList.add('liked');
+                        likeButton.innerHTML = '<i class="ti-heart" id="likeIcon"></i> <span id="likeButtonText">Beğenildi</span>';
+                    } else {
+                        likeButton.classList.remove('liked');
+                        likeButton.innerHTML = '<i class="ti-heart" id="likeIcon"></i> <span id="likeButtonText">Beğen</span>';
+                    }
+                }
+            }
+            
+            // Like işlemi fonksiyonu
+            async function toggleLike() {
+                try {
+                    const response = await fetch(`${apiBaseUrl}/api/recipes/${recipeId}/like?userId=${encodeURIComponent(userId)}`, {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Backend'den dönen isLiked ve likeCount'u kullan
+                        isLiked = data.isLiked;
+                        updateLikeButton();
+                        
+                        // Like count'u güncelle
+                        const likeCountElement = document.getElementById('likeCount');
+                        if (likeCountElement) {
+                            likeCountElement.textContent = data.likeCount;
+                        }
+                    } else {
+                        alert('Beğeni işlemi sırasında bir hata oluştu.');
+                    }
+                } catch (error) {
+                    console.error('Beğeni işlemi sırasında hata:', error);
+                    alert('Beğeni işlemi sırasında bir hata oluştu.');
+                }
+            }
+            
+            // Like butonu event listener
+            if (likeButton) {
+                likeButton.addEventListener('click', toggleLike);
+            }
+            
+            // Fotoğrafa çift tıklama ile beğenme
+            const recipeImage = document.getElementById('recipeImage');
+            if (recipeImage && likeButton) {
+                recipeImage.addEventListener('dblclick', async () => {
+                    await toggleLike();
+                });
+            }
+            
+            // Share Recipe Function
+            function shareRecipe() {
+                const recipeUrl = window.location.href;
+                const recipeTitle = '@Html.Raw(Json.Serialize(Model.Title))';
+                
+                if (navigator.share) {
+                    // Web Share API (modern browsers)
+                    navigator.share({
+                        title: recipeTitle,
+                        text: '@Html.Raw(Json.Serialize(Model.Description ?? ""))',
+                        url: recipeUrl
+                    }).catch(err => console.log('Share cancelled', err));
+                } else {
+                    // Fallback: Copy to clipboard
+                    navigator.clipboard.writeText(recipeUrl).then(() => {
+                        alert('Tarif linki kopyalandı!');
+                    }).catch(() => {
+                        // Fallback: Show URL in prompt
+                        prompt('Tarif linkini kopyalayın:', recipeUrl);
+                    });
+                }
+            }
+            
+            // Servings Calculator
+            const originalServings = @Model.Servings;
+            let originalIngredients = [];
+            
+            function initServingsCalculator() {
+                originalIngredients = Array.from(document.querySelectorAll('#ingredientsList li')).map(li => ({
+                    element: li,
+                    text: li.getAttribute('data-original') || li.textContent.trim()
+                }));
+            }
+            
+            function adjustServings(newServings) {
+                if (!originalIngredients.length) initServingsCalculator();
+                const multiplier = parseFloat(newServings) / originalServings;
+                originalIngredients.forEach(({ element, text }) => {
+                    // Try to find numbers in the ingredient text and multiply them
+                    const updatedText = text.replace(/(\d+\.?\d*)\s*([a-zA-ZğüşıöçĞÜŞİÖÇ]+)/g, (match, num, unit) => {
+                        const newNum = (parseFloat(num) * multiplier).toFixed(1).replace(/\.0$/, '');
+                        return `${newNum} ${unit}`;
+                    });
+                    element.textContent = updatedText || text;
+                });
+            }
+            
+            function resetServings() {
+                if (!originalIngredients.length) initServingsCalculator();
+                document.getElementById('servingsMultiplier').value = originalServings;
+                originalIngredients.forEach(({ element, text }) => {
+                    element.textContent = text;
+                });
+            }
+            
+            // Sayfa yüklendiğinde
+            initServingsCalculator();
+            loadUserRating();
+            loadLikeStatus();
+        </script>
+    }
+}

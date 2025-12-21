@@ -1,0 +1,91 @@
+@model IEnumerable<FrontendMvc.Models.Recipes.CategoryViewModel>
+
+@{
+    ViewData["Title"] = "Kategori Yönetimi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row gap-20">
+    <div class="col-12">
+        <div class="bd bgc-white p-30">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <div class="peers fxw-nw ai-c">
+                        <div class="peer peer-greed">
+                            <h4 class="lh-1 mB-0">Kategori Yönetimi</h4>
+                        </div>
+                        <div class="peer">
+                            <a asp-controller="Categories" asp-action="Create" class="btn btn-primary" style="color: white;">
+                                <i class="ti-plus"></i> Yeni Kategori Ekle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                @if (!Model.Any())
+                {
+                    <div class="layer w-100 ta-c p-30">
+                        <h5 class="c-grey-600">Henüz kategori yok</h5>
+                        <p class="c-grey-500 mT-10">İlk kategoriyi ekleyerek başlayın!</p>
+                        <a asp-controller="Categories" asp-action="Create" class="btn btn-primary mT-20" style="color: white;">
+                            <i class="ti-plus"></i> İlk Kategoriyi Ekle
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="layer w-100">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Ad</th>
+                                        <th>İkon</th>
+                                        <th>Sıra</th>
+                                        <th>Açıklama</th>
+                                        <th>Oluşturma Tarihi</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var category in Model)
+                                    {
+                                        <tr>
+                                            <td>@category.Id</td>
+                                            <td>@category.Name</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(category.Icon))
+                                                {
+                                                    <i class="@category.Icon"></i>
+                                                }
+                                                else
+                                                {
+                                                    <span>-</span>
+                                                }
+                                            </td>
+                                            <td>@category.DisplayOrder</td>
+                                            <td>@(category.Description ?? "-")</td>
+                                            <td>-</td>
+                                            <td>
+                                                <div class="peers fxw-nw gap-5">
+                                                    <a asp-controller="Categories" asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-primary" style="color: white;">
+                                                        <i class="ti-pencil"></i> Düzenle
+                                                    </a>
+                                                    <a asp-controller="Categories" asp-action="Delete" asp-route-id="@category.Id" class="btn btn-sm btn-danger" onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?');">
+                                                        <i class="ti-trash"></i> Sil
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

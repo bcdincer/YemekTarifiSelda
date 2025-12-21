@@ -1,0 +1,47 @@
+﻿<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+<script>
+    // Configure jQuery validation to ONLY validate forms with data-val attributes
+    // This prevents validation from interfering with navigation forms, logout, language switch, etc.
+    (function($) {
+        if (typeof $.validator !== 'undefined') {
+            // Set default ignore pattern - only validate forms with validation attributes
+            $.validator.setDefaults({
+                ignore: ":not([data-val]):not([data-val-required]):not([data-val-email]):not([data-val-length]):not([data-val-range]):not([data-val-regex]):not([data-val-equalto]):not([data-val-remote])"
+            });
+            
+            // Remove validation from forms that shouldn't be validated
+            $(document).ready(function() {
+                // Remove validation from language forms
+                $('#langFormTr, #langFormEn').each(function() {
+                    var $form = $(this);
+                    if ($form.data('validator')) {
+                        $form.removeData('validator');
+                    }
+                    $form.off('submit.validate');
+                });
+                
+                // Remove validation from any form with novalidate attribute
+                $('form[novalidate]').each(function() {
+                    var $form = $(this);
+                    if ($form.data('validator')) {
+                        $form.removeData('validator');
+                    }
+                    $form.off('submit.validate');
+                });
+            });
+            
+            // Prevent validation from being attached to non-validation forms
+            $(document).on('submit', 'form:not([data-val]):not([data-val-required]):not([data-val-email]):not([data-val-length]):not([data-val-range]):not([data-val-regex]):not([data-val-equalto]):not([data-val-remote])', function(e) {
+                var $form = $(this);
+                // Only skip validation if form has no validation attributes at all
+                if (!$form.find('[data-val]').length && !$form.find('[data-val-required]').length) {
+                    if ($form.data('validator')) {
+                        $form.removeData('validator');
+                    }
+                    return true; // Allow form to submit
+                }
+            });
+        }
+    })(jQuery);
+</script>

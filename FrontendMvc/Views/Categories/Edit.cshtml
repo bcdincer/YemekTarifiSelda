@@ -1,0 +1,68 @@
+@model FrontendMvc.Models.Recipes.CategoryViewModel
+
+@{
+    ViewData["Title"] = "Kategori Düzenle";
+}
+
+<div class="row gap-20">
+    <div class="col-md-8">
+        <div class="bd bgc-white p-30">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <h4 class="lh-1 mB-0">Kategori Düzenle</h4>
+                </div>
+
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <div class="layers">
+                        <div class="layer w-100 mB-15">
+                            <label asp-for="Name" class="form-label fw-600">Kategori Adı *</label>
+                            <input asp-for="Name" class="form-control" required />
+                            <span asp-validation-for="Name" class="text-danger fsz-sm"></span>
+                        </div>
+
+                        <div class="layer w-100 mB-15">
+                            <label asp-for="Description" class="form-label fw-600">Açıklama</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger fsz-sm"></span>
+                        </div>
+
+                        <div class="layer w-100 mB-15">
+                            <label asp-for="Icon" class="form-label fw-600">İkon Class Adı</label>
+                            <input asp-for="Icon" class="form-control" placeholder="örn: ti-book, ti-cup" />
+                            <small class="c-grey-600">Themify Icons class adını girin (örn: ti-book)</small>
+                            <span asp-validation-for="Icon" class="text-danger fsz-sm"></span>
+                        </div>
+
+                        <div class="layer w-100 mB-15">
+                            <label asp-for="DisplayOrder" class="form-label fw-600">Görünüm Sırası</label>
+                            <input asp-for="DisplayOrder" class="form-control" type="number" min="0" />
+                            <small class="c-grey-600">Menüde görünme sırası (küçük sayılar önce görünür)</small>
+                        </div>
+
+                        <div class="layer w-100 mT-20">
+                            <div class="peers fxw-nw gap-10">
+                                <div class="peer">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="ti-save"></i> Kaydet
+                                    </button>
+                                </div>
+                                <div class="peer">
+                                    <a asp-action="Index" class="btn btn-outline-secondary">
+                                        <i class="ti-close"></i> İptal
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

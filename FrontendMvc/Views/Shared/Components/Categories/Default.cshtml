@@ -1,0 +1,32 @@
+@model List<FrontendMvc.Models.Recipes.CategoryViewModel>
+
+@if (Model != null && Model.Any())
+{
+    <li class="nav-item mT-20">
+        <div class="sidebar-link" style="cursor: default; color: var(--c-text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 20px;">
+            <span>KATEGORİLER</span>
+        </div>
+    </li>
+    @foreach (var category in Model)
+    {
+        <li class="nav-item">
+            <a class="sidebar-link" asp-controller="Recipes" asp-action="Index" asp-route-categoryId="@category.Id">
+                <span class="icon-holder">
+                    @if (!string.IsNullOrEmpty(category.Icon))
+                    {
+                        <i class="@category.Icon"></i>
+                    }
+                    else
+                    {
+                        <i class="c-purple-500 ti-folder"></i>
+                    }
+                </span>
+                <span class="title">@category.Name</span>
+                <span style="margin-left: auto; color: var(--c-text-muted);">
+                    <i class="ti-angle-right"></i>
+                </span>
+            </a>
+        </li>
+    }
+}
+
