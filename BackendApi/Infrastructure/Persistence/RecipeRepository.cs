@@ -79,6 +79,23 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
             .Take(count)
             .ToListAsync();
 
+    public async Task<Recipe?> GetRandomAsync()
+    {
+        var count = await _context.Recipes.CountAsync();
+        if (count == 0) return null;
+        
+        var random = new Random();
+        var skip = random.Next(0, count);
+        
+        return await _context.Recipes
+            .Include(r => r.Category)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Skip(skip)
+            .Take(1)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<List<Recipe>> GetByCategoryAsync(int categoryId)
         => await _context.Recipes
             .Include(r => r.Category)

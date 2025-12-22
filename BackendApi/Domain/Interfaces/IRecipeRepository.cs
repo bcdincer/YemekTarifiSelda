@@ -9,6 +9,7 @@ public interface IRecipeRepository
     Task<Recipe?> GetByIdAsync(int id);
     Task<List<Recipe>> GetFeaturedAsync(int count = 6);
     Task<List<Recipe>> GetPopularAsync(int count = 6);
+    Task<Recipe?> GetRandomAsync();
     Task<List<Recipe>> GetByCategoryAsync(int categoryId);
     Task<(List<Recipe> Items, int TotalCount)> GetByCategoryPagedAsync(int categoryId, int pageNumber, int pageSize);
     Task<List<Recipe>> SearchAsync(string searchTerm);

@@ -47,6 +47,13 @@ public class RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger
         return await MapRecipesWithRealTimeRatingsAsync(recipes);
     }
 
+    public async Task<RecipeResponseDto?> GetRandomAsync()
+    {
+        var recipe = await Repository.GetRandomAsync();
+        if (recipe == null) return null;
+        return await MapRecipeWithRealTimeRatingAsync(recipe);
+    }
+
     public async Task<List<RecipeResponseDto>> GetByCategoryAsync(int categoryId)
     {
         var recipes = await Repository.GetByCategoryAsync(categoryId);

@@ -175,6 +175,20 @@ public class HomeController : Controller
         };
     }
 
+    public async Task<IActionResult> RandomRecipe()
+    {
+        var client = _httpClientFactory.CreateClient("BackendApi");
+        var recipe = await client.GetFromJsonAsync<RecipeViewModel>("/api/recipes/random", JsonOptions);
+        
+        if (recipe == null)
+        {
+            TempData["ErrorMessage"] = "Rastgele tarif bulunamadı. Lütfen daha sonra tekrar deneyin.";
+            return RedirectToAction("Index");
+        }
+        
+        return RedirectToAction("Details", "Recipes", new { id = recipe.Id });
+    }
+
     public IActionResult Privacy()
     {
         return View();

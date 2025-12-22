@@ -10,6 +10,7 @@ public interface IRecipeService
     Task<RecipeResponseDto?> GetByIdAsync(int id);
     Task<List<RecipeResponseDto>> GetFeaturedAsync(int count = 6);
     Task<List<RecipeResponseDto>> GetPopularAsync(int count = 6);
+    Task<RecipeResponseDto?> GetRandomAsync();
     Task<List<RecipeResponseDto>> GetByCategoryAsync(int categoryId);
     Task<PagedResult<RecipeResponseDto>> GetByCategoryPagedAsync(int categoryId, int pageNumber, int pageSize);
     Task<List<RecipeResponseDto>> SearchAsync(string searchTerm);

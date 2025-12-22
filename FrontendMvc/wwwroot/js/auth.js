@@ -22,7 +22,17 @@ function removeAuthToken() {
 }
 
 function isAuthenticated() {
-    return !!getAuthToken();
+    const token = getAuthToken();
+    if (!token) {
+        return false;
+    }
+    
+    // Token varsa ama geçersizse (çok kısa veya boş string), false dön
+    if (token.trim().length < 10) {
+        return false;
+    }
+    
+    return true;
 }
 
 // API çağrıları için header ekle

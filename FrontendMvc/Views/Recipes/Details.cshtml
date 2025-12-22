@@ -465,7 +465,7 @@
                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
                         <div class="layer w-100 mB-20">
-                            <img id="recipeImage" src="@Model.ImageUrl" alt="@Model.Title" class="w-100 bdrs-3" style="max-height: 500px; object-fit: cover; cursor: pointer;" title="Beğenmek için çift tıklayın">
+                            <img id="recipeImage" src="@Model.ImageUrl" alt="@Model.Title" class="w-100 bdrs-3" style="max-height: 350px; object-fit: cover; cursor: pointer;" title="Beğenmek için çift tıklayın">
                         </div>
 
                         <!-- İstatistikler ve Etkileşim (Fotoğrafın altında) -->
@@ -480,55 +480,36 @@
                                                 <span class="fsz-sm c-grey-700 mL-5 fw-500">@Model.ViewCount</span>
                                             </div>
                                             <div class="peer">
-                                                @if (User.Identity?.IsAuthenticated == true)
-                                                {
-                                                    <button id="likeButtonStat" class="btn btn-link p-0" data-recipe-id="@Model.Id" style="border: none; background: none; padding: 0; min-width: auto; line-height: 1; cursor: pointer; text-decoration: none;">
-                                                        <i class="ti-heart" style="font-size: 16px; color: #999; font-weight: normal; transition: all 0.2s; text-decoration: none;" id="likeIconStat"></i>
-                                                    </button>
-                                                }
-                                                else
-                                                {
-                                                    <i class="ti-heart" style="font-size: 16px; color: #999; font-weight: normal;" id="likeIconStat"></i>
-                                                }
+                                                <button id="likeButtonStat" class="btn btn-link p-0" data-recipe-id="@Model.Id" style="border: none; background: none; padding: 0; min-width: auto; line-height: 1; cursor: pointer; text-decoration: none;">
+                                                    <i class="ti-heart" style="font-size: 16px; color: #999; font-weight: normal; transition: all 0.2s; text-decoration: none;" id="likeIconStat"></i>
+                                                </button>
                                                 <span class="fsz-sm c-grey-700 mL-5 fw-500" id="likeCount">@Model.LikeCount</span>
                                             </div>
-                                            @if (User.Identity?.IsAuthenticated == true)
-                                            {
-                                                <div class="peer" style="flex-shrink: 0; min-width: auto;">
-                                                    <div class="peers fxw-nw ai-c" style="gap: 8px;">
-                                                        <div class="star-rating" data-recipe-id="@Model.Id" style="min-width: 130px;" data-initial-rating="@(Model.AverageRating.HasValue ? Model.AverageRating.Value : 0)">
-                                                            @for (int i = 1; i <= 5; i++)
-                                                            {
-                                                                <i class="ti-star star-icon" data-rating="@i"></i>
-                                                            }
-                                                        </div>
-                                                        @if (Model.AverageRating.HasValue)
+                                            <div class="peer" style="flex-shrink: 0; min-width: auto;">
+                                                <div class="peers fxw-nw ai-c" style="gap: 8px;">
+                                                    <div class="star-rating" data-recipe-id="@Model.Id" style="min-width: 130px;" data-initial-rating="@(Model.AverageRating.HasValue ? Model.AverageRating.Value : 0)">
+                                                        @for (int i = 1; i <= 5; i++)
                                                         {
-                                                            <span class="fsz-sm c-grey-700 fw-500" id="ratingStats" style="display: inline-block; white-space: nowrap; line-height: 1.2;">
-                                                                Puan : @Model.AverageRating.Value.ToString("F1")
-                                                                <span class="c-grey-500">(@Model.RatingCount Kişi Puan Verdi)</span>
-                                                                <span id="userRatingDisplay" class="fsz-sm c-grey-700 fw-500" style="display: none; margin-left: 20px;"></span>
-                                                            </span>
+                                                            <i class="ti-star star-icon" data-rating="@i"></i>
                                                         }
                                                     </div>
-                                                </div>
-                                            }
-                                            else
-                                            {
-                                                <div class="peer">
                                                     @if (Model.AverageRating.HasValue)
                                                     {
                                                         <span class="fsz-sm c-grey-700 fw-500" id="ratingStats" style="display: inline-block; white-space: nowrap; line-height: 1.2;">
                                                             Puan : @Model.AverageRating.Value.ToString("F1")
                                                             <span class="c-grey-500">(@Model.RatingCount Kişi Puan Verdi)</span>
+                                                            @if (User.Identity?.IsAuthenticated == true)
+                                                            {
+                                                                <span id="userRatingDisplay" class="fsz-sm c-grey-700 fw-500" style="display: none; margin-left: 20px;"></span>
+                                                            }
                                                         </span>
                                                     }
                                                     else
                                                     {
-                                                        <span class="fsz-sm c-grey-500">-</span>
+                                                        <span class="fsz-sm c-grey-500">Henüz puan verilmedi</span>
                                                     }
                                                 </div>
-                                            }
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="peer">
@@ -537,15 +518,6 @@
                                     </div>
                                 </div>
 
-                                @if (User.Identity?.IsAuthenticated == false)
-                                {
-                                    <div class="ta-c pT-15">
-                                        <p class="fsz-sm c-grey-600 mB-10">Bu tarifi puanlamak ve beğenmek için lütfen giriş yapın.</p>
-                                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-sm">
-                                            <i class="ti-user mR-5"></i> Giriş Yap
-                                        </a>
-                                    </div>
-                                }
                             </div>
                         </div>
                     }
@@ -806,30 +778,17 @@
                         </div>
 
                         <!-- Yorum Ekleme Formu -->
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <div class="bd bgc-white p-20 bdrs-3 mB-20">
-                                <div class="form-group mB-15">
-                                    <textarea id="commentContent" class="form-control" rows="3" placeholder="Yorumunuzu yazın... (Maksimum 1000 karakter)"></textarea>
-                                    <small class="text-muted">
-                                        <span id="commentCharCount">0</span>/1000 karakter
-                                    </small>
-                                </div>
-                                <button type="button" class="btn btn-primary btn-sm" id="submitCommentBtn" onclick="submitComment()">
-                                    <i class="ti-check mR-5"></i> Yorum Yap
-                                </button>
+                        <div class="bd bgc-white p-20 bdrs-3 mB-20">
+                            <div class="form-group mB-15">
+                                <textarea id="commentContent" class="form-control" rows="3" placeholder="Yorumunuzu yazın... (Maksimum 1000 karakter)"></textarea>
+                                <small class="text-muted">
+                                    <span id="commentCharCount">0</span>/1000 karakter
+                                </small>
                             </div>
-                        }
-                        else
-                        {
-                            <div class="bd bgc-grey-50 p-20 bdrs-3 mB-20 ta-c">
-                                <p class="m-0 c-grey-600">
-                                    <a asp-controller="Account" asp-action="Login" class="c-blue-500">Giriş yapın</a> veya 
-                                    <a asp-controller="Account" asp-action="Register" class="c-blue-500">kayıt olun</a> 
-                                    yorum yapmak için.
-                                </p>
-                            </div>
-                        }
+                            <button type="button" class="btn btn-primary btn-sm" id="submitCommentBtn" onclick="submitComment()">
+                                <i class="ti-check mR-5"></i> Yorum Yap
+                            </button>
+                        </div>
 
                         <!-- Yorumlar Listesi -->
                         <div id="commentsList" class="comments-container">
@@ -1222,19 +1181,44 @@
                 });
             }
         });
+
+        // Giriş yapma uyarısı ve yönlendirme fonksiyonu
+        function requireLogin(message) {
+            console.log('🔐 requireLogin çağrıldı - Mesaj:', message);
+            const confirmed = confirm(message + '\n\nGiriş sayfasına yönlendirilmek ister misiniz?');
+            console.log('Kullanıcı seçimi:', confirmed ? 'OK' : 'Cancel');
+            if (confirmed) {
+                console.log('🔄 Login sayfasına yönlendiriliyor...');
+                window.location.href = '/Account/Login';
+            } else {
+                console.log('❌ Kullanıcı iptal etti');
+            }
+            return false; // İşlemi durdur
+        }
     </script>
     
-    @if (User.Identity?.IsAuthenticated == true)
-    {
-        var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-        <script>
-            const recipeId = @Model.Id;
-
-            // Rating sistemi
-            let currentUserRating = null;
+    <script>
+        const recipeId = @Model.Id;
+        
+        // Rating sistemi - Global scope (hem giriş yapmış hem yapmamış kullanıcılar için)
+        let currentUserRating = null;
+        
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            <text>
+            const currentUserId = '@currentUserId';
+            </text>
+        }
 
             // Kullanıcının mevcut puanını yükle (sadece currentUserRating'ı set et, yıldızları güncelleme)
             async function loadUserRating() {
+                // Giriş yapmamış kullanıcılar için puan yükleme
+                if (!isAuthenticated()) {
+                    currentUserRating = 0;
+                    return;
+                }
+                
                 try {
                     const response = await apiFetch(`${apiBaseUrl}/api/recipes/${recipeId}/rating/user`);
                     if (response.ok) {
@@ -1388,8 +1372,11 @@
                 });
 
                 starRatingContainer.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
                     const target = e.target.closest('.star-icon, .half-star-container');
-                    if (!target) return;
+                    if (!target) return false;
 
                     let starIndex = -1;
                     if (target.classList.contains('star-icon')) {
@@ -1399,11 +1386,34 @@
                     }
 
                     if (starIndex >= 0) {
-                        // Anonymous kullanıcı kontrolü
-                        if (!isAuthenticated()) {
-                            showToast('Puan vermek için giriş yapmanız gerekiyor.', 'warning');
-                            return;
+                        // Anonymous kullanıcı kontrolü - ÖNCE KONTROL ET
+                        console.log('⭐ Yıldız tıklandı - Kontrol başlıyor...');
+                        console.log('isAuthenticated tipi:', typeof isAuthenticated);
+                        console.log('isAuthenticated fonksiyonu:', isAuthenticated);
+                        
+                        let authCheck = false;
+                        if (typeof isAuthenticated !== 'undefined') {
+                            authCheck = isAuthenticated();
+                            console.log('isAuthenticated() sonucu:', authCheck);
+                            
+                            // Token'ı kontrol et
+                            if (typeof getAuthToken !== 'undefined') {
+                                const token = getAuthToken();
+                                console.log('🔑 Token değeri (yıldız):', token ? (token.substring(0, 20) + '...') : 'null/undefined');
+                            }
+                        } else {
+                            console.log('⚠️ isAuthenticated tanımlı değil!');
                         }
+                        
+                        console.log('authCheck değeri:', authCheck);
+                        
+                        if (!authCheck) {
+                            console.log('🚫 Giriş yapılmamış - requireLogin çağrılıyor');
+                            requireLogin('Puan vermek için giriş yapmanız gerekiyor.');
+                            return false;
+                        }
+                        
+                        console.log('✅ Giriş yapılmış - İşleme devam ediliyor');
                         
                         const clickRating = starIndex + 1; // 1, 2, 3, 4, 5
                         
@@ -1446,10 +1456,7 @@
                 });
             }
 
-            // Sayfa yüklendiğinde event listener'ları ekle
-            document.addEventListener('DOMContentLoaded', function() {
-                attachStarEventListeners();
-            });
+            // Yıldız event listener'ları - Ana DOMContentLoaded içinde ekleniyor
 
             // Sayfa yüklendiğinde kullanıcının puanını ve beğeni durumunu yükle
             document.addEventListener('DOMContentLoaded', async function() {
@@ -1558,10 +1565,16 @@
 
 
             // Like sistemi
-            const likeButtonStat = document.getElementById('likeButtonStat');
             let isLiked = false;
 
             async function loadLikeStatus() {
+                // Giriş yapmamış kullanıcılar için beğeni durumu yükleme
+                if (!isAuthenticated()) {
+                    isLiked = false;
+                    updateLikeButton();
+                    return;
+                }
+                
                 try {
                     const response = await apiFetch(`${apiBaseUrl}/api/recipes/${recipeId}/like`);
                     if (response.ok) {
@@ -1600,12 +1613,34 @@
             }
 
             // Like işlemi fonksiyonu
-            async function toggleLike() {
-                // Anonymous kullanıcı kontrolü
-                if (!isAuthenticated()) {
-                    showToast('Beğenmek için giriş yapmanız gerekiyor.', 'warning');
-                    return;
+            async function toggleLike(e) {
+                console.log('❤️ Beğeni butonu tıklandı - Kontrol başlıyor...');
+                console.log('isAuthenticated tipi:', typeof isAuthenticated);
+                console.log('isAuthenticated fonksiyonu:', isAuthenticated);
+                
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
                 }
+                
+                // Anonymous kullanıcı kontrolü - ÖNCE KONTROL ET
+                let authCheck = false;
+                if (typeof isAuthenticated !== 'undefined') {
+                    authCheck = isAuthenticated();
+                    console.log('isAuthenticated() sonucu:', authCheck);
+                } else {
+                    console.log('⚠️ isAuthenticated tanımlı değil!');
+                }
+                
+                console.log('authCheck değeri:', authCheck);
+                
+                if (!authCheck) {
+                    console.log('🚫 Giriş yapılmamış - requireLogin çağrılıyor');
+                    requireLogin('Beğenmek için giriş yapmanız gerekiyor.');
+                    return false;
+                }
+                
+                console.log('✅ Giriş yapılmış - İşleme devam ediliyor');
                 
                 try {
                     const response = await apiFetch(`${apiBaseUrl}/api/recipes/${recipeId}/like`, {
@@ -1632,18 +1667,7 @@
                 }
             }
 
-            // İstatistikler satırındaki kalp ikonuna tıklama olayı
-            if (likeButtonStat) {
-                likeButtonStat.addEventListener('click', toggleLike);
-            }
-
-            // Fotoğrafa çift tıklama ile beğenme
-            const recipeImage = document.getElementById('recipeImage');
-            if (recipeImage) {
-                recipeImage.addEventListener('dblclick', async () => {
-                    await toggleLike();
-                });
-            }
+            // İstatistikler satırındaki kalp ikonuna tıklama olayı - DOMContentLoaded içinde ekleniyor
 
             // Share Modal Functions
             const recipeUrl = '@Html.Raw(recipeUrl)';
@@ -1856,7 +1880,7 @@
             async function toggleRecipeInCollection(collectionId) {
                 // Anonymous kullanıcı kontrolü
                 if (!isAuthenticated()) {
-                    showToast('Koleksiyona eklemek için giriş yapmanız gerekiyor.', 'warning');
+                    requireLogin('Koleksiyona eklemek için giriş yapmanız gerekiyor.');
                     return;
                 }
                 
@@ -1892,7 +1916,7 @@
             function openCollectionModal() {
                 // Anonymous kullanıcı kontrolü
                 if (!isAuthenticated()) {
-                    showToast('Koleksiyona eklemek için giriş yapmanız gerekiyor.', 'warning');
+                    requireLogin('Koleksiyona eklemek için giriş yapmanız gerekiyor.');
                     return;
                 }
                 
@@ -1924,7 +1948,7 @@
             async function createCollection() {
                 // Anonymous kullanıcı kontrolü
                 if (!isAuthenticated()) {
-                    showToast('Koleksiyon oluşturmak için giriş yapmanız gerekiyor.', 'warning');
+                    requireLogin('Koleksiyon oluşturmak için giriş yapmanız gerekiyor.');
                     return;
                 }
                 
@@ -2228,6 +2252,29 @@
 
             // Yorum ekle
             async function submitComment() {
+                console.log('💬 Yorum gönderme butonu tıklandı - Kontrol başlıyor...');
+                console.log('isAuthenticated tipi:', typeof isAuthenticated);
+                console.log('isAuthenticated fonksiyonu:', isAuthenticated);
+                
+                // Anonymous kullanıcı kontrolü - ÖNCE KONTROL ET
+                let authCheck = false;
+                if (typeof isAuthenticated !== 'undefined') {
+                    authCheck = isAuthenticated();
+                    console.log('isAuthenticated() sonucu:', authCheck);
+                } else {
+                    console.log('⚠️ isAuthenticated tanımlı değil!');
+                }
+                
+                console.log('authCheck değeri:', authCheck);
+                
+                if (!authCheck) {
+                    console.log('🚫 Giriş yapılmamış - requireLogin çağrılıyor');
+                    requireLogin('Yorum yapmak için giriş yapmanız gerekiyor.');
+                    return false;
+                }
+                
+                console.log('✅ Giriş yapılmış - İşleme devam ediliyor');
+                
                 const content = commentContent?.value.trim();
                 if (!content) {
                     showToast('Lütfen yorum yazın.', 'warning');
@@ -2235,11 +2282,6 @@
                 }
                 if (content.length > 1000) {
                     showToast('Yorum en fazla 1000 karakter olabilir.', 'warning');
-                    return;
-                }
-
-                if (!isAuthenticated()) {
-                    showToast('Yorum yapmak için giriş yapmanız gerekiyor.', 'warning');
                     return;
                 }
 
@@ -2391,7 +2433,7 @@
                 }
 
                 if (!isAuthenticated()) {
-                    showToast('Yorum silmek için giriş yapmanız gerekiyor.', 'warning');
+                    requireLogin('Yorum silmek için giriş yapmanız gerekiyor.');
                     return;
                 }
 
@@ -2444,7 +2486,7 @@
             // Yorum beğen/beğenme
             async function toggleCommentLike(commentId) {
                 if (!isAuthenticated()) {
-                    showToast('Beğenmek için giriş yapmanız gerekiyor.', 'warning');
+                    requireLogin('Beğenmek için giriş yapmanız gerekiyor.');
                     return;
                 }
 
@@ -2537,7 +2579,7 @@
             // Yanıt verme fonksiyonları
             function showReplyForm(commentId) {
                 if (!isAuthenticated()) {
-                    showToast('Yanıt vermek için giriş yapmanız gerekiyor.', 'warning');
+                    requireLogin('Yanıt vermek için giriş yapmanız gerekiyor.');
                     return;
                 }
                 
@@ -2592,7 +2634,7 @@
                 }
 
                 if (!isAuthenticated()) {
-                    showToast('Yanıt vermek için giriş yapmanız gerekiyor.', 'warning');
+                    requireLogin('Yanıt vermek için giriş yapmanız gerekiyor.');
                     return;
                 }
 
@@ -2722,66 +2764,76 @@
             const themeObserver = new MutationObserver(initDarkModeStyles);
             themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-            // Anonymous kullanıcılar için buton/form gizleme
-            function checkAuthentication() {
-                const isAuth = isAuthenticated();
-                const starRating = document.querySelector('.star-rating');
-                const likeButton = document.getElementById('likeButtonStat');
-                const commentForm = document.getElementById('commentContent')?.closest('.bd');
-                
-                if (!isAuth) {
-                    // Rating yıldızlarını gizle (sadece görüntüleme için)
-                    if (starRating) {
-                        starRating.style.pointerEvents = 'none';
-                        starRating.style.opacity = '0.6';
-                    }
-                    // Like butonunu devre dışı bırak
-                    if (likeButton) {
-                        likeButton.style.pointerEvents = 'none';
-                        likeButton.style.opacity = '0.6';
-                    }
-                } else {
-                    // Giriş yapmış kullanıcılar için aktif et
-                    if (starRating) {
-                        starRating.style.pointerEvents = 'auto';
-                        starRating.style.opacity = '1';
-                    }
-                    if (likeButton) {
-                        likeButton.style.pointerEvents = 'auto';
-                        likeButton.style.opacity = '1';
-                    }
-                }
-            }
-            
             // Sayfa yüklendiğinde - auth.js yüklendikten sonra çalışsın
             document.addEventListener('DOMContentLoaded', function() {
+                console.log('📄 DOMContentLoaded - Sayfa yüklendi');
+                console.log('isAuthenticated tipi (yükleme öncesi):', typeof isAuthenticated);
+                console.log('isAuthenticated fonksiyonu (yükleme öncesi):', isAuthenticated);
+                
                 // auth.js yüklendiğinden emin ol - fallback ekle
                 if (typeof isAuthenticated === 'undefined') {
-                    console.warn('auth.js yüklenmedi! Fallback kullanılıyor.');
-                    window.isAuthenticated = function() { return false; };
+                    console.warn('⚠️ auth.js yüklenmedi! Fallback kullanılıyor.');
+                    window.isAuthenticated = function() { 
+                        console.log('🔍 Fallback isAuthenticated çağrıldı - false dönüyor');
+                        return false; 
+                    };
+                } else {
+                    console.log('✅ isAuthenticated tanımlı');
+                    // Test et
+                    const testResult = isAuthenticated();
+                    console.log('🧪 isAuthenticated() test sonucu:', testResult);
+                    
+                    // Token'ı kontrol et
+                    if (typeof getAuthToken !== 'undefined') {
+                        const token = getAuthToken();
+                        console.log('🔑 Token değeri:', token ? (token.substring(0, 20) + '...') : 'null/undefined');
+                        console.log('🔑 Token uzunluğu:', token ? token.length : 0);
+                    } else {
+                        console.log('⚠️ getAuthToken fonksiyonu tanımlı değil!');
+                    }
+                    
+                    // localStorage'ı kontrol et
+                    const storedToken = localStorage.getItem('authToken');
+                    console.log('💾 localStorage authToken:', storedToken ? (storedToken.substring(0, 20) + '...') : 'null/undefined');
                 }
+                
                 if (typeof apiFetch === 'undefined') {
-                    console.warn('apiFetch tanımlı değil! Fallback kullanılıyor.');
+                    console.warn('⚠️ apiFetch tanımlı değil! Fallback kullanılıyor.');
                     window.apiFetch = async function(url, options = {}) {
                         return await fetch(url, options);
                     };
                 }
                 
-                checkAuthentication();
+                // Yıldız event listener'larını ekle
+                attachStarEventListeners();
                 
-                // Sadece giriş yapmış kullanıcılar için yükle
+                // Beğeni butonuna event listener ekle
+                const likeButtonStat = document.getElementById('likeButtonStat');
+                if (likeButtonStat) {
+                    likeButtonStat.addEventListener('click', function(e) {
+                        toggleLike(e);
+                    });
+                }
+                
+                // Fotoğrafa çift tıklama ile beğenme
+                const recipeImage = document.getElementById('recipeImage');
+                if (recipeImage) {
+                    recipeImage.addEventListener('dblclick', async function(e) {
+                        await toggleLike(e);
+                    });
+                }
+                
+                // Her zaman yükle (fonksiyonlar içinde giriş kontrolü var)
+                loadUserRating();
+                loadLikeStatus();
+                
+                // Sadece giriş yapmış kullanıcılar için koleksiyonları yükle
                 if (isAuthenticated()) {
-                    loadUserRating();
-                    loadLikeStatus();
-                    loadCollections(); // Koleksiyonları yükle
-                } else {
-                    // Anonymous kullanıcılar için sadece görüntüleme verilerini yükle
-                    loadLikeStatus(); // Bu endpoint anonymous da çalışıyor (isLiked: false döner)
+                    loadCollections();
                 }
                 
                 loadComments(true); // Yorumları yükle (herkes görebilir)
                 setupInfiniteScroll(); // Infinite scroll'u başlat
             });
-        </script>
-    }
+    </script>
 }

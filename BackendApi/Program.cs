@@ -235,6 +235,9 @@ app.MapGet("/api/recipes/featured", async (IRecipeService service) =>
 app.MapGet("/api/recipes/popular", async (IRecipeService service) =>
     await service.GetPopularAsync());
 
+app.MapGet("/api/recipes/random", async (IRecipeService service) =>
+    await service.GetRandomAsync() is { } recipe ? Results.Ok(recipe) : Results.NotFound());
+
 app.MapGet("/api/recipes/category/{categoryId:int}", async (int categoryId, IRecipeService service, int pageNumber = 1, int pageSize = 10) =>
 {
     if (pageNumber <= 0) pageNumber = 1;

@@ -330,7 +330,7 @@
 
                 <!-- Main Navigation Menu -->
                 <nav class="main-navbar">
-                    <div class="main-navbar-container">
+                    <div class="main-navbar-container" style="display: flex; justify-content: space-between; align-items: center;">
                         <ul class="main-nav-menu">
                             <li>
                                 <a asp-controller="Home" asp-action="Index">ANA SAYFA</a>
@@ -346,11 +346,6 @@
                             </li>
                             @if (SignInManager.IsSignedIn(User))
                             {
-                                <li>
-                                    <a asp-controller="Recipes" asp-action="Create" class="tarif-ekle-btn">
-                                        <i class="ti-plus mR-5"></i> TARIF EKLE
-                                    </a>
-                                </li>
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <li>
@@ -359,6 +354,18 @@
                                 }
                             }
                         </ul>
+                        <!-- Bugün Ne Pişirsem? Butonu - Sağa hizalı, herkes için görünür -->
+                        <div style="margin-left: auto; margin-top: 20px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+                            @if (SignInManager.IsSignedIn(User))
+                            {
+                                <a asp-controller="Recipes" asp-action="Create" class="tarif-ekle-btn">
+                                    <i class="ti-plus mR-5"></i> TARIF EKLE
+                                </a>
+                            }
+                            <a asp-controller="Home" asp-action="RandomRecipe" class="bugun-pisirsem-btn">
+                                <i class="ti-shuffle"></i> Bugün Ne Pişirsem?
+                            </a>
+                        </div>
                     </div>
                 </nav>
             </div>
@@ -454,23 +461,37 @@
     </script>
     <script src="~/js/auth.js"></script>
     <script>
-        // Cookie'deki token'ı localStorage'a kopyala (eğer localStorage'da yoksa)
+        // Cookie'deki token'ı localStorage'a kopyala (SADECE kullanıcı giriş yapmışsa)
         (function() {
-            function getCookie(name) {
-                const value = `; ${document.cookie}`;
-                const parts = value.split(`; ${name}=`);
-                if (parts.length === 2) return parts.pop().split(';').shift();
-                return null;
-            }
-            
-            // Cookie'den token al
-            const cookieToken = getCookie('authToken');
-            if (cookieToken && typeof localStorage !== 'undefined') {
-                // localStorage'da yoksa veya farklıysa güncelle
-                const storedToken = localStorage.getItem('authToken');
-                if (!storedToken || storedToken !== cookieToken) {
-                    localStorage.setItem('authToken', cookieToken);
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <text>
+                function getCookie(name) {
+                    const value = `; ${document.cookie}`;
+                    const parts = value.split(`; ${name}=`);
+                    if (parts.length === 2) return parts.pop().split(';').shift();
+                    return null;
                 }
+                
+                // Cookie'den token al (sadece giriş yapmış kullanıcılar için)
+                const cookieToken = getCookie('authToken');
+                if (cookieToken && typeof localStorage !== 'undefined') {
+                    // localStorage'da yoksa veya farklıysa güncelle
+                    const storedToken = localStorage.getItem('authToken');
+                    if (!storedToken || storedToken !== cookieToken) {
+                        localStorage.setItem('authToken', cookieToken);
+                    }
+                }
+                </text>
+            }
+            else
+            {
+                <text>
+                // Kullanıcı giriş yapmamış - localStorage'daki token'ı temizle
+                if (typeof localStorage !== 'undefined') {
+                    localStorage.removeItem('authToken');
+                }
+                </text>
             }
         })();
     </script>
@@ -546,7 +567,7 @@
             padding: 10px 20px !important;
             border-radius: 8px !important;
             font-weight: 600 !important;
-            font-size: 13px !important;
+            font-size: 14px !important;
             box-shadow: 0 3px 10px rgba(102, 126, 234, 0.25) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             text-decoration: none !important;
@@ -556,6 +577,8 @@
             margin: 0 !important;
             letter-spacing: 0.3px;
             line-height: 1.4;
+            min-width: 180px !important;
+            height: 42px !important;
         }
         
         .tarif-ekle-btn i {
@@ -588,6 +611,58 @@
         
         [data-theme="dark"] .tarif-ekle-btn:hover {
             background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%) !important;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        /* Bugün Ne Pişirsem? Butonu Stilleri */
+        .bugun-pisirsem-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+            border: none !important;
+            color: white !important;
+            padding: 10px 20px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            transition: all 0.3s ease !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            white-space: nowrap !important;
+            min-width: 180px !important;
+            height: 42px !important;
+        }
+        
+        .bugun-pisirsem-btn i {
+            font-size: 14px;
+        }
+        
+        .bugun-pisirsem-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 5px 18px rgba(40, 167, 69, 0.35) !important;
+            background: linear-gradient(135deg, #20c997 0%, #28a745 100%) !important;
+            color: white !important;
+            text-decoration: none !important;
+        }
+        
+        .bugun-pisirsem-btn:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.25) !important;
+        }
+        
+        .bugun-pisirsem-btn:focus {
+            outline: none !important;
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.25), 0 0 0 3px rgba(40, 167, 69, 0.1) !important;
+        }
+        
+        [data-theme="dark"] .bugun-pisirsem-btn {
+            background: linear-gradient(135deg, #155724 0%, #1e7e34 100%) !important;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        [data-theme="dark"] .bugun-pisirsem-btn:hover {
+            background: linear-gradient(135deg, #1e7e34 0%, #155724 100%) !important;
             box-shadow: 0 5px 18px rgba(0, 0, 0, 0.4) !important;
         }
         
