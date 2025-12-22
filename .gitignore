@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Cleanup scripts (may contain secret patterns)
+*cleanup*.ps1
+*cleanup*.sh
+*cleanup*.md
+CLEANUP_INSTRUCTIONS.md
