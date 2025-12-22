@@ -17,11 +17,13 @@ public class CreateRecipeDtoValidator : AbstractValidator<CreateRecipeDto>
 
         RuleFor(x => x.Ingredients)
             .NotEmpty().WithMessage("Malzemeler zorunludur")
-            .MinimumLength(10).WithMessage("Malzemeler en az 10 karakter olmalıdır");
+            .Must(ingredients => ingredients != null && ingredients.Count > 0).WithMessage("En az bir malzeme eklenmelidir")
+            .Must(ingredients => ingredients != null && ingredients.All(i => !string.IsNullOrWhiteSpace(i))).WithMessage("Malzemeler boş olamaz");
 
         RuleFor(x => x.Steps)
             .NotEmpty().WithMessage("Yapılış adımları zorunludur")
-            .MinimumLength(20).WithMessage("Yapılış adımları en az 20 karakter olmalıdır");
+            .Must(steps => steps != null && steps.Count > 0).WithMessage("En az bir yapılış adımı eklenmelidir")
+            .Must(steps => steps != null && steps.All(s => !string.IsNullOrWhiteSpace(s))).WithMessage("Yapılış adımları boş olamaz");
 
         RuleFor(x => x.PrepTimeMinutes)
             .GreaterThanOrEqualTo(0).WithMessage("Hazırlık süresi 0 veya daha büyük olmalıdır")

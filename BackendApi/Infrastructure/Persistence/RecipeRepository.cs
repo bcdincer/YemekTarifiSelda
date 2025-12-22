@@ -12,12 +12,18 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
     public async Task<List<Recipe>> GetAllAsync()
         => await _context.Recipes
             .Include(r => r.Category)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order))
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync();
 
     public async Task<(List<Recipe> Items, int TotalCount)> GetAllPagedAsync(int pageNumber, int pageSize)
     {
-        var query = _context.Recipes.Include(r => r.Category).OrderByDescending(r => r.CreatedAt);
+        var query = _context.Recipes
+            .Include(r => r.Category)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order))
+            .OrderByDescending(r => r.CreatedAt);
         
         var totalCount = await query.CountAsync();
         
@@ -32,6 +38,8 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
     public async Task<Recipe?> GetByIdAsync(int id)
         => await _context.Recipes
             .Include(r => r.Category)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order))
             .FirstOrDefaultAsync(r => r.Id == id);
 
     public async Task AddAsync(Recipe recipe)
@@ -54,6 +62,8 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
     public async Task<List<Recipe>> GetFeaturedAsync(int count = 6)
         => await _context.Recipes
             .Include(r => r.Category)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order))
             .Where(r => r.IsFeatured)
             .OrderByDescending(r => r.CreatedAt)
             .Take(count)
@@ -62,6 +72,8 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
     public async Task<List<Recipe>> GetPopularAsync(int count = 6)
         => await _context.Recipes
             .Include(r => r.Category)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order))
             .OrderByDescending(r => r.ViewCount)
             .ThenByDescending(r => r.CreatedAt)
             .Take(count)
@@ -70,6 +82,8 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
     public async Task<List<Recipe>> GetByCategoryAsync(int categoryId)
         => await _context.Recipes
             .Include(r => r.Category)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order))
             .Where(r => r.CategoryId == categoryId)
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync();
@@ -78,6 +92,8 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
     {
         var query = _context.Recipes
             .Include(r => r.Category)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order))
             .Where(r => r.CategoryId == categoryId)
             .OrderByDescending(r => r.CreatedAt);
         
@@ -96,11 +112,13 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
         var term = searchTerm.ToLower();
         return await _context.Recipes
             .Include(r => r.Category)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order))
             .Where(r => 
                 r.Title.ToLower().Contains(term) ||
                 r.Description.ToLower().Contains(term) ||
-                r.Ingredients.ToLower().Contains(term) ||
-                r.Steps.ToLower().Contains(term) ||
+                r.Ingredients.Any(i => i.Name.ToLower().Contains(term)) ||
+                r.Steps.Any(s => s.Description.ToLower().Contains(term)) ||
                 (r.Tips != null && r.Tips.ToLower().Contains(term)) ||
                 (r.AlternativeIngredients != null && r.AlternativeIngredients.ToLower().Contains(term)) ||
                 (r.Category != null && r.Category.Name.ToLower().Contains(term)))
@@ -113,11 +131,13 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
         var term = searchTerm.ToLower();
         var query = _context.Recipes
             .Include(r => r.Category)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order))
             .Where(r => 
                 r.Title.ToLower().Contains(term) ||
                 r.Description.ToLower().Contains(term) ||
-                r.Ingredients.ToLower().Contains(term) ||
-                r.Steps.ToLower().Contains(term) ||
+                r.Ingredients.Any(i => i.Name.ToLower().Contains(term)) ||
+                r.Steps.Any(s => s.Description.ToLower().Contains(term)) ||
                 (r.Tips != null && r.Tips.ToLower().Contains(term)) ||
                 (r.AlternativeIngredients != null && r.AlternativeIngredients.ToLower().Contains(term)) ||
                 (r.Category != null && r.Category.Name.ToLower().Contains(term)))
@@ -154,7 +174,10 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
         int pageNumber,
         int pageSize)
     {
-        IQueryable<Recipe> query = _context.Recipes.Include(r => r.Category);
+        IQueryable<Recipe> query = _context.Recipes
+            .Include(r => r.Category)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order));
 
         // Arama terimi filtresi
         if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -163,8 +186,8 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
             query = query.Where(r =>
                 r.Title.ToLower().Contains(term) ||
                 r.Description.ToLower().Contains(term) ||
-                r.Ingredients.ToLower().Contains(term) ||
-                r.Steps.ToLower().Contains(term) ||
+                r.Ingredients.Any(i => i.Name.ToLower().Contains(term)) ||
+                r.Steps.Any(s => s.Description.ToLower().Contains(term)) ||
                 (r.Tips != null && r.Tips.ToLower().Contains(term)) ||
                 (r.AlternativeIngredients != null && r.AlternativeIngredients.ToLower().Contains(term)) ||
                 (r.Category != null && r.Category.Name.ToLower().Contains(term)));
@@ -214,7 +237,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
         if (!string.IsNullOrWhiteSpace(ingredient))
         {
             var ingredientLower = ingredient.ToLower();
-            query = query.Where(r => r.Ingredients.ToLower().Contains(ingredientLower) ||
+            query = query.Where(r => r.Ingredients.Any(i => i.Name.ToLower().Contains(ingredientLower)) ||
                                     (r.AlternativeIngredients != null && r.AlternativeIngredients.ToLower().Contains(ingredientLower)));
         }
 
@@ -226,7 +249,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
                 if (!string.IsNullOrWhiteSpace(ing))
                 {
                     var ingredientLower = ing.ToLower();
-                    query = query.Where(r => r.Ingredients.ToLower().Contains(ingredientLower) ||
+                    query = query.Where(r => r.Ingredients.Any(i => i.Name.ToLower().Contains(ingredientLower)) ||
                                             (r.AlternativeIngredients != null && r.AlternativeIngredients.ToLower().Contains(ingredientLower)));
                 }
             }
@@ -240,7 +263,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
                 if (!string.IsNullOrWhiteSpace(excludedIng))
                 {
                     var excludedLower = excludedIng.ToLower();
-                    query = query.Where(r => !r.Ingredients.ToLower().Contains(excludedLower) &&
+                    query = query.Where(r => !r.Ingredients.Any(i => i.Name.ToLower().Contains(excludedLower)) &&
                                             (r.AlternativeIngredients == null || !r.AlternativeIngredients.ToLower().Contains(excludedLower)));
                 }
             }
@@ -257,7 +280,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
                     var veganExcluded = new[] { "et", "balık", "tavuk", "kırmızı et", "beyaz et", "süt", "yumurta", "peynir", "bal", "yoğurt", "tereyağı", "krema", "mayonez" };
                     foreach (var ex in veganExcluded)
                     {
-                        query = query.Where(r => !r.Ingredients.ToLower().Contains(ex) &&
+                        query = query.Where(r => !r.Ingredients.Any(i => i.Name.ToLower().Contains(ex)) &&
                                                 (r.AlternativeIngredients == null || !r.AlternativeIngredients.ToLower().Contains(ex)));
                     }
                     break;
@@ -266,7 +289,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
                     var vegExcluded = new[] { "et", "balık", "tavuk", "kırmızı et", "beyaz et", "hamburger", "sosis", "salam" };
                     foreach (var ex in vegExcluded)
                     {
-                        query = query.Where(r => !r.Ingredients.ToLower().Contains(ex) &&
+                        query = query.Where(r => !r.Ingredients.Any(i => i.Name.ToLower().Contains(ex)) &&
                                                 (r.AlternativeIngredients == null || !r.AlternativeIngredients.ToLower().Contains(ex)));
                     }
                     break;
@@ -275,7 +298,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
                     var glutenExcluded = new[] { "buğday", "arpa", "çavdar", "yulaf", "un", "ekmek", "makarna", "bulgur", "irmik" };
                     foreach (var ex in glutenExcluded)
                     {
-                        query = query.Where(r => !r.Ingredients.ToLower().Contains(ex) &&
+                        query = query.Where(r => !r.Ingredients.Any(i => i.Name.ToLower().Contains(ex)) &&
                                                 (r.AlternativeIngredients == null || !r.AlternativeIngredients.ToLower().Contains(ex)));
                     }
                     break;
@@ -284,7 +307,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
                     var dairyExcluded = new[] { "süt", "peynir", "yoğurt", "tereyağı", "krema", "kaymak", "lor", "labne" };
                     foreach (var ex in dairyExcluded)
                     {
-                        query = query.Where(r => !r.Ingredients.ToLower().Contains(ex) &&
+                        query = query.Where(r => !r.Ingredients.Any(i => i.Name.ToLower().Contains(ex)) &&
                                                 (r.AlternativeIngredients == null || !r.AlternativeIngredients.ToLower().Contains(ex)));
                     }
                     break;
@@ -293,7 +316,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
                     var nutExcluded = new[] { "fındık", "fıstık", "ceviz", "badem", "kaju", "antep fıstığı", "fıstık ezmesi" };
                     foreach (var ex in nutExcluded)
                     {
-                        query = query.Where(r => !r.Ingredients.ToLower().Contains(ex) &&
+                        query = query.Where(r => !r.Ingredients.Any(i => i.Name.ToLower().Contains(ex)) &&
                                                 (r.AlternativeIngredients == null || !r.AlternativeIngredients.ToLower().Contains(ex)));
                     }
                     break;

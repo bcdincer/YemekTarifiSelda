@@ -4,8 +4,18 @@ public class CreateRecipeDto
 {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string Ingredients { get; set; } = string.Empty;
-    public string Steps { get; set; } = string.Empty;
+    
+    // Yeni yapı: Liste olarak malzemeler ve adımlar
+    public List<string> Ingredients { get; set; } = new();
+    public List<string> Steps { get; set; } = new();
+    
+    // Backward compatibility için (eski string formatı)
+    [Obsolete("Use Ingredients list instead")]
+    public string IngredientsString { get; set; } = string.Empty;
+    
+    [Obsolete("Use Steps list instead")]
+    public string StepsString { get; set; } = string.Empty;
+    
     public int PrepTimeMinutes { get; set; }
     public int CookingTimeMinutes { get; set; }
     public int Servings { get; set; }

@@ -1,4 +1,5 @@
 using BackendApi.Application.Services;
+using BackendApi.Application.Services.AI;
 using BackendApi.Application.Validators;
 using BackendApi.Domain.Interfaces;
 using BackendApi.Infrastructure.Events;
@@ -7,6 +8,7 @@ using BackendApi.Infrastructure.Services;
 using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Microsoft.Extensions.Options;
 
 namespace BackendApi.Infrastructure.DependencyInjection;
 
@@ -77,11 +79,34 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMealPlanService, MealPlanService>();
         services.AddScoped<IShoppingListService, ShoppingListService>();
 
-        // AI Agent Service (will be implemented later)
-        // services.AddScoped<IAiAgentService, AiAgentService>();
+        // AI Configuration (Options Pattern)
+        services.Configure<AiConfiguration>(configuration.GetSection(AiConfiguration.SectionName));
+        // Fallback: Eğer section yoksa, eski formatı kullan
+        if (configuration.GetSection(AiConfiguration.SectionName).Exists() == false)
+        {
+            services.Configure<AiConfiguration>(options =>
+            {
+                options.Provider = configuration["AiProvider"] ?? "HuggingFace";
+                options.OpenAI.ApiKey = configuration["OpenAI:ApiKey"] ?? string.Empty;
+                options.OpenAI.ApiUrl = configuration["OpenAI:ApiUrl"] ?? "https://api.openai.com/v1/chat/completions";
+                options.OpenAI.Model = configuration["OpenAI:Model"] ?? "gpt-4o-mini";
+                options.OpenAI.Temperature = configuration.GetValue<double>("OpenAI:Temperature", 0.2);
+                options.OpenAI.MaxTokens = configuration.GetValue<int>("OpenAI:MaxTokens", 1000);
+                options.HuggingFace.ApiKey = configuration["HuggingFace:ApiKey"] ?? string.Empty;
+                options.HuggingFace.ApiUrl = configuration["HuggingFace:ApiUrl"] ?? "https://api-inference.huggingface.co/v1/chat/completions";
+                options.HuggingFace.Model = configuration["HuggingFace:Model"] ?? "meta-llama/Meta-Llama-3-8B-Instruct";
+                options.HuggingFace.Enabled = configuration.GetValue<bool>("HuggingFace:Enabled", true);
+                options.HuggingFace.Temperature = configuration.GetValue<double>("HuggingFace:Temperature", 0.3);
+                options.HuggingFace.MaxTokens = configuration.GetValue<int>("HuggingFace:MaxTokens", 1000);
+            });
+        }
 
-        // External Services (will be implemented later)
-        // services.AddScoped<IExternalService, SomeExternalService>();
+        // AI Ingredient Service
+        services.AddHttpClient<IAiIngredientService, AiIngredientService>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+        services.AddScoped<IAiIngredientService, AiIngredientService>();
 
         return services;
     }

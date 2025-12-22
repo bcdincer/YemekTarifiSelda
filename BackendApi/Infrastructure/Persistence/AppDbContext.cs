@@ -17,6 +17,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<MealPlanItem> MealPlanItems => Set<MealPlanItem>();
     public DbSet<ShoppingList> ShoppingLists => Set<ShoppingList>();
     public DbSet<ShoppingListItem> ShoppingListItems => Set<ShoppingListItem>();
+    public DbSet<RecipeIngredient> RecipeIngredients => Set<RecipeIngredient>();
+    public DbSet<RecipeStep> RecipeSteps => Set<RecipeStep>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -203,6 +205,33 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<ShoppingListItem>()
             .HasIndex(sli => sli.ShoppingListId);
+
+        // RecipeIngredient ilişkileri
+        modelBuilder.Entity<RecipeIngredient>()
+            .HasOne(ri => ri.Recipe)
+            .WithMany(r => r.Ingredients)
+            .HasForeignKey(ri => ri.RecipeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // RecipeStep ilişkileri
+        modelBuilder.Entity<RecipeStep>()
+            .HasOne(rs => rs.Recipe)
+            .WithMany(r => r.Steps)
+            .HasForeignKey(rs => rs.RecipeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Index'ler (performans için)
+        modelBuilder.Entity<RecipeIngredient>()
+            .HasIndex(ri => ri.RecipeId);
+
+        modelBuilder.Entity<RecipeIngredient>()
+            .HasIndex(ri => new { ri.RecipeId, ri.Order });
+
+        modelBuilder.Entity<RecipeStep>()
+            .HasIndex(rs => rs.RecipeId);
+
+        modelBuilder.Entity<RecipeStep>()
+            .HasIndex(rs => new { rs.RecipeId, rs.Order });
     }
 }
 

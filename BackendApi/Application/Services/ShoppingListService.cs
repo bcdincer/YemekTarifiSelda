@@ -100,7 +100,7 @@ public class ShoppingListService : IShoppingListService
             var servingsRatio = item.Servings / (double)recipe.Servings;
 
             // Malzemeleri parse et ve birleştir
-            var ingredients = ParseIngredients(recipe.Ingredients);
+            var ingredients = ParseIngredientsFromCollection(recipe.Ingredients);
             foreach (var ing in ingredients)
             {
                 var key = ing.Name.ToLowerInvariant();
@@ -219,6 +219,49 @@ public class ShoppingListService : IShoppingListService
         await _unitOfWork.SaveChangesAsync();
 
         return true;
+    }
+
+    private List<ParsedIngredient> ParseIngredientsFromCollection(ICollection<Domain.Entities.RecipeIngredient> ingredients)
+    {
+        var result = new List<ParsedIngredient>();
+
+        if (ingredients == null || !ingredients.Any())
+            return result;
+
+        foreach (var ingredient in ingredients.OrderBy(i => i.Order))
+        {
+            var name = ingredient.Name.Trim();
+            if (string.IsNullOrWhiteSpace(name))
+                continue;
+
+            // Basit parse: "2 adet domates" veya "500g un" gibi formatları destekle
+            var match = Regex.Match(name, @"^(\d+(?:[.,]\d+)?)\s*(\w+)?\s*(.+)$");
+            if (match.Success)
+            {
+                var quantity = double.Parse(match.Groups[1].Value.Replace(',', '.'));
+                var unit = match.Groups[2].Value.Trim();
+                var parsedName = match.Groups[3].Value.Trim();
+
+                result.Add(new ParsedIngredient
+                {
+                    Name = parsedName,
+                    Quantity = quantity,
+                    Unit = string.IsNullOrWhiteSpace(unit) ? null : unit
+                });
+            }
+            else
+            {
+                // Parse edilemezse direkt isim olarak ekle
+                result.Add(new ParsedIngredient
+                {
+                    Name = name,
+                    Quantity = 1,
+                    Unit = null
+                });
+            }
+        }
+
+        return result;
     }
 
     private List<ParsedIngredient> ParseIngredients(string ingredientsText)

@@ -13,9 +13,16 @@ public class Recipe
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     
-    // Malzemeler ve adımlar (JSON string olarak saklanabilir veya ayrı tablo)
-    public string Ingredients { get; set; } = string.Empty; // JSON veya virgülle ayrılmış
-    public string Steps { get; set; } = string.Empty; // JSON veya adım adım
+    // Malzemeler ve adımlar - 1-N ilişki
+    public ICollection<RecipeIngredient> Ingredients { get; set; } = new List<RecipeIngredient>();
+    public ICollection<RecipeStep> Steps { get; set; } = new List<RecipeStep>();
+    
+    // Backward compatibility için (eski veriler için)
+    [Obsolete("Use Ingredients collection instead")]
+    public string IngredientsString { get; set; } = string.Empty;
+    
+    [Obsolete("Use Steps collection instead")]
+    public string StepsString { get; set; } = string.Empty;
     
     // Süre bilgileri
     public int PrepTimeMinutes { get; set; } // Hazırlık süresi

@@ -16,7 +16,11 @@ public class HomeController : Controller
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        Converters = { new FrontendMvc.Models.Recipes.DifficultyJsonConverter() }
+        Converters = { 
+            new FrontendMvc.Models.Recipes.DifficultyJsonConverter(),
+            new FrontendMvc.Models.Recipes.IngredientsListConverter(),
+            new FrontendMvc.Models.Recipes.StepsListConverter()
+        }
     };
 
     public HomeController(ILogger<HomeController> logger, IHttpClientFactory httpClientFactory)

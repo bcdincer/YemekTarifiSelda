@@ -53,6 +53,90 @@
         #ingredientsList li {
             border-bottom-color: var(--c-border) !important;
         }
+    }
+
+    /* Numaralandırılmış malzemeler ve adımlar - Genel stiller (hem light hem dark mode için) */
+    .numbered-ingredient,
+    .numbered-step {
+        position: relative;
+        padding-left: 40px !important;
+        margin-bottom: 12px;
+        line-height: 1.6;
+    }
+    
+    .numbered-ingredient:last-child,
+    .numbered-step:last-child {
+        border-bottom: none !important;
+        margin-bottom: 0;
+    }
+    
+    .numbered-ingredient::before,
+    .numbered-step::before {
+        content: counter(item-counter);
+        counter-increment: item-counter;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 28px;
+        height: 28px;
+        background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+    }
+    
+    /* Dark mode için özel stiller */
+    [data-theme="dark"] .numbered-ingredient::before,
+    [data-theme="dark"] .numbered-step::before {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+    }
+    
+    [data-theme="dark"] .numbered-step {
+        border-bottom-color: var(--c-border) !important;
+    }
+    
+    .numbered-steps-container {
+        counter-reset: item-counter;
+    }
+    
+    .numbered-ingredients-container {
+        counter-reset: item-counter;
+    }
+    
+    /* Malzemeler ve Yapılış yan yana düzeni */
+    .recipe-section .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .recipe-section .col-lg-6,
+    .recipe-section .col-md-6 {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .recipe-section .bd.bgc-grey-50 {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Mobilde alt alta */
+    @@media (max-width: 768px) {
+        .recipe-section .col-md-6 {
+            margin-bottom: 20px;
+        }
+        
+        .recipe-section .col-md-6:last-child {
+            margin-bottom: 0;
+        }
+    }
         
         /* QR code container */
         #qrcode {
@@ -466,41 +550,67 @@
                         </div>
                     }
 
-                    <!-- Malzemeler -->
+                    <!-- Malzemeler ve Yapılış - Yan Yana -->
                     <div class="layer w-100 mB-30 recipe-section">
-                        <div class="peers fxw-nw ai-c mB-15">
-                            <div class="peer peer-greed">
-                                <h5 class="mB-0">
-                                    <i class="ti-shopping-cart c-blue-500"></i> Malzemeler
-                                </h5>
-                            </div>
-                            <div class="peer">
-                                <div class="d-flex ai-c gap-10" style="gap: 8px;">
-                                    <label class="fsz-sm c-grey-600 mB-0" for="servingsMultiplier">Kişi sayısı:</label>
-                                    <input type="number" id="servingsMultiplier" min="1" max="20" value="@Model.Servings" class="form-control form-control-sm" style="width: 70px; text-align: center;" onchange="adjustServings(this.value)">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetServings()" title="Sıfırla">
-                                        <i class="ti-reload"></i>
-                                    </button>
+                        <div class="row">
+                            <!-- Sol Kolon - Malzemeler -->
+                            <div class="col-lg-6 col-md-6 col-12 mB-20 mB-md-0">
+                                <div class="peers fxw-nw ai-c mB-15">
+                                    <div class="peer peer-greed">
+                                        <h5 class="mB-0">
+                                            <i class="ti-shopping-cart c-blue-500"></i> Malzemeler
+                                        </h5>
+                                    </div>
+                                    <div class="peer">
+                                        <div class="d-flex ai-c gap-10" style="gap: 8px; flex-wrap: wrap;">
+                                            <label class="fsz-sm c-grey-600 mB-0" for="servingsMultiplier">Kişi sayısı:</label>
+                                            <input type="number" id="servingsMultiplier" min="1" max="20" value="@Model.Servings" class="form-control form-control-sm" style="width: 70px; text-align: center;">
+                                            <div class="form-check d-flex ai-c" style="margin: 0; padding: 0;">
+                                                <input class="form-check-input" type="checkbox" id="useAiToggle" style="margin: 0; margin-right: 5px; cursor: pointer;" title="Yapay zeka ile hesapla">
+                                                <label class="form-check-label fsz-xs c-grey-600 mB-0" for="useAiToggle" style="cursor: pointer; white-space: nowrap;" title="Yapay zeka ile daha akıllı hesaplama">
+                                                    <i class="ti-brain" style="font-size: 14px;"></i> AI
+                                                </label>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-primary" id="calculateBtn" title="Malzemeleri Hesapla">
+                                                <i class="ti-calculator" style="margin-right: 4px;"></i> Hesapla
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" id="resetServingsBtn" title="Sıfırla">
+                                                <i class="ti-reload"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bd bgc-grey-50 p-20 bdrs-3 numbered-ingredients-container" style="height: 100%;">
+                                    <ul class="list-group" id="ingredientsList" style="list-style: none; padding: 0; margin: 0;">
+                                        @foreach (var ingredient in Model.Ingredients.Split(new[] { '\n', '\r', ',' }, StringSplitOptions.RemoveEmptyEntries).Where(i => !string.IsNullOrWhiteSpace(i)))
+                                        {
+                                            <li class="numbered-ingredient" data-original="@ingredient.Trim()" style="border-bottom: 1px solid #e0e0e0; padding: 8px 0;">@ingredient.Trim()</li>
+                                        }
+                                    </ul>
                                 </div>
                             </div>
-                        </div>
-                        <div class="bd bgc-grey-50 p-20 bdrs-3">
-                            <ul class="list-group" id="ingredientsList" style="list-style: none; padding: 0; margin: 0;">
-                                @foreach (var ingredient in Model.Ingredients.Split(new[] { '\n', '\r', ',' }, StringSplitOptions.RemoveEmptyEntries).Where(i => !string.IsNullOrWhiteSpace(i)))
-                                {
-                                    <li class="pY-5" data-original="@ingredient.Trim()" style="border-bottom: 1px solid #e0e0e0; padding: 8px 0;">@ingredient.Trim()</li>
-                                }
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Yapılış -->
-                    <div class="layer w-100 mB-30">
-                        <h5 class="mB-15">
-                            <i class="ti-list c-green-500"></i> Yapılış
-                        </h5>
-                        <div class="bd bgc-grey-50 p-20 bdrs-3">
-                            <pre class="m-0 fsz-sm" style="white-space: pre-wrap; font-family: inherit;">@Model.Steps</pre>
+                            
+                            <!-- Sağ Kolon - Yapılış -->
+                            <div class="col-lg-6 col-md-6 col-12">
+                                <h5 class="mB-15">
+                                    <i class="ti-list c-green-500"></i> Yapılış
+                                </h5>
+                                <div class="bd bgc-grey-50 p-20 bdrs-3 numbered-steps-container" style="height: 100%;">
+                                    @{
+                                        var steps = Model.Steps.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                                            .Where(s => !string.IsNullOrWhiteSpace(s))
+                                            .Select(s => s.Trim())
+                                            .ToList();
+                                    }
+                                    @for (int i = 0; i < steps.Count; i++)
+                                    {
+                                        var isLast = i == steps.Count - 1;
+                                        <div class="numbered-step" style="margin-bottom: @(isLast ? "0" : "16px"); padding-bottom: @(isLast ? "0" : "12px"); border-bottom: @(isLast ? "none" : "1px solid #e0e0e0");">
+                                            @steps[i]
+                                        </div>
+                                    }
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -866,6 +976,27 @@
         cursor: not-allowed;
     }
 
+    /* Hesapla Butonu Stilleri */
+    #calculateBtn {
+        transition: all 0.3s ease;
+        font-weight: 500;
+        min-width: 100px;
+    }
+
+    #calculateBtn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    }
+
+    #calculateBtn:disabled {
+        opacity: 0.7;
+        cursor: wait;
+    }
+
+    #calculateBtn i[style*="animation"] {
+        display: inline-block;
+    }
+
         #likeButtonStat:hover,
         #likeButtonStat:focus,
         #likeButtonStat:active {
@@ -903,12 +1034,201 @@
     <!-- QR Code Library -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     
+    <!-- Servings Calculator - Herkes için erişilebilir -->
+    <script>
+        // API Base URL - Global
+        const apiBaseUrl = window.API_BASE_URL || 'https://localhost:7016';
+        
+        // Servings Calculator
+        const originalServings = @Model.Servings;
+        let originalIngredients = [];
+
+        function initServingsCalculator() {
+            originalIngredients = Array.from(document.querySelectorAll('#ingredientsList li')).map(li => ({
+                element: li,
+                text: li.getAttribute('data-original') || li.textContent.trim()
+            }));
+        }
+
+        // Global scope'a ekle
+        window.calculateServings = async function() {
+            const input = document.getElementById('servingsMultiplier');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const newServings = parseFloat(input.value);
+            
+            if (!newServings || newServings < 1 || newServings > 20) {
+                alert('Lütfen geçerli bir kişi sayısı girin (1-20 arası)');
+                input.focus();
+                return;
+            }
+            
+            if (newServings === originalServings) {
+                // Kişi sayısı değişmemişse uyarı ver
+                if (confirm('Kişi sayısı değişmedi. Yine de hesaplamak istiyor musunuz?')) {
+                    // Kullanıcı onayladıysa devam et
+                } else {
+                    return;
+                }
+            }
+            
+            // Loading state
+            const originalBtnText = calculateBtn.innerHTML;
+            calculateBtn.disabled = true;
+            calculateBtn.innerHTML = '<i class="ti-reload" style="animation: spin 1s linear infinite; margin-right: 4px; display: inline-block;"></i> Hesaplanıyor...';
+            input.disabled = true;
+            
+            try {
+                await adjustServings(newServings);
+                // Başarı mesajı
+                const useAi = document.getElementById('useAiToggle')?.checked || false;
+                const method = useAi ? 'AI ile' : 'matematiksel olarak';
+                console.log(`Malzemeler ${method} başarıyla güncellendi`);
+            } catch (error) {
+                console.error('Error adjusting servings:', error);
+                alert('Malzemeler hesaplanırken bir hata oluştu. Lütfen tekrar deneyin.');
+            } finally {
+                calculateBtn.disabled = false;
+                calculateBtn.innerHTML = originalBtnText;
+                input.disabled = false;
+            }
+        };
+        
+        // Global scope'a ekle
+        window.resetServings = function() {
+            if (!originalIngredients.length) initServingsCalculator();
+            document.getElementById('servingsMultiplier').value = originalServings;
+            originalIngredients.forEach(({ element, text }) => {
+                element.textContent = text;
+            });
+        };
+        
+        async function adjustServings(newServings) {
+            if (!originalIngredients.length) initServingsCalculator();
+            
+            const newServingsNum = parseFloat(newServings);
+            const useAi = document.getElementById('useAiToggle')?.checked || false;
+            
+            // AI kullanımı seçilmişse
+            if (useAi) {
+                try {
+                    const ingredients = originalIngredients.map(ing => ing.text);
+                    
+                    const response = await fetch(`${apiBaseUrl}/api/recipes/adjust-ingredients`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            ingredients: ingredients,
+                            originalServings: originalServings,
+                            newServings: newServingsNum
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.ingredients && data.ingredients.length === originalIngredients.length) {
+                            // AI'dan gelen sonuçları kullan
+                            originalIngredients.forEach(({ element }, index) => {
+                                element.textContent = data.ingredients[index];
+                            });
+                            return;
+                        }
+                    }
+                    
+                    // AI başarısız olursa fallback kullan
+                    console.warn('AI adjustment failed, using fallback calculation');
+                    adjustServingsFallback(newServingsNum);
+                } catch (error) {
+                    console.error('AI adjustment error:', error);
+                    // Hata durumunda fallback kullan
+                    adjustServingsFallback(newServingsNum);
+                }
+            } else {
+                // Normal matematiksel hesaplama
+                adjustServingsFallback(newServingsNum);
+            }
+        }
+        
+        function adjustServingsFallback(newServings) {
+            const multiplier = parseFloat(newServings) / originalServings;
+            
+            originalIngredients.forEach(({ element, text }) => {
+                let updatedText = text;
+                
+                // Türkçe kesir ifadelerini sayıya çevir
+                const fractionMap = {
+                    'yarım': 0.5,
+                    'yarı': 0.5,
+                    'çeyrek': 0.25,
+                    'üçte bir': 1/3,
+                    'üçte iki': 2/3,
+                    'dörtte bir': 0.25,
+                    'dörtte üç': 0.75
+                };
+                
+                // Önce kesir ifadelerini kontrol et
+                for (const [fraction, value] of Object.entries(fractionMap)) {
+                    const regex = new RegExp(`(${fraction})\\s+([a-zA-ZğüşıöçĞÜŞİÖÇ\\s]+)`, 'gi');
+                    updatedText = updatedText.replace(regex, (match, frac, unit) => {
+                        const newValue = (value * multiplier).toFixed(2);
+                        // Eğer sonuç 1'e yakınsa tam sayı olarak göster
+                        if (Math.abs(newValue - 1) < 0.01) {
+                            return `1 ${unit.trim()}`;
+                        } else if (Math.abs(newValue - 0.5) < 0.01) {
+                            return `yarım ${unit.trim()}`;
+                        } else {
+                            return `${newValue} ${unit.trim()}`;
+                        }
+                    });
+                }
+                
+                // Sayısal değerleri bul ve çarp
+                updatedText = updatedText.replace(/(\d+\.?\d*)\s+([a-zA-ZğüşıöçĞÜŞİÖÇ\s]+?)(?=\s|$|,|\.)/g, (match, num, unit) => {
+                    const numValue = parseFloat(num);
+                    const newNum = numValue * multiplier;
+                    
+                    // Sonucu formatla
+                    if (newNum % 1 === 0) {
+                        return `${Math.round(newNum)} ${unit.trim()}`;
+                    } else if (newNum < 1) {
+                        return `${newNum.toFixed(2).replace(/\.?0+$/, '')} ${unit.trim()}`;
+                    } else {
+                        return `${newNum.toFixed(1).replace(/\.?0+$/, '')} ${unit.trim()}`;
+                    }
+                });
+                
+                element.textContent = updatedText;
+            });
+        }
+        
+        // Sayfa yüklendiğinde event listener'ları ekle
+        document.addEventListener('DOMContentLoaded', function() {
+            initServingsCalculator();
+            
+            // Buton event listener'larını ekle
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resetBtn = document.getElementById('resetServingsBtn');
+            
+            if (calculateBtn) {
+                calculateBtn.addEventListener('click', async function() {
+                    await window.calculateServings();
+                });
+            }
+            
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function() {
+                    window.resetServings();
+                });
+            }
+        });
+    </script>
+    
     @if (User.Identity?.IsAuthenticated == true)
     {
         var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
         <script>
             const recipeId = @Model.Id;
-            const apiBaseUrl = window.API_BASE_URL || 'https://localhost:7016';
 
             // Rating sistemi
             let currentUserRating = null;
@@ -1464,38 +1784,6 @@
                     prompt('Linki kopyalamak için Ctrl+C kullanın:', text);
                 }
                 document.body.removeChild(textArea);
-            }
-
-            // Servings Calculator
-            const originalServings = @Model.Servings;
-            let originalIngredients = [];
-
-            function initServingsCalculator() {
-                originalIngredients = Array.from(document.querySelectorAll('#ingredientsList li')).map(li => ({
-                    element: li,
-                    text: li.getAttribute('data-original') || li.textContent.trim()
-                }));
-            }
-
-            function adjustServings(newServings) {
-                if (!originalIngredients.length) initServingsCalculator();
-                const multiplier = parseFloat(newServings) / originalServings;
-                originalIngredients.forEach(({ element, text }) => {
-                    // Try to find numbers in the ingredient text and multiply them
-                    const updatedText = text.replace(/(\d+\.?\d*)\s*([a-zA-ZğüşıöçĞÜŞİÖÇ]+)/g, (match, num, unit) => {
-                        const newNum = (parseFloat(num) * multiplier).toFixed(1).replace(/\.0$/, '');
-                        return `${newNum} ${unit}`;
-                    });
-                    element.textContent = updatedText || text;
-                });
-            }
-
-            function resetServings() {
-                if (!originalIngredients.length) initServingsCalculator();
-                document.getElementById('servingsMultiplier').value = originalServings;
-                originalIngredients.forEach(({ element, text }) => {
-                    element.textContent = text;
-                });
             }
 
             // Collection System
@@ -2479,7 +2767,6 @@
                     };
                 }
                 
-                initServingsCalculator();
                 checkAuthentication();
                 
                 // Sadece giriş yapmış kullanıcılar için yükle

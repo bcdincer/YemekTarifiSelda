@@ -621,6 +621,159 @@
     [data-theme="dark"] .recipe-create-container .layers {
         color: #e0e0e0;
     }
+
+    /* Dinamik Liste Stilleri */
+    .dynamic-list {
+        margin-top: 10px;
+    }
+
+    .dynamic-list-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+
+    .dynamic-list-item:hover {
+        background: #e9ecef;
+        border-color: #dee2e6;
+    }
+
+    [data-theme="dark"] .dynamic-list-item {
+        background: #2d2d3f;
+        border-color: #3d3d4f;
+    }
+
+    [data-theme="dark"] .dynamic-list-item:hover {
+        background: #3d3d4f;
+        border-color: #4d4d5f;
+    }
+
+    .dynamic-list-item.dragging {
+        opacity: 0.5;
+        transform: scale(0.98);
+    }
+
+    .dynamic-list-item .drag-handle {
+        cursor: move;
+        color: #6c757d;
+        font-size: 18px;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .dynamic-list-item .drag-handle:hover {
+        color: #495057;
+    }
+
+    [data-theme="dark"] .dynamic-list-item .drag-handle {
+        color: #a0a0b0;
+    }
+
+    [data-theme="dark"] .dynamic-list-item .drag-handle:hover {
+        color: #e0e0e0;
+    }
+
+    .dynamic-list-item .item-number {
+        font-weight: 600;
+        color: #495057;
+        min-width: 24px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    [data-theme="dark"] .dynamic-list-item .item-number {
+        color: #e0e0e0;
+    }
+
+    .dynamic-list-item .item-input {
+        flex: 1;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+
+    .dynamic-list-item .item-input:focus {
+        border-color: #818cf8;
+        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
+        outline: none;
+    }
+
+    [data-theme="dark"] .dynamic-list-item .item-input {
+        background: #1e1e2e;
+        border-color: #4d4d5f;
+        color: #e0e0e0;
+    }
+
+    [data-theme="dark"] .dynamic-list-item .item-input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .dynamic-list-item .item-remove {
+        cursor: pointer;
+        color: #dc3545;
+        font-size: 18px;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+
+    .dynamic-list-item .item-remove:hover {
+        color: #c82333;
+        transform: scale(1.1);
+    }
+
+    .dynamic-list-add-btn {
+        margin-top: 10px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .dynamic-list-add-btn:hover {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    [data-theme="dark"] .dynamic-list-add-btn {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+
+    [data-theme="dark"] .dynamic-list-add-btn:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    }
+
+    .dynamic-list-empty {
+        text-align: center;
+        padding: 20px;
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    [data-theme="dark"] .dynamic-list-empty {
+        color: #a0a0b0;
+    }
 </style>
 
 <div class="recipe-create-container">
@@ -696,11 +849,16 @@
                                         </div>
 
                                         <div class="layer w-100 mB-15">
-                                            <label asp-for="Ingredients" class="form-label fw-600">
-                                                <i class="ti-shopping-cart mR-5"></i> Malzemeler *
-                                            </label>
-                                            <textarea asp-for="Ingredients" class="form-control" rows="5" required
-                                                      placeholder="Her malzemeyi ayrı satıra yazın&#10;Örn:&#10;500g tavuk göğsü&#10;2 su bardağı pilav&#10;1 adet soğan"></textarea>
+                                            <div class="d-flex justify-content-between align-items-center mB-10">
+                                                <label class="form-label fw-600 mB-0">
+                                                    <i class="ti-shopping-cart mR-5"></i> Malzemeler *
+                                                </label>
+                                                <button type="button" class="dynamic-list-add-btn" onclick="addIngredientItem()">
+                                                    <i class="ti-plus"></i> Malzeme Ekle
+                                                </button>
+                                            </div>
+                                            <div id="ingredientsList" class="dynamic-list"></div>
+                                            <textarea asp-for="Ingredients" id="Ingredients" name="Ingredients" class="d-none" required></textarea>
                                             <span asp-validation-for="Ingredients" class="text-danger fsz-sm"></span>
                                         </div>
 
@@ -746,11 +904,16 @@
                                         </div>
 
                                         <div class="layer w-100 mB-15">
-                                            <label asp-for="Steps" class="form-label fw-600">
-                                                <i class="ti-list mR-5"></i> Yapılış *
-                                            </label>
-                                            <textarea asp-for="Steps" class="form-control" rows="5" required
-                                                      placeholder="Adım adım yapılışını yazın&#10;Örn:&#10;1. Tavuğu küp küp doğrayın&#10;2. Soğanı ince ince doğrayın&#10;3. Tencereye yağ ekleyin ve kavurun"></textarea>
+                                            <div class="d-flex justify-content-between align-items-center mB-10">
+                                                <label class="form-label fw-600 mB-0">
+                                                    <i class="ti-list mR-5"></i> Yapılış *
+                                                </label>
+                                                <button type="button" class="dynamic-list-add-btn" onclick="addStepItem()">
+                                                    <i class="ti-plus"></i> Adım Ekle
+                                                </button>
+                                            </div>
+                                            <div id="stepsList" class="dynamic-list"></div>
+                                            <textarea asp-for="Steps" id="Steps" name="Steps" class="d-none" required></textarea>
                                             <span asp-validation-for="Steps" class="text-danger fsz-sm"></span>
                                         </div>
 
@@ -847,6 +1010,141 @@
                     }
                 });
             }
+
+            // Dinamik Liste Fonksiyonları
+            let ingredientCounter = 0;
+            let stepCounter = 0;
+            let draggedElement = null;
+
+            function addIngredientItem(value = '') {
+                const list = document.getElementById('ingredientsList');
+                const item = createListItem('ingredient', ingredientCounter++, value);
+                list.appendChild(item);
+                updateIngredientsTextarea();
+                makeSortable(list);
+            }
+
+            function addStepItem(value = '') {
+                const list = document.getElementById('stepsList');
+                const item = createListItem('step', stepCounter++, value);
+                list.appendChild(item);
+                updateStepsTextarea();
+                makeSortable(list);
+            }
+
+            function createListItem(type, index, value = '') {
+                const item = document.createElement('div');
+                item.className = 'dynamic-list-item';
+                item.dataset.index = index;
+                item.draggable = true;
+
+                const dragHandle = document.createElement('div');
+                dragHandle.className = 'drag-handle';
+                dragHandle.innerHTML = '<i class="ti-menu"></i>';
+
+                const number = document.createElement('div');
+                number.className = 'item-number';
+                number.textContent = (document.querySelectorAll(`#${type}sList .dynamic-list-item`).length + 1) + '.';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'item-input';
+                input.value = value;
+                input.placeholder = type === 'ingredient' ? 'Örn: 500g tavuk göğsü' : 'Örn: Tavuğu küp küp doğrayın';
+                input.addEventListener('input', () => {
+                    if (type === 'ingredient') {
+                        updateIngredientsTextarea();
+                    } else {
+                        updateStepsTextarea();
+                    }
+                    updateItemNumbers(type);
+                });
+
+                const removeBtn = document.createElement('div');
+                removeBtn.className = 'item-remove';
+                removeBtn.innerHTML = '<i class="ti-close"></i>';
+                removeBtn.onclick = () => {
+                    item.remove();
+                    if (type === 'ingredient') {
+                        updateIngredientsTextarea();
+                    } else {
+                        updateStepsTextarea();
+                    }
+                    updateItemNumbers(type);
+                };
+
+                item.appendChild(dragHandle);
+                item.appendChild(number);
+                item.appendChild(input);
+                item.appendChild(removeBtn);
+
+                // Drag & Drop event listeners
+                item.addEventListener('dragstart', (e) => {
+                    draggedElement = item;
+                    item.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    draggedElement = null;
+                });
+
+                item.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (draggedElement && draggedElement !== item) {
+                        const rect = item.getBoundingClientRect();
+                        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+                        item.parentNode.insertBefore(draggedElement, next ? item.nextSibling : item);
+                        updateItemNumbers(type);
+                        if (type === 'ingredient') {
+                            updateIngredientsTextarea();
+                        } else {
+                            updateStepsTextarea();
+                        }
+                    }
+                });
+
+                return item;
+            }
+
+            function updateItemNumbers(type) {
+                const items = document.querySelectorAll(`#${type}sList .dynamic-list-item`);
+                items.forEach((item, index) => {
+                    item.querySelector('.item-number').textContent = (index + 1) + '.';
+                });
+            }
+
+            function updateIngredientsTextarea() {
+                const items = document.querySelectorAll('#ingredientsList .item-input');
+                const values = Array.from(items).map(input => input.value.trim()).filter(v => v);
+                document.getElementById('Ingredients').value = values.join('\n');
+            }
+
+            function updateStepsTextarea() {
+                const items = document.querySelectorAll('#stepsList .item-input');
+                const values = Array.from(items).map(input => input.value.trim()).filter(v => v);
+                document.getElementById('Steps').value = values.join('\n');
+            }
+
+            function makeSortable(list) {
+                // Sortable functionality is handled by drag & drop event listeners
+            }
+
+            // Form submit edilmeden önce textarea'ları güncelle
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    updateIngredientsTextarea();
+                    updateStepsTextarea();
+                });
+            }
+
+            // Sayfa yüklendiğinde varsayılan olarak bir boş item ekle
+            document.addEventListener('DOMContentLoaded', () => {
+                addIngredientItem();
+                addStepItem();
+            });
         </script>
     }
 </div>

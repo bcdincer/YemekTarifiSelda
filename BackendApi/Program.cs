@@ -269,6 +269,38 @@ app.MapPost("/api/recipes/{id:int}/view", async (int id, IRecipeService service)
     return Results.Ok();
 });
 
+// AI ile malzeme miktarı ayarlama endpoint'i
+app.MapPost("/api/recipes/adjust-ingredients", async (AdjustIngredientsRequestDto request, IAiIngredientService aiService) =>
+{
+    if (request.Ingredients == null || !request.Ingredients.Any())
+    {
+        return Results.BadRequest(new { error = "Malzeme listesi gereklidir." });
+    }
+
+    if (request.OriginalServings <= 0 || request.NewServings <= 0)
+    {
+        return Results.BadRequest(new { error = "Kişi sayıları 0'dan büyük olmalıdır." });
+    }
+
+    try
+    {
+        var adjustedIngredients = await aiService.AdjustIngredientsAsync(
+            request.Ingredients,
+            request.OriginalServings,
+            request.NewServings
+        );
+
+        return Results.Ok(new { ingredients = adjustedIngredients });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: 500
+        );
+    }
+});
+
 // Rating endpoint'leri
 app.MapPost("/api/recipes/{id:int}/rate", async (int id, int rating, HttpContext httpContext, IRatingService service) =>
 {
@@ -437,8 +469,8 @@ app.MapGet("/api/users/liked-recipes/search", async (string? q, HttpContext http
             .Where(r =>
                 r.Title.ToLower().Contains(searchTerm) ||
                 (r.Description != null && r.Description.ToLower().Contains(searchTerm)) ||
-                (r.Ingredients != null && r.Ingredients.ToLower().Contains(searchTerm)) ||
-                (r.Steps != null && r.Steps.ToLower().Contains(searchTerm)) ||
+                (r.Ingredients != null && r.Ingredients.Any(i => i.Name.ToLower().Contains(searchTerm))) ||
+                (r.Steps != null && r.Steps.Any(s => s.Description.ToLower().Contains(searchTerm))) ||
                 (r.Category != null && r.Category.Name.ToLower().Contains(searchTerm)))
             .ToList();
     }

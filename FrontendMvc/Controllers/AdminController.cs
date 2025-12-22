@@ -29,7 +29,11 @@ public class AdminController : Controller
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        Converters = { new FrontendMvc.Models.Recipes.DifficultyJsonConverter() }
+        Converters = { 
+            new FrontendMvc.Models.Recipes.DifficultyJsonConverter(),
+            new FrontendMvc.Models.Recipes.IngredientsListConverter(),
+            new FrontendMvc.Models.Recipes.StepsListConverter()
+        }
     };
 
     // Dashboard
@@ -168,13 +172,28 @@ public class AdminController : Controller
         }
         // Eğer model.ImageUrl doluysa (URL input'undan geliyorsa), onu kullan (zaten model'de var)
 
+        // Malzemeleri ve adımları string'den listeye çevir
+        var ingredientsList = string.IsNullOrWhiteSpace(model.Ingredients)
+            ? new List<string>()
+            : model.Ingredients.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(i => i.Trim())
+                .Where(i => !string.IsNullOrWhiteSpace(i))
+                .ToList();
+
+        var stepsList = string.IsNullOrWhiteSpace(model.Steps)
+            ? new List<string>()
+            : model.Steps.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .ToList();
+
         // RecipeViewModel'den CreateRecipeDto formatına mapping yap
         var updateDto = new
         {
             Title = model.Title ?? string.Empty,
             Description = model.Description ?? string.Empty,
-            Ingredients = model.Ingredients ?? string.Empty,
-            Steps = model.Steps ?? string.Empty,
+            Ingredients = ingredientsList,
+            Steps = stepsList,
             PrepTimeMinutes = model.PrepTimeMinutes,
             CookingTimeMinutes = model.CookingTimeMinutes,
             Servings = model.Servings,

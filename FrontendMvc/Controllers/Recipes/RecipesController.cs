@@ -15,7 +15,11 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        Converters = { new FrontendMvc.Models.Recipes.DifficultyJsonConverter() }
+        Converters = { 
+            new FrontendMvc.Models.Recipes.DifficultyJsonConverter(),
+            new FrontendMvc.Models.Recipes.IngredientsListConverter(),
+            new FrontendMvc.Models.Recipes.StepsListConverter()
+        }
     };
 
     public async Task<IActionResult> Index(int? categoryId, string? search, string? sortBy)
@@ -177,13 +181,28 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
 
         // RecipeViewModel'den CreateRecipeDto formatına mapping yap
         // Backend API PascalCase bekliyor (PropertyNamingPolicy = null)
+        // Malzemeleri ve adımları string'den listeye çevir
+        var ingredientsList = string.IsNullOrWhiteSpace(model.Ingredients)
+            ? new List<string>()
+            : model.Ingredients.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(i => i.Trim())
+                .Where(i => !string.IsNullOrWhiteSpace(i))
+                .ToList();
+
+        var stepsList = string.IsNullOrWhiteSpace(model.Steps)
+            ? new List<string>()
+            : model.Steps.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .ToList();
+
         // Anonymous object kullanarak JSON serialization otomatik olarak PascalCase kullanır (PropertyNamingPolicy = null ayarı sayesinde)
         var createDto = new
         {
             Title = model.Title ?? string.Empty,
             Description = model.Description ?? string.Empty,
-            Ingredients = model.Ingredients ?? string.Empty,
-            Steps = model.Steps ?? string.Empty,
+            Ingredients = ingredientsList,
+            Steps = stepsList,
             PrepTimeMinutes = model.PrepTimeMinutes,
             CookingTimeMinutes = model.CookingTimeMinutes,
             Servings = model.Servings,
