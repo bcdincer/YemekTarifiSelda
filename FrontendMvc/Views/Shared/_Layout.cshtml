@@ -347,8 +347,8 @@
                             @if (SignInManager.IsSignedIn(User))
                             {
                                 <li>
-                                    <a asp-controller="Recipes" asp-action="Create" class="btn btn-primary btn-sm" style="color: white; padding: 8px 16px; margin: 0;">
-                                        <i class="ti-plus"></i> TARIF EKLE
+                                    <a asp-controller="Recipes" asp-action="Create" class="tarif-ekle-btn">
+                                        <i class="ti-plus mR-5"></i> TARIF EKLE
                                     </a>
                                 </li>
                                 @if (User.IsInRole("Admin"))
@@ -517,6 +517,59 @@
     </script>
 
     <style>
+        /* TARIF EKLE Butonu - Zarif ve Modern */
+        .tarif-ekle-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border: none !important;
+            color: white !important;
+            padding: 10px 20px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.25) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 0 !important;
+            letter-spacing: 0.3px;
+            line-height: 1.4;
+        }
+        
+        .tarif-ekle-btn i {
+            font-size: 14px;
+            margin-right: 6px;
+        }
+        
+        .tarif-ekle-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 5px 18px rgba(102, 126, 234, 0.35) !important;
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+            color: white !important;
+            text-decoration: none !important;
+        }
+        
+        .tarif-ekle-btn:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25) !important;
+        }
+        
+        .tarif-ekle-btn:focus {
+            outline: none !important;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.25), 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+        }
+        
+        [data-theme="dark"] .tarif-ekle-btn {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%) !important;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        [data-theme="dark"] .tarif-ekle-btn:hover {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%) !important;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.4) !important;
+        }
+        
         @@keyframes slideInRight {
             from {
                 transform: translateX(100%);

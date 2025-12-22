@@ -3,83 +3,105 @@
 <script>
     // Configure jQuery validation to ONLY validate forms with data-val attributes
     // This prevents validation from interfering with navigation forms, logout, language switch, etc.
-    (function($) {
-        // Wait for jQuery and jQuery validation to be fully loaded
-        if (typeof $ === 'undefined') {
-            console.warn('jQuery not loaded');
-            return;
-        }
-        
-        // Wait for document ready and validation to be available
-        $(document).ready(function() {
-            // Check if validator is available
-            if (typeof $.validator === 'undefined') {
-                console.warn('jQuery Validation not loaded');
+    (function() {
+        // Wait for all scripts to load
+        function initValidation() {
+            // Check if jQuery is loaded
+            if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
+                setTimeout(initValidation, 50);
                 return;
             }
             
-            // Set default ignore pattern - only validate forms with validation attributes
-            try {
-                $.validator.setDefaults({
-                    ignore: ":not([data-val]):not([data-val-required]):not([data-val-email]):not([data-val-length]):not([data-val-range]):not([data-val-regex]):not([data-val-equalto]):not([data-val-remote])"
-                });
-            } catch (e) {
-                console.warn('Error setting validator defaults:', e);
+            var $ = jQuery;
+            
+            // Check if validator is available
+            if (typeof $.validator === 'undefined' || !$.validator || !$.validator.setDefaults) {
+                setTimeout(initValidation, 50);
+                return;
             }
             
-            // Remove validation from forms that shouldn't be validated
-            try {
-                // Remove validation from language forms
-                $('#langFormTr, #langFormEn').each(function() {
-                    var $form = $(this);
-                    if ($form.length) {
-                        try {
-                            if ($form.data('validator')) {
-                                $form.removeData('validator');
-                            }
-                            $form.off('submit.validate');
-                        } catch (e) {
-                            console.warn('Error removing validation from form:', e);
-                        }
-                    }
-                });
-                
-                // Remove validation from any form with novalidate attribute
-                $('form[novalidate]').each(function() {
-                    var $form = $(this);
-                    if ($form.length) {
-                        try {
-                            if ($form.data('validator')) {
-                                $form.removeData('validator');
-                            }
-                            $form.off('submit.validate');
-                        } catch (e) {
-                            console.warn('Error removing validation from form:', e);
-                        }
-                    }
-                });
-            } catch (e) {
-                console.warn('Error processing forms:', e);
-            }
-        });
-        
-        // Prevent validation from being attached to non-validation forms
-        $(document).on('submit', 'form:not([data-val]):not([data-val-required]):not([data-val-email]):not([data-val-length]):not([data-val-range]):not([data-val-regex]):not([data-val-equalto]):not([data-val-remote])', function(e) {
-            var $form = $(this);
-            if (!$form.length) return true;
-            
-            // Only skip validation if form has no validation attributes at all
-            try {
-                if (!$form.find('[data-val]').length && !$form.find('[data-val-required]').length) {
-                    if ($form.data('validator')) {
-                        $form.removeData('validator');
-                    }
-                    return true; // Allow form to submit
+            // Wait for document ready
+            $(document).ready(function() {
+                // Double-check validator is available
+                if (typeof $.validator === 'undefined' || !$.validator || !$.validator.setDefaults) {
+                    return;
                 }
-            } catch (e) {
-                console.warn('Error checking form validation:', e);
-                return true; // Allow form to submit on error
-            }
-        });
-    })(jQuery);
+                
+                // Set default ignore pattern - only validate forms with validation attributes
+                try {
+                    $.validator.setDefaults({
+                        ignore: ":not([data-val]):not([data-val-required]):not([data-val-email]):not([data-val-length]):not([data-val-range]):not([data-val-regex]):not([data-val-equalto]):not([data-val-remote])"
+                    });
+                } catch (e) {
+                    // Silently ignore
+                }
+                
+                // Remove validation from forms that shouldn't be validated
+                try {
+                    // Remove validation from language forms
+                    $('#langFormTr, #langFormEn').each(function() {
+                        try {
+                            var $form = $(this);
+                            if ($form && $form.length) {
+                                var validator = $form.data('validator');
+                                if (validator) {
+                                    $form.removeData('validator');
+                                }
+                                $form.off('submit.validate');
+                            }
+                        } catch (e) {
+                            // Silently ignore
+                        }
+                    });
+                    
+                    // Remove validation from any form with novalidate attribute
+                    $('form[novalidate]').each(function() {
+                        try {
+                            var $form = $(this);
+                            if ($form && $form.length) {
+                                var validator = $form.data('validator');
+                                if (validator) {
+                                    $form.removeData('validator');
+                                }
+                                $form.off('submit.validate');
+                            }
+                        } catch (e) {
+                            // Silently ignore
+                        }
+                    });
+                } catch (e) {
+                    // Silently ignore
+                }
+            });
+            
+            // Prevent validation from being attached to non-validation forms
+            $(document).on('submit', 'form:not([data-val]):not([data-val-required]):not([data-val-email]):not([data-val-length]):not([data-val-range]):not([data-val-regex]):not([data-val-equalto]):not([data-val-remote])', function(e) {
+                try {
+                    var $form = $(this);
+                    if (!$form || !$form.length) return true;
+                    
+                    // Only skip validation if form has no validation attributes at all
+                    if (!$form.find('[data-val]').length && !$form.find('[data-val-required]').length) {
+                        var validator = $form.data('validator');
+                        if (validator) {
+                            $form.removeData('validator');
+                        }
+                        return true; // Allow form to submit
+                    }
+                } catch (e) {
+                    // Silently ignore errors and allow form submission
+                    return true;
+                }
+            });
+        }
+        
+        // Start initialization after a short delay to ensure scripts are loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(initValidation, 100);
+            });
+        } else {
+            setTimeout(initValidation, 100);
+        }
+    })();
 </script>

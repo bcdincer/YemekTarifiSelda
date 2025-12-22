@@ -848,34 +848,52 @@ h1, h2, h3, h4, h5, h6 {
   // Light grey backgrounds - make them darker in dark mode
   .bgc-grey-50,
   .bgc-grey-100 {
-    background-color: color-mix(in srgb, var(--c-bkg-card) 90%, var(--c-bkg-body)) !important;
+    background-color: var(--c-bkg-body) !important;
     border-color: var(--c-border) !important;
   }
   
   .bgc-grey-200 {
-    background-color: color-mix(in srgb, var(--c-bkg-card) 85%, var(--c-border)) !important;
+    background-color: var(--c-bkg-card) !important;
     border-color: var(--c-border) !important;
   }
   
   // Recipe details page specific - darker info boxes and containers
   // Override inline styles with !important for dark mode
+  .bd.bgc-grey-50,
+  button.bd.bgc-grey-50,
+  .bd.bgc-grey-50.bdrs-3,
   .bd.bgc-grey-50[style*="background"],
-  button.bd.bgc-grey-50[style*="background"],
-  .bd.bgc-grey-50.bdrs-3[style*="background"] {
-    background-color: color-mix(in srgb, var(--c-bkg-card) 85%, var(--c-bkg-body)) !important;
+  button.bd.bgc-grey-50[style*="background"] {
+    background-color: var(--c-bkg-body) !important;
     border-color: var(--c-border) !important;
     
     &:hover {
-      background-color: color-mix(in srgb, var(--c-bkg-card) 75%, var(--c-bkg-body)) !important;
+      background-color: var(--c-bkg-card) !important;
     }
   }
   
   // Ingredients and steps containers
   .bd.bgc-grey-50.p-20,
   .bd.bgc-grey-50.p-15 {
-    background-color: color-mix(in srgb, var(--c-bkg-card) 85%, var(--c-bkg-body)) !important;
+    background-color: var(--c-bkg-body) !important;
     border-color: var(--c-border) !important;
     color: var(--c-text-base) !important;
+  }
+  
+  // Püf Noktaları ve Alternatif Malzemeler bölümleri
+  .bd.bgc-yellow-50,
+  .bd.bgc-orange-50 {
+    background-color: var(--c-bkg-body) !important;
+    border-color: var(--c-border) !important;
+    color: var(--c-text-base) !important;
+  }
+  
+  // Inline style'lı açık renkli alanlar
+  [style*="background-color: #fafafa"],
+  [style*="background: #fafafa"],
+  [style*="background-color: #f5f5f5"],
+  [style*="background: #f5f5f5"] {
+    background-color: var(--c-bkg-body) !important;
   }
   
   // Text areas - better readability
@@ -968,6 +986,43 @@ h1, h2, h3, h4, h5, h6 {
     background-color: var(--c-bkg-card) !important;
     border-color: var(--c-border) !important;
     color: var(--c-text-base) !important;
+  }
+  
+  // Main navigation menu (üst menü)
+  .sticky-header {
+    background-color: var(--c-bkg-card) !important;
+  }
+  
+  .main-navbar {
+    background-color: var(--c-bkg-card) !important;
+    border-top-color: var(--c-border) !important;
+    border-bottom-color: var(--c-border) !important;
+  }
+  
+  .main-nav-menu > li > a {
+    color: var(--c-text-base) !important;
+    
+    &:hover,
+    &.active {
+      color: var(--c-primary) !important;
+      background-color: var(--c-bkg-body) !important;
+      border-bottom-color: var(--c-primary) !important;
+    }
+  }
+  
+  .dropdown-nav-menu {
+    background-color: var(--c-bkg-card) !important;
+    border-color: var(--c-border) !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
+  }
+  
+  .dropdown-nav-item-link {
+    color: var(--c-text-base) !important;
+    
+    &:hover {
+      background-color: var(--c-bkg-body) !important;
+      color: var(--c-primary) !important;
+    }
   }
 }
 

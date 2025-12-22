@@ -10,10 +10,12 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="bd bgc-white p-30">
-                <h2 class="mB-20">
-                    <i class="ti-calendar c-blue-500"></i> @(isEdit ? "Yemek Planını Düzenle" : "Yeni Yemek Planı Oluştur")
-                </h2>
+            <div class="bd bgc-white p-30 meal-plan-create-container">
+                <div class="d-flex justify-content-between align-items-center mB-30">
+                    <h2 class="mB-0">
+                        <i class="ti-calendar c-blue-500 mR-10"></i> @(isEdit ? "Yemek Planını Düzenle" : "Yeni Yemek Planı Oluştur")
+                    </h2>
+                </div>
 
                 <form asp-action="@(isEdit ? "Edit" : "Create")" method="post" id="mealPlanForm" data-val="true">
                     @if (isEdit)
@@ -24,133 +26,137 @@
                     
                     @if (!ViewData.ModelState.IsValid)
                     {
-                        <div class="alert alert-danger mB-20">
+                        <div class="alert alert-danger mB-30">
                             <div asp-validation-summary="All" class="mB-0"></div>
                         </div>
                     }
                     
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group mB-20">
-                                <label asp-for="Name" class="fw-600 mB-8">Plan Adı *</label>
-                                <input asp-for="Name" class="form-control" placeholder="Örn: Aralık 2024 - Hafta 1" required>
-                                <span asp-validation-for="Name" class="text-danger"></span>
+                    <div class="bd bgc-grey-50 p-20 mB-30 bdrs-3 plan-info-section">
+                        <h4 class="mB-20 c-grey-800">
+                            <i class="ti-info-alt mR-8"></i> Plan Bilgileri
+                        </h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mB-20">
+                                    <label asp-for="Name" class="fw-600 mB-8">Plan Adı *</label>
+                                    <input asp-for="Name" class="form-control" placeholder="Örn: Aralık 2024 - Hafta 1" required>
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group mB-20">
-                                <label asp-for="StartDate" class="fw-600 mB-8">Başlangıç Tarihi *</label>
-                                <input asp-for="StartDate" type="date" class="form-control" required>
-                                <span asp-validation-for="StartDate" class="text-danger"></span>
+                            <div class="col-md-3">
+                                <div class="form-group mB-20">
+                                    <label asp-for="StartDate" class="fw-600 mB-8">Başlangıç Tarihi *</label>
+                                    <input asp-for="StartDate" type="date" class="form-control" required>
+                                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group mB-20">
-                                <label asp-for="EndDate" class="fw-600 mB-8">Bitiş Tarihi *</label>
-                                <input asp-for="EndDate" type="date" class="form-control" required>
-                                <span asp-validation-for="EndDate" class="text-danger"></span>
+                            <div class="col-md-3">
+                                <div class="form-group mB-20">
+                                    <label asp-for="EndDate" class="fw-600 mB-8">Bitiş Tarihi *</label>
+                                    <input asp-for="EndDate" type="date" class="form-control" required>
+                                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="mB-30">
-                        <h4 class="mB-15">Öğünler</h4>
+                        <div class="d-flex justify-content-between align-items-center mB-20">
+                            <h4 class="mB-0 c-grey-800">
+                                <i class="ti-shopping-cart-full mR-8"></i> Öğünler
+                            </h4>
+                            <button type="button" class="btn btn-success meal-add-btn" onclick="addMealItem()">
+                                <i class="ti-plus mR-5"></i> Öğün Ekle
+                            </button>
+                        </div>
                         <div id="mealItems">
                             @if (Model.Items != null && Model.Items.Any())
                             {
                                 for (int i = 0; i < Model.Items.Count; i++)
                                 {
-                                    <div class="meal-item-row bd bgc-grey-50 p-15 mB-10 bdrs-3" data-index="@i">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="form-group mB-10">
-                                                    <label class="fw-600 mB-5">Tarih</label>
-                                                    <input type="date" name="Items[@i].Date" class="form-control" value="@Model.Items[i].Date.ToString("yyyy-MM-dd")" required>
-                                                </div>
+                                    <div class="meal-item-row bd bgc-grey-50 p-10 mB-15" data-index="@i">
+                                        <div class="row align-items-center g-2">
+                                            <div class="col-md-3 col-lg-2">
+                                                <label class="fw-600 mB-2 d-block" style="font-size: 12px;">Tarih</label>
+                                                <input type="date" name="Items[@i].Date" class="form-control form-control-sm" value="@Model.Items[i].Date.ToString("yyyy-MM-dd")" required>
                                             </div>
-                                            <div class="col-md-3">
-                                                <div class="form-group mB-10">
-                                                    <label class="fw-600 mB-5">Öğün Tipi</label>
-                                                    <select name="Items[@i].MealType" class="form-control" required>
-                                                        @if (Model.Items[i].MealType == "Kahvaltı")
-                                                        {
-                                                            <option value="Kahvaltı" selected>Kahvaltı</option>
-                                                        }
-                                                        else
-                                                        {
-                                                            <option value="Kahvaltı">Kahvaltı</option>
-                                                        }
-                                                        @if (Model.Items[i].MealType == "ÖğleYemeği")
-                                                        {
-                                                            <option value="ÖğleYemeği" selected>Öğle Yemeği</option>
-                                                        }
-                                                        else
-                                                        {
-                                                            <option value="ÖğleYemeği">Öğle Yemeği</option>
-                                                        }
-                                                        @if (Model.Items[i].MealType == "AkşamYemeği")
-                                                        {
-                                                            <option value="AkşamYemeği" selected>Akşam Yemeği</option>
-                                                        }
-                                                        else
-                                                        {
-                                                            <option value="AkşamYemeği">Akşam Yemeği</option>
-                                                        }
-                                                        @if (Model.Items[i].MealType == "Atıştırmalık")
-                                                        {
-                                                            <option value="Atıştırmalık" selected>Atıştırmalık</option>
-                                                        }
-                                                        else
-                                                        {
-                                                            <option value="Atıştırmalık">Atıştırmalık</option>
-                                                        }
-                                                    </select>
-                                                </div>
+                                            <div class="col-md-2 col-lg-2">
+                                                <label class="fw-600 mB-2 d-block" style="font-size: 12px;">Öğün Tipi</label>
+                                                <select name="Items[@i].MealType" class="form-control form-control-sm" required>
+                                                    @if (Model.Items[i].MealType == "Kahvaltı")
+                                                    {
+                                                        <option value="Kahvaltı" selected>Kahvaltı</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="Kahvaltı">Kahvaltı</option>
+                                                    }
+                                                    @if (Model.Items[i].MealType == "ÖğleYemeği")
+                                                    {
+                                                        <option value="ÖğleYemeği" selected>Öğle Yemeği</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="ÖğleYemeği">Öğle Yemeği</option>
+                                                    }
+                                                    @if (Model.Items[i].MealType == "AkşamYemeği")
+                                                    {
+                                                        <option value="AkşamYemeği" selected>Akşam Yemeği</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="AkşamYemeği">Akşam Yemeği</option>
+                                                    }
+                                                    @if (Model.Items[i].MealType == "Atıştırmalık")
+                                                    {
+                                                        <option value="Atıştırmalık" selected>Atıştırmalık</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="Atıştırmalık">Atıştırmalık</option>
+                                                    }
+                                                </select>
                                             </div>
-                                            <div class="col-md-3">
-                                                <div class="form-group mB-10">
-                                                    <label class="fw-600 mB-5">Tarif</label>
-                                                    <select name="Items[@i].RecipeId" class="form-control" required>
-                                                        <option value="">Seçiniz...</option>
-                                                        @foreach (var recipe in recipes)
+                                            <div class="col-md-4 col-lg-5">
+                                                <label class="fw-600 mB-2 d-block" style="font-size: 12px;">Tarif</label>
+                                                <select name="Items[@i].RecipeId" class="form-control form-control-sm" required>
+                                                    <option value="">Seçiniz...</option>
+                                                    @foreach (var recipe in recipes)
+                                                    {
+                                                        @if (Model.Items[i].RecipeId == recipe.Id)
                                                         {
-                                                            @if (Model.Items[i].RecipeId == recipe.Id)
-                                                            {
-                                                                <option value="@recipe.Id" selected>@recipe.Title</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="@recipe.Id">@recipe.Title</option>
-                                                            }
+                                                            <option value="@recipe.Id" selected>@recipe.Title</option>
                                                         }
-                                                    </select>
-                                                </div>
+                                                        else
+                                                        {
+                                                            <option value="@recipe.Id">@recipe.Title</option>
+                                                        }
+                                                    }
+                                                </select>
                                             </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group mB-10">
-                                                    <label class="fw-600 mB-5">Kişilik</label>
-                                                    <input type="number" name="Items[@i].Servings" class="form-control" value="@Model.Items[i].Servings" min="1" required>
-                                                    <button type="button" class="btn btn-sm btn-danger w-100 mT-5" onclick="removeMealItem(this)">
-                                                        <i class="ti-trash"></i> Sil
-                                                    </button>
-                                                </div>
+                                            <div class="col-md-2 col-lg-2">
+                                                <label class="fw-600 mB-2 d-block" style="font-size: 12px;">Kişilik</label>
+                                                <input type="number" name="Items[@i].Servings" class="form-control form-control-sm" value="@Model.Items[i].Servings" min="1" required>
+                                            </div>
+                                            <div class="col-md-1 col-lg-1">
+                                                <label class="fw-600 mB-2 d-block" style="font-size: 12px; visibility: hidden;">Sil</label>
+                                                <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeMealItem(this)" title="Sil">
+                                                    <i class="ti-trash"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 }
                             }
                         </div>
-                        <button type="button" class="btn btn-success" onclick="addMealItem()">
-                            <i class="ti-plus mR-5"></i> Öğün Ekle
-                        </button>
                     </div>
 
-                    <div class="d-flex gap-10">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="ti-save mR-5"></i> Planı Kaydet
+                    <div class="d-flex gap-10 meal-plan-form-actions">
+                        <button type="submit" class="meal-plan-save-btn">
+                            Planı Kaydet
                         </button>
-                        <a asp-action="Index" class="btn btn-secondary">
-                            <i class="ti-close mR-5"></i> İptal
+                        <a asp-action="Index" class="meal-plan-cancel-btn">
+                            İptal
                         </a>
                     </div>
                 </form>
@@ -175,46 +181,41 @@ function addMealItem() {
     const endDate = '@Model.EndDate.ToString("yyyy-MM-dd")';
     
     const div = document.createElement('div');
-    div.className = 'meal-item-row bd bgc-grey-50 p-15 mB-10 bdrs-3';
+    div.className = 'meal-item-row bd bgc-grey-50 p-10 mB-15';
     div.setAttribute('data-index', itemIndex);
     
     const recipeOptions = recipes.map(r => '<option value="' + (r.Id || r.id) + '">' + (r.Title || r.title || '') + '</option>').join('');
     
-    div.innerHTML = '<div class="row">' +
-        '<div class="col-md-4">' +
-            '<div class="form-group mB-10">' +
-                '<label class="fw-600 mB-5">Tarih</label>' +
-                '<input type="date" name="Items[' + itemIndex + '].Date" class="form-control" value="' + startDate + '" min="' + startDate + '" max="' + endDate + '" required>' +
-            '</div>' +
+    div.innerHTML = '<div class="row align-items-center g-2">' +
+        '<div class="col-md-3 col-lg-2">' +
+            '<label class="fw-600 mB-2 d-block" style="font-size: 12px;">Tarih</label>' +
+            '<input type="date" name="Items[' + itemIndex + '].Date" class="form-control form-control-sm" value="' + startDate + '" min="' + startDate + '" max="' + endDate + '" required>' +
         '</div>' +
-        '<div class="col-md-3">' +
-            '<div class="form-group mB-10">' +
-                '<label class="fw-600 mB-5">Öğün Tipi</label>' +
-                '<select name="Items[' + itemIndex + '].MealType" class="form-control" required>' +
-                    '<option value="Kahvaltı">Kahvaltı</option>' +
-                    '<option value="ÖğleYemeği">Öğle Yemeği</option>' +
-                    '<option value="AkşamYemeği" selected>Akşam Yemeği</option>' +
-                    '<option value="Atıştırmalık">Atıştırmalık</option>' +
-                '</select>' +
-            '</div>' +
+        '<div class="col-md-2 col-lg-2">' +
+            '<label class="fw-600 mB-2 d-block" style="font-size: 12px;">Öğün Tipi</label>' +
+            '<select name="Items[' + itemIndex + '].MealType" class="form-control form-control-sm" required>' +
+                '<option value="Kahvaltı">Kahvaltı</option>' +
+                '<option value="ÖğleYemeği">Öğle Yemeği</option>' +
+                '<option value="AkşamYemeği" selected>Akşam Yemeği</option>' +
+                '<option value="Atıştırmalık">Atıştırmalık</option>' +
+            '</select>' +
         '</div>' +
-        '<div class="col-md-3">' +
-            '<div class="form-group mB-10">' +
-                '<label class="fw-600 mB-5">Tarif</label>' +
-                '<select name="Items[' + itemIndex + '].RecipeId" class="form-control" required>' +
-                    '<option value="">Seçiniz...</option>' +
-                    recipeOptions +
-                '</select>' +
-            '</div>' +
+        '<div class="col-md-4 col-lg-5">' +
+            '<label class="fw-600 mB-2 d-block" style="font-size: 12px;">Tarif</label>' +
+            '<select name="Items[' + itemIndex + '].RecipeId" class="form-control form-control-sm" required>' +
+                '<option value="">Seçiniz...</option>' +
+                recipeOptions +
+            '</select>' +
         '</div>' +
-        '<div class="col-md-2">' +
-            '<div class="form-group mB-10">' +
-                '<label class="fw-600 mB-5">Kişilik</label>' +
-                '<input type="number" name="Items[' + itemIndex + '].Servings" class="form-control" value="4" min="1" required>' +
-                '<button type="button" class="btn btn-sm btn-danger w-100 mT-5" onclick="removeMealItem(this)">' +
-                    '<i class="ti-trash"></i> Sil' +
-                '</button>' +
-            '</div>' +
+        '<div class="col-md-2 col-lg-2">' +
+            '<label class="fw-600 mB-2 d-block" style="font-size: 12px;">Kişilik</label>' +
+            '<input type="number" name="Items[' + itemIndex + '].Servings" class="form-control form-control-sm" value="4" min="1" required>' +
+        '</div>' +
+        '<div class="col-md-1 col-lg-1">' +
+            '<label class="fw-600 mB-2 d-block" style="font-size: 12px; visibility: hidden;">Sil</label>' +
+            '<button type="button" class="btn btn-sm btn-danger w-100" onclick="removeMealItem(this)" title="Sil">' +
+                '<i class="ti-trash"></i>' +
+            '</button>' +
         '</div>' +
     '</div>';
     
@@ -274,4 +275,443 @@ function removeMealItem(button) {
         });
     </script>
 }
+
+<style>
+    /* Dark Mode Desteği - Yemek Planı Oluştur/Düzenle Sayfası */
+    [data-theme="dark"] .bd.bgc-white {
+        background-color: var(--c-bkg-card) !important;
+        border-color: var(--c-border) !important;
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] .bd.bgc-grey-50 {
+        background-color: var(--c-bkg-body) !important;
+        border-color: var(--c-border) !important;
+    }
+    
+    [data-theme="dark"] h2,
+    [data-theme="dark"] h4 {
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] label {
+        color: var(--c-text-base) !important;
+    }
+    
+    /* Form kontrolleri */
+    [data-theme="dark"] .form-control,
+    [data-theme="dark"] .form-select {
+        background-color: var(--c-bkg-body) !important;
+        border-color: var(--c-border) !important;
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] .form-control:focus,
+    [data-theme="dark"] .form-select:focus {
+        background-color: var(--c-bkg-body) !important;
+        border-color: var(--c-primary) !important;
+        color: var(--c-text-base) !important;
+        box-shadow: 0 0 0 0.1rem rgba(var(--c-primary-rgb), 0.25) !important;
+    }
+    
+    [data-theme="dark"] .form-control::placeholder {
+        color: var(--c-text-muted) !important;
+    }
+    
+    /* Date input için calendar ikonu görünürlüğü */
+    [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.8;
+        cursor: pointer;
+    }
+    
+    [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+    }
+    
+    /* Öğün satırları için label ve text renkleri */
+    [data-theme="dark"] .meal-item-row label {
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] .meal-item-row .form-control,
+    [data-theme="dark"] .meal-item-row .form-select {
+        background-color: var(--c-bkg-card) !important;
+        border-color: var(--c-border) !important;
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] .meal-item-row .form-control:focus,
+    [data-theme="dark"] .meal-item-row .form-select:focus {
+        background-color: var(--c-bkg-card) !important;
+        border-color: var(--c-primary) !important;
+        color: var(--c-text-base) !important;
+    }
+    
+    /* Butonlar */
+    [data-theme="dark"] .btn {
+        border-color: var(--c-border) !important;
+    }
+    
+    [data-theme="dark"] .btn-primary {
+        background-color: var(--c-primary) !important;
+        border-color: var(--c-primary) !important;
+        color: white !important;
+    }
+    
+    [data-theme="dark"] .btn-primary:hover {
+        background-color: color-mix(in srgb, var(--c-primary) 90%, black) !important;
+    }
+    
+    [data-theme="dark"] .btn-success {
+        background-color: #059669 !important;
+        border-color: #059669 !important;
+        color: white !important;
+    }
+    
+    [data-theme="dark"] .btn-success:hover {
+        background-color: #047857 !important;
+    }
+    
+    [data-theme="dark"] .btn-secondary {
+        background-color: var(--c-bkg-body) !important;
+        border-color: var(--c-border) !important;
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] .btn-secondary:hover {
+        background-color: var(--c-bkg-card) !important;
+        color: var(--c-primary) !important;
+    }
+    
+    [data-theme="dark"] .btn-danger {
+        background-color: #dc2626 !important;
+        border-color: #dc2626 !important;
+        color: white !important;
+    }
+    
+    [data-theme="dark"] .btn-danger:hover {
+        background-color: #b91c1c !important;
+    }
+    
+    [data-theme="dark"] .alert-danger {
+        background-color: #7f1d1d !important;
+        border-color: #991b1b !important;
+        color: #fee2e2 !important;
+    }
+    
+    [data-theme="dark"] .text-danger {
+        color: #fca5a5 !important;
+    }
+    
+    [data-theme="dark"] .c-blue-500 {
+        color: var(--c-primary) !important;
+    }
+    
+    /* Kompakt öğün satırları */
+    .meal-item-row {
+        border-radius: 12px !important;
+        transition: all 0.2s ease;
+    }
+    
+    .meal-item-row:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+    }
+    
+    [data-theme="dark"] .meal-item-row:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Form control sm için dark mode */
+    [data-theme="dark"] .form-control-sm,
+    [data-theme="dark"] .form-select.form-control-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Sil butonu kompakt */
+    .meal-item-row .btn-sm {
+        padding: 0.25rem 0.5rem;
+        min-width: 36px;
+    }
+    
+    /* Tarif dropdown için özel stil */
+    .meal-item-row select[name*="RecipeId"],
+    .meal-item-row .form-select[name*="RecipeId"] {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 16px 12px;
+        padding-right: 2rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .meal-item-row select[name*="RecipeId"]:hover,
+    .meal-item-row .form-select[name*="RecipeId"]:hover {
+        border-color: var(--c-primary, #6366f1);
+        box-shadow: 0 0 0 0.1rem rgba(99, 102, 241, 0.1);
+    }
+    
+    .meal-item-row select[name*="RecipeId"]:focus,
+    .meal-item-row .form-select[name*="RecipeId"]:focus {
+        border-color: var(--c-primary, #6366f1);
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+    }
+    
+    [data-theme="dark"] .meal-item-row select[name*="RecipeId"],
+    [data-theme="dark"] .meal-item-row .form-select[name*="RecipeId"] {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e2e8f0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+    
+    [data-theme="dark"] .meal-item-row select[name*="RecipeId"]:hover,
+    [data-theme="dark"] .meal-item-row .form-select[name*="RecipeId"]:hover {
+        border-color: var(--c-primary);
+        box-shadow: 0 0 0 0.1rem rgba(99, 102, 241, 0.2);
+    }
+    
+    /* Öğün tipi dropdown için de aynı stil */
+    .meal-item-row select[name*="MealType"],
+    .meal-item-row .form-select[name*="MealType"] {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 16px 12px;
+        padding-right: 2rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .meal-item-row select[name*="MealType"]:hover,
+    .meal-item-row .form-select[name*="MealType"]:hover {
+        border-color: var(--c-primary, #6366f1);
+        box-shadow: 0 0 0 0.1rem rgba(99, 102, 241, 0.1);
+    }
+    
+    [data-theme="dark"] .meal-item-row select[name*="MealType"],
+    [data-theme="dark"] .meal-item-row .form-select[name*="MealType"] {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e2e8f0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+    
+    /* Plan Bilgileri Bölümü */
+    .plan-info-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    [data-theme="dark"] .plan-info-section {
+        background: linear-gradient(135deg, var(--c-bkg-body) 0%, var(--c-bkg-card) 100%);
+        border-color: var(--c-border) !important;
+    }
+    
+    .plan-info-section h4 {
+        color: var(--c-text-base);
+        font-weight: 600;
+    }
+    
+    /* Öğün Ekle Butonu */
+    .meal-add-btn {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .meal-add-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: white;
+    }
+    
+    [data-theme="dark"] .meal-add-btn {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-theme="dark"] .meal-add-btn:hover {
+        background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    /* Form Action Butonları */
+    .meal-plan-form-actions {
+        padding-top: 25px;
+        border-top: 1px solid #e9ecef;
+        margin-top: 30px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+    
+    [data-theme="dark"] .meal-plan-form-actions {
+        border-top-color: var(--c-border);
+    }
+    
+    .meal-plan-save-btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 24px !important;
+        border-radius: 8px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        font-family: inherit;
+        line-height: 1.5 !important;
+        border: none !important;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        text-decoration: none !important;
+    }
+    
+    .meal-plan-save-btn i {
+        font-size: inherit;
+        line-height: inherit;
+    }
+    
+    /* meal-add-btn class'ını da aynı font stilinde yap (Planı Kaydet butonu için) */
+    .meal-add-btn {
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        font-family: inherit;
+        line-height: 1.5;
+    }
+    
+    .meal-add-btn i {
+        font-size: inherit;
+        line-height: inherit;
+    }
+    
+    .meal-plan-save-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        color: white;
+    }
+    
+    .meal-plan-save-btn:active {
+        transform: translateY(0);
+    }
+    
+    .meal-plan-cancel-btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 24px !important;
+        border-radius: 8px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        font-family: inherit;
+        line-height: 1.5 !important;
+        border: none !important;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        text-decoration: none !important;
+    }
+    
+    .meal-plan-cancel-btn i {
+        font-size: inherit;
+        line-height: inherit;
+    }
+    
+    .meal-plan-cancel-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .meal-plan-cancel-btn:active {
+        transform: translateY(0);
+    }
+    
+    [data-theme="dark"] .meal-plan-save-btn {
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-theme="dark"] .meal-plan-save-btn:hover {
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    [data-theme="dark"] .meal-plan-cancel-btn {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        color: #fee2e2;
+    }
+    
+    [data-theme="dark"] .meal-plan-cancel-btn:hover {
+        background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        color: white;
+    }
+    
+    /* Başlık iyileştirmeleri */
+    .meal-plan-create-container h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--c-text-base);
+    }
+    
+    .meal-plan-create-container h4 {
+        font-size: 20px;
+        font-weight: 600;
+    }
+    
+    /* Responsive - mobilde dikey düzen */
+    @@media (max-width: 768px) {
+        .meal-item-row .row {
+            flex-direction: column;
+        }
+        
+        .meal-item-row .col-md-1,
+        .meal-item-row .col-md-2,
+        .meal-item-row .col-md-3,
+        .meal-item-row .col-md-4 {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        
+        .meal-item-row .col-md-1:last-child {
+            margin-bottom: 0;
+        }
+        
+        .meal-plan-form-actions {
+            flex-direction: column;
+        }
+        
+        .meal-plan-save-btn,
+        .meal-plan-cancel-btn {
+            width: 100%;
+        }
+        
+        .d-flex.justify-content-between.align-items-center.mB-20 {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 15px;
+        }
+        
+        .meal-add-btn {
+            width: 100%;
+        }
+    }
+</style>
 

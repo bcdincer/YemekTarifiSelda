@@ -15,12 +15,23 @@
     <div class="row gap-20">
         <!-- Sol Sidebar - Filtreler -->
         <div class="col-lg-3 col-md-4">
-            <div class="bd bgc-white p-20" style="position: sticky; top: 20px;">
-                <h5 class="mB-20">
+            <div class="bd bgc-white filter-panel-container" style="position: sticky; top: 20px; display: flex; flex-direction: column; height: calc(100vh - 40px); max-height: calc(100vh - 40px);">
+                <h5 class="filter-panel-header" style="padding: 20px 20px 0 20px; margin-bottom: 20px; flex-shrink: 0;">
                     <i class="ti-filter mR-8"></i> Filtrele
                 </h5>
                 
-                <form asp-controller="Home" asp-action="Index" method="get" id="filterForm">
+                <form asp-controller="Home" asp-action="Index" method="get" id="filterForm" style="display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; position: relative;">
+                    <!-- Filtre Butonları - Üstte, her zaman görünür -->
+                    <div class="filter-panel-buttons" style="padding: 0 20px 20px 20px; flex-shrink: 0; background-color: white; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px;">
+                        <button type="submit" class="btn btn-primary w-100" style="color: white;">
+                            <i class="ti-search mR-5"></i> Filtrele
+                        </button>
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary w-100 mT-10">
+                            <i class="ti-reload mR-5"></i> Filtreleri Temizle
+                        </a>
+                    </div>
+                    
+                    <div class="filter-panel-content" style="flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 20px; min-height: 0; max-height: 100%;">
                     <!-- Arama Kelimesi -->
                     <div class="form-group mB-20">
                         <label class="fw-600 mB-8">Arama Kelimesi</label>
@@ -285,13 +296,7 @@
                             }
                         </select>
                     </div>
-
-                    <button type="submit" class="btn btn-primary w-100" style="color: white;">
-                        <i class="ti-search mR-5"></i> Filtrele
-                    </button>
-                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary w-100 mT-10">
-                        <i class="ti-reload mR-5"></i> Filtreleri Temizle
-                    </a>
+                    </div>
                 </form>
             </div>
         </div>
@@ -326,27 +331,27 @@
             </div>
 
             <!-- Sıralama Seçenekleri -->
-            <div class="bd bgc-white p-15 mB-20">
-                <div class="peers fxw-nw gap-10">
+            <div class="bd bgc-white p-20 mB-20">
+                <div class="sort-buttons-container">
                     <a href="@Url.Action("Index", "Home", new { categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm, sortBy = (string)null })" 
-                       class="btn btn-sm @(ViewBag.SortBy == null || ViewBag.SortBy == "" ? "btn-primary" : "btn-outline-secondary")" 
-                       style="color: @(ViewBag.SortBy == null || ViewBag.SortBy == "" ? "white" : "inherit");">
-                        Akıllı Sıralama
+                       class="sort-btn @(ViewBag.SortBy == null || ViewBag.SortBy == "" ? "sort-btn-active" : "")">
+                        <i class="ti-layout-grid2"></i>
+                        <span>Akıllı Sıralama</span>
                     </a>
                     <a href="@Url.Action("Index", "Home", new { categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm, sortBy = "newest" })" 
-                       class="btn btn-sm @(ViewBag.SortBy == "newest" ? "btn-primary" : "btn-outline-secondary")" 
-                       style="color: @(ViewBag.SortBy == "newest" ? "white" : "inherit");">
-                        Tarihe Göre
+                       class="sort-btn @(ViewBag.SortBy == "newest" ? "sort-btn-active" : "")">
+                        <i class="ti-calendar"></i>
+                        <span>Tarihe Göre</span>
                     </a>
                     <a href="@Url.Action("Index", "Home", new { categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm, sortBy = "rating" })" 
-                       class="btn btn-sm @(ViewBag.SortBy == "rating" ? "btn-primary" : "btn-outline-secondary")" 
-                       style="color: @(ViewBag.SortBy == "rating" ? "white" : "inherit");">
-                        En Yüksek Puan
+                       class="sort-btn @(ViewBag.SortBy == "rating" ? "sort-btn-active" : "")">
+                        <i class="ti-star"></i>
+                        <span>En Yüksek Puan</span>
                     </a>
                     <a href="@Url.Action("Index", "Home", new { categoryId = ViewBag.CategoryId, search = ViewBag.SearchTerm, sortBy = "likes" })" 
-                       class="btn btn-sm @(ViewBag.SortBy == "likes" ? "btn-primary" : "btn-outline-secondary")" 
-                       style="color: @(ViewBag.SortBy == "likes" ? "white" : "inherit");">
-                        En Çok Beğenilen
+                       class="sort-btn @(ViewBag.SortBy == "likes" ? "sort-btn-active" : "")">
+                        <i class="ti-heart"></i>
+                        <span>En Çok Beğenilen</span>
                     </a>
                 </div>
             </div>
@@ -822,6 +827,174 @@ else
     
     .recipe-card:hover h6 {
         color: #007bff !important;
+    }
+    
+    /* Sort Buttons Styling */
+    .sort-buttons-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+    }
+    
+    .sort-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        border-radius: 8px;
+        border: 2px solid var(--c-border, #e0e0e0);
+        background-color: var(--c-bkg-card, #fff);
+        color: var(--c-text-base, #333);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .sort-btn i {
+        font-size: 16px;
+        transition: transform 0.3s ease;
+    }
+    
+    .sort-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-color: var(--c-primary, #007bff);
+        background-color: var(--c-bkg-card, #fff);
+    }
+    
+    .sort-btn:hover i {
+        transform: scale(1.1);
+    }
+    
+    .sort-btn-active {
+        background-color: var(--c-primary, #007bff) !important;
+        border-color: var(--c-primary, #007bff) !important;
+        color: #fff !important;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+    
+    .sort-btn-active:hover {
+        background-color: var(--c-primary, #007bff) !important;
+        border-color: var(--c-primary, #007bff) !important;
+        color: #fff !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
+    }
+    
+    /* Dark mode support */
+    [data-theme="dark"] .sort-btn {
+        background-color: var(--c-bkg-card) !important;
+        border-color: var(--c-border) !important;
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] .sort-btn:hover {
+        border-color: var(--c-primary) !important;
+        background-color: var(--c-bkg-body) !important;
+    }
+    
+    [data-theme="dark"] .sort-btn-active {
+        background-color: var(--c-primary) !important;
+        border-color: var(--c-primary) !important;
+        color: #fff !important;
+    }
+    
+    /* Responsive */
+    @@media (max-width: 576px) {
+        .sort-buttons-container {
+            gap: 8px;
+        }
+        
+        .sort-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            flex: 1;
+            min-width: calc(50% - 4px);
+            justify-content: center;
+        }
+    }
+    
+    /* Filtre Panel Stilleri */
+    .filter-panel-container {
+        border-radius: 8px;
+        /* Butonların her zaman görünür olması için minimum yükseklik */
+        min-height: 400px;
+    }
+    
+    .filter-panel-content {
+        /* Scroll bar için padding */
+        padding-right: 10px !important;
+        /* Minimum yükseklik yok, flex ile genişleyecek */
+    }
+    
+    .filter-panel-content::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .filter-panel-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .filter-panel-content::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+    
+    .filter-panel-content::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+    
+    .filter-panel-buttons {
+        flex-shrink: 0;
+        z-index: 10;
+        /* Butonlar üstte, her zaman görünür */
+        position: relative;
+        width: 100%;
+    }
+    
+    /* Form içeriğinin scroll edilebilir alanını butonların üstünde tut */
+    #filterForm {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    #filterForm .filter-panel-content {
+        flex: 1 1 auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+    
+    #filterForm .filter-panel-buttons {
+        flex: 0 0 auto !important;
+    }
+    
+    /* Dark mode desteği */
+    [data-theme="dark"] .filter-panel-container {
+        background-color: var(--c-bkg-card) !important;
+        border-color: var(--c-border) !important;
+    }
+    
+    [data-theme="dark"] .filter-panel-buttons {
+        background-color: var(--c-bkg-card) !important;
+        border-bottom-color: var(--c-border) !important;
+    }
+    
+    [data-theme="dark"] .filter-panel-content::-webkit-scrollbar-track {
+        background: var(--c-bkg-body);
+    }
+    
+    [data-theme="dark"] .filter-panel-content::-webkit-scrollbar-thumb {
+        background: var(--c-border);
+    }
+    
+    [data-theme="dark"] .filter-panel-content::-webkit-scrollbar-thumb:hover {
+        background: var(--c-text-muted);
     }
 </style>
 

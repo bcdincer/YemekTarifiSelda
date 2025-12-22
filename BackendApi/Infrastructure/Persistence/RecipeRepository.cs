@@ -182,20 +182,20 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
             query = query.Where(r => r.Difficulty == difficulty.Value);
         }
 
-        // Hazırlık süresi filtresi
-        if (maxPrepTime.HasValue)
+        // Hazırlık süresi filtresi (sadece pozitif değerler için)
+        if (maxPrepTime.HasValue && maxPrepTime.Value > 0)
         {
             query = query.Where(r => r.PrepTimeMinutes <= maxPrepTime.Value);
         }
 
-        // Pişirme süresi filtresi
-        if (maxCookingTime.HasValue)
+        // Pişirme süresi filtresi (sadece pozitif değerler için)
+        if (maxCookingTime.HasValue && maxCookingTime.Value > 0)
         {
             query = query.Where(r => r.CookingTimeMinutes <= maxCookingTime.Value);
         }
 
-        // Toplam süre filtresi (hazırlık + pişirme)
-        if (maxTotalTime.HasValue)
+        // Toplam süre filtresi (hazırlık + pişirme) (sadece pozitif değerler için)
+        if (maxTotalTime.HasValue && maxTotalTime.Value > 0)
         {
             query = query.Where(r => (r.PrepTimeMinutes + r.CookingTimeMinutes) <= maxTotalTime.Value);
         }

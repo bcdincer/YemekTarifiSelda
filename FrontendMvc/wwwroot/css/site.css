@@ -266,3 +266,41 @@ a.btn.btn-outline-primary:hover {
   color: #007bff !important;
   font-weight: 600;
 }
+
+/* Dark mode için üst menü stilleri */
+[data-theme="dark"] .sticky-header {
+  background-color: var(--c-bkg-card) !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .main-navbar {
+  background-color: var(--c-bkg-card) !important;
+  border-top-color: var(--c-border) !important;
+  border-bottom-color: var(--c-border) !important;
+}
+
+[data-theme="dark"] .main-nav-menu > li > a {
+  color: var(--c-text-base) !important;
+}
+
+[data-theme="dark"] .main-nav-menu > li > a:hover,
+[data-theme="dark"] .main-nav-menu > li > a.active {
+  color: var(--c-primary) !important;
+  background-color: var(--c-bkg-body) !important;
+  border-bottom-color: var(--c-primary) !important;
+}
+
+[data-theme="dark"] .dropdown-nav-menu {
+  background-color: var(--c-bkg-card) !important;
+  border-color: var(--c-border) !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .dropdown-nav-item-link {
+  color: var(--c-text-base) !important;
+}
+
+[data-theme="dark"] .dropdown-nav-item-link:hover {
+  background-color: var(--c-bkg-body) !important;
+  color: var(--c-primary) !important;
+}

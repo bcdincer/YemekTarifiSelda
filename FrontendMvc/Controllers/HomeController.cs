@@ -60,7 +60,9 @@ public class HomeController : Controller
         }
 
         // Gelişmiş filtreleme kullanılacak mı kontrol et
-        bool useAdvancedFilters = categoryId.HasValue || 
+        // sortBy parametresi varsa mutlaka gelişmiş filtreleme kullan (gerçek zamanlı sıralama için)
+        bool useAdvancedFilters = !string.IsNullOrWhiteSpace(sortBy) ||
+                                  categoryId.HasValue || 
                                   !string.IsNullOrWhiteSpace(difficulty) ||
                                   maxPrepTime.HasValue ||
                                   maxCookingTime.HasValue ||
@@ -93,7 +95,7 @@ public class HomeController : Controller
                 isFeatured = isFeatured,
                 minRating = minRating,
                 minRatingCount = minRatingCount,
-                sortBy = sortBy ?? "newest",
+                sortBy = sortBy, // null ise backend'de "smart" sıralaması yapılır
                 sortDescending = true
             };
 

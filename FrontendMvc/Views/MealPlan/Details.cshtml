@@ -16,21 +16,21 @@
                             @Model.StartDate.ToString("dd.MM.yyyy") - @Model.EndDate.ToString("dd.MM.yyyy")
                         </p>
                     </div>
-                    <div class="d-flex gap-10">
+                    <div class="d-flex gap-10 meal-plan-detail-actions">
                         <form asp-controller="ShoppingList" asp-action="CreateFromMealPlan" asp-route-mealPlanId="@Model.Id" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-success">
-                                <i class="ti-shopping-cart mR-5"></i> Alışveriş Listesi Oluştur
+                            <button type="submit" class="meal-plan-action-btn meal-plan-action-shopping">
+                                <i class="ti-shopping-cart"></i> <span>Alışveriş Listesi Oluştur</span>
                             </button>
                         </form>
-                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-secondary">
-                            <i class="ti-pencil mR-5"></i> Düzenle
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="meal-plan-action-btn meal-plan-action-edit">
+                            <i class="ti-pencil"></i> <span>Düzenle</span>
                         </a>
-                        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline" 
+                        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline meal-plan-delete-form-detail" 
                               onsubmit="return confirm('Bu planı silmek istediğinizden emin misiniz?');">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-danger">
-                                <i class="ti-trash mR-5"></i> Sil
+                            <button type="submit" class="meal-plan-action-btn meal-plan-action-delete">
+                                <i class="ti-trash"></i> <span>Sil</span>
                             </button>
                         </form>
                     </div>
@@ -90,4 +90,223 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Dark Mode Desteği - Yemek Planı Detay Sayfası */
+    [data-theme="dark"] .bd.bgc-white {
+        background-color: var(--c-bkg-card) !important;
+        border-color: var(--c-border) !important;
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] .bd.bgc-grey-50 {
+        background-color: var(--c-bkg-body) !important;
+        border-color: var(--c-border) !important;
+    }
+    
+    [data-theme="dark"] h2,
+    [data-theme="dark"] h4,
+    [data-theme="dark"] h5 {
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] .c-grey-600 {
+        color: var(--c-text-muted) !important;
+    }
+    
+    [data-theme="dark"] .c-grey-900 {
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] .c-blue-500 {
+        color: var(--c-primary) !important;
+    }
+    
+    [data-theme="dark"] .badge.bgc-blue-500 {
+        background-color: var(--c-primary) !important;
+        color: white !important;
+    }
+    
+    [data-theme="dark"] a.c-grey-900 {
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] a.c-grey-900:hover {
+        color: var(--c-primary) !important;
+    }
+    
+    [data-theme="dark"] .btn {
+        border-color: var(--c-border) !important;
+    }
+    
+    [data-theme="dark"] .btn-success {
+        background-color: #059669 !important;
+        border-color: #059669 !important;
+        color: white !important;
+    }
+    
+    [data-theme="dark"] .btn-success:hover {
+        background-color: #047857 !important;
+        border-color: #047857 !important;
+    }
+    
+    [data-theme="dark"] .btn-secondary {
+        background-color: var(--c-bkg-body) !important;
+        border-color: var(--c-border) !important;
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] .btn-secondary:hover {
+        background-color: var(--c-bkg-card) !important;
+        color: var(--c-primary) !important;
+    }
+    
+    [data-theme="dark"] .btn-danger {
+        background-color: #dc2626 !important;
+        border-color: #dc2626 !important;
+        color: white !important;
+    }
+    
+    [data-theme="dark"] .btn-danger:hover {
+        background-color: #b91c1c !important;
+        border-color: #b91c1c !important;
+    }
+    
+    /* Tarif kartları için */
+    [data-theme="dark"] .bd.bgc-white.p-15 {
+        background-color: var(--c-bkg-body) !important;
+        border-color: var(--c-border) !important;
+    }
+    
+    /* Zarif Buton Stilleri - Detay Sayfası */
+    .meal-plan-detail-actions {
+        flex-wrap: wrap;
+    }
+    
+    .meal-plan-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: white;
+    }
+    
+    .meal-plan-action-btn i {
+        font-size: 14px;
+        transition: transform 0.3s ease;
+    }
+    
+    .meal-plan-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .meal-plan-action-btn:hover i {
+        transform: scale(1.1);
+    }
+    
+    .meal-plan-action-btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Alışveriş Listesi Butonu - Yeşil */
+    .meal-plan-action-shopping {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .meal-plan-action-shopping:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    /* Düzenle Butonu - Indigo/Mor */
+    .meal-plan-action-edit {
+        background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+    }
+    
+    .meal-plan-action-edit:hover {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    
+    /* Sil Butonu - Kırmızı */
+    .meal-plan-action-delete {
+        background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+    }
+    
+    .meal-plan-action-delete:hover {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    
+    .meal-plan-delete-form-detail {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .meal-plan-delete-form-detail button {
+        margin: 0;
+        padding: 10px 16px;
+    }
+    
+    /* Dark Mode - Butonlar */
+    [data-theme="dark"] .meal-plan-action-shopping {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+    
+    [data-theme="dark"] .meal-plan-action-shopping:hover {
+        background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    [data-theme="dark"] .meal-plan-action-edit {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+    
+    [data-theme="dark"] .meal-plan-action-edit:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+    
+    [data-theme="dark"] .meal-plan-action-delete {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+    
+    [data-theme="dark"] .meal-plan-action-delete:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+    
+    [data-theme="dark"] .meal-plan-action-btn {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-theme="dark"] .meal-plan-action-btn:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Responsive */
+    @@media (max-width: 576px) {
+        .meal-plan-detail-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .meal-plan-action-btn,
+        .meal-plan-delete-form-detail button {
+            width: 100%;
+        }
+    }
+</style>
 

@@ -75,6 +75,16 @@ public class RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger
 
     public async Task<PagedResult<RecipeResponseDto>> SearchWithFiltersAsync(DTOs.RecipeFilterDto filter, int pageNumber, int pageSize)
     {
+        // Rating ve likes sıralamaları için gerçek zamanlı değerlere ihtiyacımız var
+        // Bu yüzden sayfalama yapmadan tüm sonuçları alıp, gerçek zamanlı değerlerle sıralayıp sonra sayfalama yapıyoruz
+        bool needsRealtimeSort = string.IsNullOrWhiteSpace(filter.SortBy) || 
+                                  filter.SortBy.ToLower() == "rating" || 
+                                  filter.SortBy.ToLower() == "likes";
+        
+        // Rating/likes için tüm sonuçları al (maksimum 10000 kayıt limiti)
+        int fetchPageSize = needsRealtimeSort ? 10000 : pageSize;
+        int fetchPageNumber = needsRealtimeSort ? 1 : pageNumber;
+        
         var (items, totalCount) = await Repository.SearchWithFiltersAsync(
             filter.SearchTerm,
             filter.CategoryId,
@@ -91,12 +101,81 @@ public class RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger
             filter.IsFeatured,
             filter.MinRating,
             filter.MinRatingCount,
-            filter.SortBy,
+            needsRealtimeSort ? null : filter.SortBy, // Rating/likes için repository sıralamasını devre dışı bırak
             filter.SortDescending,
-            pageNumber,
-            pageSize);
+            fetchPageNumber,
+            fetchPageSize);
+        
         var dtoItems = await MapRecipesWithRealTimeRatingsAsync(items);
+        
+        // Gerçek zamanlı rating ve like count'lara göre sıralama yap
+        if (needsRealtimeSort)
+        {
+            // Repository'den gelen totalCount'u kullan (tüm sonuçlar için)
+            // Eğer fetchPageSize limiti nedeniyle tüm sonuçları alamadıysak,
+            // repository'den gelen totalCount doğru olacaktır
+            // Aksi halde items.Count gerçek sayıdır
+            if (items.Count < fetchPageSize)
+            {
+                // Tüm sonuçları aldık, gerçek sayı items.Count
+                totalCount = items.Count;
+            }
+            // Aksi halde repository'den gelen totalCount zaten doğru
+            
+            // Sıralamayı yap
+            dtoItems = SortDtoItems(dtoItems, filter.SortBy, filter.SortDescending);
+            
+            // Sayfalama yap
+            dtoItems = dtoItems
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+        }
+        
         return new PagedResult<RecipeResponseDto>(dtoItems, totalCount, pageNumber, pageSize);
+    }
+    
+    private List<RecipeResponseDto> SortDtoItems(List<RecipeResponseDto> items, string? sortBy, bool sortDescending)
+    {
+        if (string.IsNullOrWhiteSpace(sortBy))
+        {
+            // Akıllı sıralama: önce featured, sonra rating, sonra like count
+            return items
+                .OrderByDescending(r => r.IsFeatured)
+                .ThenByDescending(r => r.AverageRating.HasValue ? r.AverageRating.Value : double.MinValue)
+                .ThenByDescending(r => r.LikeCount)
+                .ThenByDescending(r => r.CreatedAt)
+                .ToList();
+        }
+        
+        return sortBy.ToLower() switch
+        {
+            "rating" => sortDescending
+                ? items.Where(r => r.AverageRating.HasValue)
+                      .OrderByDescending(r => r.AverageRating!.Value)
+                      .ThenByDescending(r => r.RatingCount)
+                      .ThenByDescending(r => r.LikeCount)
+                      .Concat(items.Where(r => !r.AverageRating.HasValue))
+                      .ToList()
+                : items.Where(r => r.AverageRating.HasValue)
+                      .OrderBy(r => r.AverageRating!.Value)
+                      .ThenBy(r => r.RatingCount)
+                      .ThenBy(r => r.LikeCount)
+                      .Concat(items.Where(r => !r.AverageRating.HasValue))
+                      .ToList(),
+            "likes" => sortDescending
+                ? items.OrderByDescending(r => r.LikeCount).ToList()
+                : items.OrderBy(r => r.LikeCount).ToList(),
+            "views" => sortDescending
+                ? items.OrderByDescending(r => r.ViewCount).ToList()
+                : items.OrderBy(r => r.ViewCount).ToList(),
+            "newest" => sortDescending
+                ? items.OrderByDescending(r => r.CreatedAt).ToList()
+                : items.OrderBy(r => r.CreatedAt).ToList(),
+            _ => sortDescending
+                ? items.OrderByDescending(r => r.CreatedAt).ToList()
+                : items.OrderBy(r => r.CreatedAt).ToList()
+        };
     }
 
     public async Task<RecipeResponseDto> CreateAsync(Recipe recipe)
