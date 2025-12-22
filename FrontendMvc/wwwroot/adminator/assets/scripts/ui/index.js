@@ -96,10 +96,14 @@ export default (function () {
       this.element = element;
       this.menu = null;
       this.isOpen = false;
+      this.clickHandler = null;
+      this.keydownHandler = null;
       this.init();
     }
     
     init() {
+      if (!this.element || !this.element.parentNode) return;
+      
       this.menu = this.element.parentNode.querySelector('.dropdown-menu');
       if (this.menu) {
         this.element.addEventListener('click', (e) => {
@@ -109,18 +113,31 @@ export default (function () {
         });
         
         // Close on outside click
-        document.addEventListener('click', (e) => {
-          if (!this.element.parentNode.contains(e.target)) {
+        this.clickHandler = (e) => {
+          if (this.element && this.element.parentNode && !this.element.parentNode.contains(e.target)) {
             this.hide();
           }
-        });
+        };
+        document.addEventListener('click', this.clickHandler);
         
         // Close on escape
-        document.addEventListener('keydown', (e) => {
+        this.keydownHandler = (e) => {
           if (e.key === 'Escape' && this.isOpen) {
             this.hide();
           }
-        });
+        };
+        document.addEventListener('keydown', this.keydownHandler);
+      }
+    }
+    
+    destroy() {
+      if (this.clickHandler) {
+        document.removeEventListener('click', this.clickHandler);
+        this.clickHandler = null;
+      }
+      if (this.keydownHandler) {
+        document.removeEventListener('keydown', this.keydownHandler);
+        this.keydownHandler = null;
       }
     }
     
@@ -160,21 +177,33 @@ export default (function () {
       this.element = element;
       this.popover = null;
       this.isOpen = false;
+      this.clickHandler = null;
       this.init();
     }
     
     init() {
+      if (!this.element) return;
+      
       this.element.addEventListener('click', (e) => {
         e.preventDefault();
         this.toggle();
       });
       
       // Close on outside click
-      document.addEventListener('click', (e) => {
-        if (!this.element.contains(e.target) && (!this.popover || !this.popover.contains(e.target))) {
+      this.clickHandler = (e) => {
+        if (this.element && !this.element.contains(e.target) && (!this.popover || !this.popover.contains(e.target))) {
           this.hide();
         }
-      });
+      };
+      document.addEventListener('click', this.clickHandler);
+    }
+    
+    destroy() {
+      if (this.clickHandler) {
+        document.removeEventListener('click', this.clickHandler);
+        this.clickHandler = null;
+      }
+      this.hide();
     }
     
     toggle() {

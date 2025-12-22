@@ -4,74 +4,495 @@
     ViewData["Title"] = "Alışveriş Listelerim";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="bd bgc-white p-20 mB-20">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h2 class="mB-0">
-                        <i class="ti-shopping-cart c-green-500"></i> Alışveriş Listelerim
-                    </h2>
+<div>
+    <div class="col-12">
+        <div class="bd bgc-white p-20 shopping-lists-main-container">
+            <div class="layers">
+                <div class="layer w-100 mB-20" style="flex-shrink: 0;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mB-0">
+                            <i class="ti-shopping-cart c-green-500 mR-10"></i> Alışveriş Listelerim
+                        </h2>
+                    </div>
                 </div>
-            </div>
 
-            @if (Model.Any())
-            {
-                <div class="row">
-                    @foreach (var shoppingList in Model)
+                <div class="layer w-100 shopping-lists-content-layer">
+                    @if (Model.Any())
                     {
-                        <div class="col-md-6 col-lg-4 mB-20">
-                            <div class="bd bgc-white p-20 bdrs-3" style="height: 100%;">
-                                <h4 class="mB-10">
-                                    <a asp-action="Details" asp-route-id="@shoppingList.Id" class="c-grey-900">
-                                        @shoppingList.Name
-                                    </a>
-                                </h4>
-                                <p class="fsz-sm c-grey-600 mB-15">
-                                    <i class="ti-clipboard mR-5"></i>
-                                    @shoppingList.Items.Count öğe
-                                </p>
-                                @if (shoppingList.IsCompleted)
-                                {
-                                    <span class="badge bgc-green-500 c-white mB-15">
-                                        <i class="ti-check mR-5"></i> Tamamlandı
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bgc-orange-500 c-white mB-15">
-                                        <i class="ti-time mR-5"></i> Devam Ediyor
-                                    </span>
-                                }
-                                <div class="d-flex gap-10">
-                                    <a asp-action="Details" asp-route-id="@shoppingList.Id" class="btn btn-sm btn-primary">
-                                        <i class="ti-eye mR-5"></i> Görüntüle
-                                    </a>
-                                    <form asp-action="Delete" asp-route-id="@shoppingList.Id" method="post" class="d-inline" 
-                                          onsubmit="return confirm('Bu listeyi silmek istediğinizden emin misiniz?');">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="ti-trash mR-5"></i> Sil
-                                        </button>
-                                    </form>
+                        <div class="row gap-20 shopping-lists-scrollable">
+                            @foreach (var shoppingList in Model)
+                            {
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="bd bgc-white p-20 bdrs-3 shopping-list-card" style="height: 100%; display: flex; flex-direction: column;">
+                                        <div class="shopping-list-card-content" style="flex: 1;">
+                                            <div class="d-flex justify-content-between align-items-start mB-10">
+                                                <h4 class="mB-0" style="flex: 1;">
+                                                    <a asp-action="Details" asp-route-id="@shoppingList.Id" class="c-grey-900" style="text-decoration: none;">
+                                                        @shoppingList.Name
+                                                    </a>
+                                                </h4>
+                                                <div class="shopping-list-status-badge">
+                                                    @if (shoppingList.IsCompleted)
+                                                    {
+                                                        <span class="status-badge status-completed">
+                                                            <i class="ti-check mR-3"></i>Tamamlandı
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="status-badge status-ongoing">
+                                                            <i class="ti-time mR-3"></i>Devam Ediyor
+                                                        </span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="shopping-list-card-footer">
+                                            @{
+                                                var completedCount = shoppingList.Items.Count(i => i.IsChecked);
+                                                var totalCount = shoppingList.Items.Count;
+                                                var completionPercentage = totalCount > 0 ? (completedCount * 100) / totalCount : 0;
+                                            }
+                                            <div class="d-flex justify-content-between align-items-center shopping-list-item-info mB-10">
+                                                <p class="fsz-sm c-grey-600 mB-0">
+                                                    <i class="ti-clipboard mR-5"></i>
+                                                    @shoppingList.Items.Count öğe
+                                                </p>
+                                                <p class="fsz-sm c-grey-600 mB-0">
+                                                    <i class="ti-check-box mR-5"></i>
+                                                    @completedCount / @totalCount tamamlandı
+                                                </p>
+                                            </div>
+                                            <div class="progress-bar-container mB-15">
+                                                <div class="progress-bar" style="width: @completionPercentage%"></div>
+                                            </div>
+                                            <div class="d-flex gap-10 shopping-list-actions">
+                                            <a asp-action="Details" asp-route-id="@shoppingList.Id" class="shopping-list-btn shopping-list-btn-view">
+                                                <i class="ti-eye"></i> <span>Görüntüle</span>
+                                            </a>
+                                            <form asp-action="Delete" asp-route-id="@shoppingList.Id" method="post" class="shopping-list-delete-form" 
+                                                  onsubmit="return confirm('Bu listeyi silmek istediğinizden emin misiniz?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="shopping-list-btn shopping-list-btn-delete">
+                                                    <i class="ti-trash"></i> <span>Sil</span>
+                                                </button>
+                                            </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center p-40">
+                            <i class="ti-shopping-cart fsz-xxl c-grey-400 d-b mB-20"></i>
+                            <h4 class="c-grey-600 mB-10">Henüz alışveriş listeniz yok</h4>
+                            <p class="c-grey-600 mB-30">Yemek planınızdan otomatik olarak alışveriş listesi oluşturabilirsiniz.</p>
+                            <a asp-controller="MealPlan" asp-action="Index" class="btn btn-primary shopping-list-create-btn">
+                                <i class="ti-calendar mR-5"></i> Yemek Planlarına Git
+                            </a>
                         </div>
                     }
                 </div>
-            }
-            else
-            {
-                <div class="bd bgc-white p-40 ta-c">
-                    <i class="ti-shopping-cart c-grey-400" style="font-size: 64px;"></i>
-                    <h4 class="mT-20 mB-10 c-grey-600">Henüz alışveriş listeniz yok</h4>
-                    <p class="c-grey-500 mB-20">Yemek planınızdan otomatik olarak alışveriş listesi oluşturabilirsiniz.</p>
-                    <a asp-controller="MealPlan" asp-action="Index" class="btn btn-primary">
-                        <i class="ti-calendar mR-5"></i> Yemek Planlarına Git
-                    </a>
-                </div>
-            }
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Shopping Lists container için tam yükseklik */
+    .shopping-lists-main-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 150px);
+        min-height: 600px;
+    }
+    
+    .shopping-lists-main-container .layers {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .shopping-lists-content-layer {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        min-height: 0;
+    }
+    
+    /* Scrollbar styling */
+    .shopping-lists-content-layer::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .shopping-lists-content-layer::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .shopping-lists-content-layer::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+    
+    .shopping-lists-content-layer::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+    
+    /* Gap-20 overflow özelliğini override et */
+    .shopping-lists-scrollable {
+        overflow: visible !important;
+    }
+    
+    /* Kartların eşit yükseklikte olması için */
+    .shopping-lists-scrollable .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .shopping-lists-scrollable .row > [class*="col-"] {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Shopping List Card */
+    .shopping-list-card {
+        display: flex;
+        flex-direction: column;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease;
+        border: 1px solid #e0e0e0;
+        border-radius: 3px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    /* Dark Mode için daha belirgin ve açık border - Default açık, hover koyu */
+    /* Sadece shopping-lists container içindeki kartları hedeflemek için çok spesifik selector kullanıyoruz */
+    [data-theme="dark"] .shopping-lists-main-container .bd.bgc-white.shopping-list-card,
+    [data-theme="dark"] .shopping-lists-main-container .shopping-list-card.bd.bgc-white,
+    [data-theme="dark"] .shopping-lists-main-container .shopping-list-card {
+        border: 1px solid #e5e7eb !important;
+        border-color: #e5e7eb !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    [data-theme="dark"] .shopping-lists-main-container .bd.bgc-white.shopping-list-card:hover,
+    [data-theme="dark"] .shopping-lists-main-container .shopping-list-card.bd.bgc-white:hover,
+    [data-theme="dark"] .shopping-lists-main-container .shopping-list-card:hover {
+        border-color: #b0b5c0 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    .shopping-list-card-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+    
+    .shopping-list-item-info {
+        flex-shrink: 0;
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .shopping-list-card-footer {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        margin-top: auto;
+    }
+    
+    /* Progress Bar */
+    .progress-bar-container {
+        width: 100%;
+        height: 8px;
+        min-height: 8px;
+        background-color: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+    
+    [data-theme="dark"] .progress-bar-container {
+        background-color: #374151;
+    }
+    
+    [data-theme="dark"] .progress-bar {
+        background: linear-gradient(90deg, #059669 0%, #047857 100%);
+    }
+    
+    /* Zarif Buton Stilleri */
+    .shopping-list-actions {
+        margin-top: 0;
+        padding-top: 15px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: nowrap;
+        width: 100%;
+        flex-shrink: 0;
+        min-height: 40px;
+    }
+    
+    .shopping-list-actions > a {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        width: 100%;
+        height: 40px;
+    }
+    
+    .shopping-list-delete-form {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        margin: 0;
+        padding: 0;
+        align-items: center;
+        border: none;
+        width: 100%;
+        height: 40px;
+    }
+    
+    .shopping-list-delete-form button {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+    }
+    
+    .shopping-list-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        min-height: 40px;
+        height: 40px;
+        line-height: 1;
+        vertical-align: middle;
+        flex: 1;
+        box-sizing: border-box;
+    }
+    
+    .shopping-list-btn i {
+        font-size: 14px;
+        transition: transform 0.3s ease;
+        flex-shrink: 0;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .shopping-list-btn span {
+        white-space: nowrap;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .shopping-list-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .shopping-list-btn:hover i {
+        transform: scale(1.1);
+    }
+    
+    .shopping-list-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Görüntüle Butonu - Zarif Indigo/Mor (Yemek Planları Düzenle butonuyla aynı) */
+    .shopping-list-btn-view {
+        background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+        color: white;
+    }
+    
+    .shopping-list-btn-view:hover {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    
+    /* Sil Butonu - Zarif Kırmızı/Pembe (Yemek Planları Sil butonuyla aynı) */
+    .shopping-list-btn-delete {
+        background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+        color: white;
+    }
+    
+    .shopping-list-btn-delete:hover {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Dark Mode Desteği */
+    [data-theme="dark"] .shopping-list-btn-view {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: #e0e7ff;
+    }
+    
+    [data-theme="dark"] .shopping-list-btn-view:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+    
+    [data-theme="dark"] .shopping-list-btn-delete {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: #fee2e2;
+    }
+    
+    [data-theme="dark"] .shopping-list-btn-delete:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+    
+    [data-theme="dark"] .shopping-list-btn {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-theme="dark"] .shopping-list-btn:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Yemek Planlarına Git Butonu */
+    .shopping-list-create-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .shopping-list-create-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        color: white;
+    }
+    
+    .shopping-list-create-btn:active {
+        transform: translateY(0);
+    }
+    
+    [data-theme="dark"] .shopping-list-create-btn {
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-theme="dark"] .shopping-list-create-btn:hover {
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Responsive */
+    @@media (max-width: 576px) {
+        .shopping-list-actions {
+            flex-direction: row;
+            gap: 8px;
+        }
+        
+        .shopping-list-actions > a,
+        .shopping-list-actions form {
+            flex: 1;
+        }
+        
+        .shopping-list-btn {
+            width: 100%;
+            padding: 10px 8px;
+            min-height: 40px;
+            font-size: 12px;
+        }
+        
+        .shopping-list-btn span {
+            display: none;
+        }
+        
+        .shopping-list-btn i {
+            margin: 0;
+        }
+        
+        .shopping-list-create-btn {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+    }
+    
+    /* Liste Durumu Badge */
+    .shopping-list-status-badge {
+        flex-shrink: 0;
+        margin-left: 10px;
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-badge.status-completed {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+    }
+    
+    .status-badge.status-ongoing {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(249, 115, 22, 0.2);
+    }
+    
+    [data-theme="dark"] .status-badge.status-completed {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+    
+    [data-theme="dark"] .status-badge.status-ongoing {
+        background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    }
+</style>
 

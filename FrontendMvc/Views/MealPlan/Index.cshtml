@@ -27,65 +27,73 @@
                             @foreach (var mealPlan in Model)
                             {
                                 <div class="col-md-6 col-lg-4 mb-3">
-                                    <div class="bd bgc-white p-20 bdrs-3 meal-plan-card" style="height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
-                                        <div class="d-flex justify-content-between align-items-start mB-10">
-                                            <h4 class="mB-0" style="flex: 1;">
-                                                <a asp-action="Details" asp-route-id="@mealPlan.Id" class="c-grey-900" style="text-decoration: none;">
-                                                    @mealPlan.Name
-                                                </a>
-                                            </h4>
-                                            <div class="meal-plan-status-badge">
+                                    <div class="bd bgc-white p-20 bdrs-3 meal-plan-card" style="height: 100%; display: flex; flex-direction: column;">
+                                        <div class="meal-plan-card-content" style="flex: 1;">
+                                            <div class="meal-plan-title-section mB-10">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <h4 class="mB-0" style="flex: 1;">
+                                                        <a asp-action="Details" asp-route-id="@mealPlan.Id" class="c-grey-900" style="text-decoration: none;">
+                                                            @mealPlan.Name
+                                                        </a>
+                                                    </h4>
+                                                    <div class="meal-plan-status-badge">
+                                                        @{
+                                                            var now = DateTime.Now.Date;
+                                                            var statusClass = "";
+                                                            var statusText = "";
+                                                            if (mealPlan.EndDate < now)
+                                                            {
+                                                                statusClass = "status-past";
+                                                                statusText = "Geçmiş";
+                                                            }
+                                                            else if (mealPlan.StartDate <= now && mealPlan.EndDate >= now)
+                                                            {
+                                                                statusClass = "status-active";
+                                                                statusText = "Aktif";
+                                                            }
+                                                            else
+                                                            {
+                                                                statusClass = "status-upcoming";
+                                                                statusText = "Gelecek";
+                                                            }
+                                                        }
+                                                        <span class="status-badge @statusClass">@statusText</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="meal-plan-date-info mB-15">
+                                                <p class="fsz-sm c-grey-600 mB-0">
+                                                    <i class="ti-calendar mR-5"></i>
+                                                    @mealPlan.StartDate.ToString("dd.MM.yyyy") - @mealPlan.EndDate.ToString("dd.MM.yyyy")
+                                                </p>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center meal-plan-item-info mB-15">
+                                                <p class="fsz-sm c-grey-600 mB-0">
+                                                    <i class="ti-clipboard mR-5"></i>
+                                                    @mealPlan.Items.Count öğün
+                                                </p>
                                                 @{
-                                                    var now = DateTime.Now.Date;
-                                                    var statusClass = "";
-                                                    var statusText = "";
-                                                    if (mealPlan.EndDate < now)
-                                                    {
-                                                        statusClass = "status-past";
-                                                        statusText = "Geçmiş";
-                                                    }
-                                                    else if (mealPlan.StartDate <= now && mealPlan.EndDate >= now)
-                                                    {
-                                                        statusClass = "status-active";
-                                                        statusText = "Aktif";
-                                                    }
-                                                    else
-                                                    {
-                                                        statusClass = "status-upcoming";
-                                                        statusText = "Gelecek";
-                                                    }
+                                                    var totalServings = mealPlan.Items.Sum(item => item.Servings);
                                                 }
-                                                <span class="status-badge @statusClass">@statusText</span>
+                                                <p class="fsz-sm c-grey-600 mB-0">
+                                                    <i class="ti-user mR-5"></i>
+                                                    Toplam @totalServings porsiyon
+                                                </p>
                                             </div>
                                         </div>
-                                        <p class="fsz-sm c-grey-600 mB-15">
-                                            <i class="ti-calendar mR-5"></i>
-                                            @mealPlan.StartDate.ToString("dd.MM.yyyy") - @mealPlan.EndDate.ToString("dd.MM.yyyy")
-                                        </p>
-                                        <div class="d-flex justify-content-between align-items-center mB-15">
-                                            <p class="fsz-sm c-grey-600 mB-0">
-                                                <i class="ti-clipboard mR-5"></i>
-                                                @mealPlan.Items.Count öğün
-                                            </p>
-                                            @{
-                                                var totalServings = mealPlan.Items.Sum(item => item.Servings);
-                                            }
-                                            <p class="fsz-sm c-grey-600 mB-0">
-                                                <i class="ti-user mR-5"></i>
-                                                Toplam @totalServings porsiyon
-                                            </p>
-                                        </div>
-                                        <div class="d-flex gap-10 meal-plan-actions">
-                                            <a asp-action="Edit" asp-route-id="@mealPlan.Id" class="meal-plan-btn meal-plan-btn-edit">
-                                                <i class="ti-pencil"></i> <span>Düzenle</span>
-                                            </a>
-                                            <form asp-action="Delete" asp-route-id="@mealPlan.Id" method="post" class="meal-plan-delete-form" 
-                                                  onsubmit="return confirm('Bu planı silmek istediğinizden emin misiniz?');">
-                                                @Html.AntiForgeryToken()
-                                                <button type="submit" class="meal-plan-btn meal-plan-btn-delete">
-                                                    <i class="ti-trash"></i> <span>Sil</span>
-                                                </button>
-                                            </form>
+                                        <div class="meal-plan-card-footer">
+                                            <div class="d-flex gap-10 meal-plan-actions">
+                                                <a asp-action="Edit" asp-route-id="@mealPlan.Id" class="meal-plan-btn meal-plan-btn-edit">
+                                                    <i class="ti-pencil"></i> <span>Düzenle</span>
+                                                </a>
+                                                <form asp-action="Delete" asp-route-id="@mealPlan.Id" method="post" class="meal-plan-delete-form" 
+                                                      onsubmit="return confirm('Bu planı silmek istediğinizden emin misiniz?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="meal-plan-btn meal-plan-btn-delete">
+                                                        <i class="ti-trash"></i> <span>Sil</span>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -156,41 +164,140 @@
         overflow: visible !important;
     }
     
-    /* Zarif Buton Stilleri */
-    .meal-plan-actions {
-        margin-top: 15px;
+    /* Kartların eşit yükseklikte olması için */
+    .meal-plans-scrollable .row {
         display: flex;
-        gap: 10px;
-        align-items: center;
         flex-wrap: wrap;
     }
     
-    .meal-plan-actions > a {
+    .meal-plans-scrollable .row > [class*="col-"] {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Meal Plan Card */
+    .meal-plan-card {
+        display: flex;
+        flex-direction: column;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease;
+        border: 1px solid #e0e0e0;
+        border-radius: 3px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .meal-plan-card-content {
         flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+    
+    .meal-plan-title-section {
+        flex-shrink: 0;
+        min-height: 70px;
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    .meal-plan-title-section > div {
+        width: 100%;
+    }
+    
+    .meal-plan-title-section h4 {
+        line-height: 1.4;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .meal-plan-date-info {
+        flex-shrink: 0;
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .meal-plan-item-info {
+        flex-shrink: 0;
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .meal-plan-card-footer {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        margin-top: auto;
+    }
+    
+    /* Dark Mode için daha belirgin ve açık border - Default açık, hover koyu */
+    /* Sadece meal-plans container içindeki kartları hedeflemek için çok spesifik selector kullanıyoruz */
+    [data-theme="dark"] .meal-plans-main-container .bd.bgc-white.meal-plan-card,
+    [data-theme="dark"] .meal-plans-main-container .meal-plan-card.bd.bgc-white,
+    [data-theme="dark"] .meal-plans-main-container .meal-plan-card {
+        border: 1px solid #e5e7eb !important;
+        border-color: #e5e7eb !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    [data-theme="dark"] .meal-plans-main-container .bd.bgc-white.meal-plan-card:hover,
+    [data-theme="dark"] .meal-plans-main-container .meal-plan-card.bd.bgc-white:hover,
+    [data-theme="dark"] .meal-plans-main-container .meal-plan-card:hover {
+        border-color: #b0b5c0 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Zarif Buton Stilleri */
+    .meal-plan-actions {
+        margin-top: 0;
+        padding-top: 15px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: nowrap;
+        width: 100%;
+        flex-shrink: 0;
+        min-height: 40px;
+    }
+    
+    .meal-plan-actions > a {
+        flex: 1 1 0;
         min-width: 0;
         display: flex;
         align-items: center;
+        justify-content: center;
         text-decoration: none;
+        width: 100%;
+        height: 40px;
     }
     
     .meal-plan-delete-form {
-        flex: 1;
+        flex: 1 1 0;
         min-width: 0;
         display: flex;
         margin: 0;
         padding: 0;
         align-items: center;
         border: none;
+        width: 100%;
+        height: 40px;
     }
     
     .meal-plan-delete-form button {
         width: 100%;
+        height: 100%;
         margin: 0;
         padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
     }
     
     .meal-plan-btn {
-        display: inline-flex;
+        display: flex;
         align-items: center;
         justify-content: center;
         gap: 6px;
@@ -210,6 +317,8 @@
         height: 40px;
         line-height: 1;
         vertical-align: middle;
+        flex: 1;
+        box-sizing: border-box;
     }
     
     .meal-plan-btn i {
@@ -333,18 +442,28 @@
     /* Responsive */
     @@media (max-width: 576px) {
         .meal-plan-actions {
-            flex-direction: column;
+            flex-direction: row;
+            gap: 8px;
         }
         
         .meal-plan-actions > a,
         .meal-plan-actions form {
-            width: 100%;
+            flex: 1;
         }
         
         .meal-plan-btn {
             width: 100%;
-            padding: 12px 16px;
-            min-height: 44px;
+            padding: 10px 8px;
+            min-height: 40px;
+            font-size: 12px;
+        }
+        
+        .meal-plan-btn span {
+            display: none;
+        }
+        
+        .meal-plan-btn i {
+            margin: 0;
         }
         
         .meal-plan-create-btn {

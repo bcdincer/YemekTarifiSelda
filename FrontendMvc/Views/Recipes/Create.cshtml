@@ -6,18 +6,64 @@
 }
 
 <style>
+    /* Ana container için stil */
+    .recipe-create-container {
+        max-width: 100%;
+    }
+
+    .recipe-create-container .row {
+        margin-left: -8px;
+        margin-right: -8px;
+    }
+
+    .recipe-create-container [class*="col-"] {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .recipe-create-container .bd.bgc-white {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: box-shadow 0.3s ease;
+    }
+
+    [data-theme="dark"] .recipe-create-container .bd.bgc-white,
+    [data-theme="dark"] .recipe-create-container.bd.bgc-white {
+        background: #1e1e2e !important;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+        border-color: #3d3d4f !important;
+    }
+
     /* Üst bilgi satırı için stil */
     .quick-info-bar {
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 6px;
-        padding: 18px 20px;
-        margin-bottom: 20px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
         display: flex;
         justify-content: space-around;
         align-items: center;
         flex-wrap: wrap;
         gap: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    [data-theme="dark"] .quick-info-bar {
+        background: linear-gradient(135deg, #2d2d3f 0%, #1e1e2e 100%);
+        border: 1px solid #3d3d4f;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .quick-info-bar:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+    }
+
+    [data-theme="dark"] .quick-info-bar:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
 
     .quick-info-bar .quick-info-item {
@@ -38,6 +84,20 @@
         cursor: default;
         display: flex;
         align-items: center;
+        transition: color 0.2s ease;
+    }
+
+    [data-theme="dark"] .quick-info-bar .quick-info-item > label {
+        color: #e0e0e0;
+    }
+
+    .quick-info-bar .quick-info-item > label i {
+        color: #6c757d;
+        transition: color 0.2s ease;
+    }
+
+    [data-theme="dark"] .quick-info-bar .quick-info-item > label i {
+        color: #a0a0b0;
     }
 
     .quick-info-bar .quick-info-item input[type="number"],
@@ -45,6 +105,45 @@
         width: auto;
         display: inline-block;
         flex-shrink: 0;
+        border: 1px solid #ced4da !important;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        background: #ffffff !important;
+        color: #495057 !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+    [data-theme="dark"] .quick-info-bar .quick-info-item input[type="number"],
+    [data-theme="dark"] .quick-info-bar .quick-info-item select {
+        background: #2d2d3f !important;
+        border-color: #4d4d5f !important;
+        color: #e0e0e0 !important;
+    }
+
+    .quick-info-bar .quick-info-item input[type="number"]:focus,
+    .quick-info-bar .quick-info-item select:focus {
+        border-color: #818cf8 !important;
+        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1) !important;
+        outline: none;
+    }
+
+    [data-theme="dark"] .quick-info-bar .quick-info-item input[type="number"]:focus,
+    [data-theme="dark"] .quick-info-bar .quick-info-item select:focus {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+    }
+
+    /* Select'lerin normal durumda mor border göstermemesi için */
+    .quick-info-bar .quick-info-item select:not(:focus) {
+        border-color: #ced4da !important;
+        box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .quick-info-bar .quick-info-item select:not(:focus) {
+        border-color: #4d4d5f !important;
+        box-shadow: none !important;
     }
 
     /* Hazırlık ve Pişirme süreleri için daha küçük input */
@@ -58,6 +157,65 @@
 
     .quick-info-bar .quick-info-item select[name="Difficulty"] {
         min-width: 100px;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 0.5rem center !important;
+        background-size: 12px 10px !important;
+        padding-right: 1.75rem !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+        cursor: pointer;
+        border: 1px solid #ced4da !important;
+        background-color: #ffffff !important;
+        color: #495057 !important;
+    }
+
+    [data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"] {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+        border-color: #4d4d5f !important;
+        background-color: #2d2d3f !important;
+        color: #e0e0e0 !important;
+    }
+
+    .quick-info-bar .quick-info-item select[name="Difficulty"]:focus {
+        border-color: #818cf8 !important;
+        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1) !important;
+        outline: none;
+    }
+
+    [data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"]:focus {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+    }
+
+    .quick-info-bar .quick-info-item select[name="Difficulty"]:not(:focus) {
+        border-color: #ced4da !important;
+        box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"]:not(:focus) {
+        border-color: #4d4d5f !important;
+        box-shadow: none !important;
+    }
+
+    .quick-info-bar .quick-info-item select[name="Difficulty"] option {
+        background: #ffffff;
+        color: #495057;
+        padding: 8px;
+    }
+
+    [data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"] option {
+        background: #2d2d3f !important;
+        color: #e0e0e0 !important;
+    }
+
+    .quick-info-bar .quick-info-item select[name="Difficulty"]:hover {
+        border-color: #adb5bd;
+    }
+
+    [data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"]:hover {
+        border-color: #5d5d6f;
     }
 
     .quick-info-bar .form-check {
@@ -69,18 +227,95 @@
 
     .quick-info-bar .form-check-input {
         margin-top: 0;
-        margin-right: 6px;
+        margin-right: 8px;
         flex-shrink: 0;
+        width: 20px !important;
+        height: 20px !important;
+        border: 2px solid #ced4da !important;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background-color: #ffffff;
+        position: relative;
     }
 
     .quick-info-bar .form-check-label {
         margin-bottom: 0;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 600;
         color: #495057;
         display: flex;
         align-items: center;
         white-space: nowrap;
+        transition: color 0.2s ease;
+        cursor: pointer;
+    }
+
+    [data-theme="dark"] .quick-info-bar .form-check-label {
+        color: #e0e0e0;
+    }
+
+    .quick-info-bar .form-check-label i {
+        color: #ffc107;
+        transition: color 0.2s ease;
+        font-size: 16px;
+    }
+
+    .quick-info-bar .form-check-input:checked ~ .form-check-label i {
+        color: #ff9800;
+    }
+
+    .quick-info-bar .form-check-input:checked {
+        background-color: #818cf8 !important;
+        border-color: #6366f1 !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e") !important;
+        background-size: 14px 14px !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        box-shadow: 0 2px 4px rgba(129, 140, 248, 0.3);
+    }
+
+    .quick-info-bar .form-check-input:hover {
+        border-color: #818cf8 !important;
+        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
+    }
+
+    .quick-info-bar .form-check-input:checked:hover {
+        border-color: #6366f1 !important;
+        box-shadow: 0 2px 6px rgba(129, 140, 248, 0.4);
+    }
+
+    [data-theme="dark"] .quick-info-bar .form-check-input {
+        background-color: #2d2d3f !important;
+        border-color: #5d5d6f !important;
+    }
+
+    [data-theme="dark"] .quick-info-bar .form-check-input:checked {
+        background-color: #6366f1 !important;
+        border-color: #4f46e5 !important;
+        box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4);
+    }
+
+    [data-theme="dark"] .quick-info-bar .form-check-input:hover {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    [data-theme="dark"] .quick-info-bar .form-check-input:checked:hover {
+        border-color: #4f46e5 !important;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.5);
+    }
+
+    [data-theme="dark"] .quick-info-bar .form-check-input:focus {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25) !important;
+        outline: none;
+    }
+
+    .quick-info-bar .form-check-input:focus {
+        border-color: #818cf8 !important;
+        box-shadow: 0 0 0 0.25rem rgba(129, 140, 248, 0.25) !important;
+        outline: none;
     }
 
     /* Validation mesajı için */
@@ -187,205 +422,431 @@
             max-width: 60px;
         }
     }
+
+    /* Form alanları için iyileştirmeler */
+    .recipe-create-container .form-control {
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        padding: 10px 14px;
+    }
+
+    [data-theme="dark"] .recipe-create-container .form-control {
+        background: #2d2d3f;
+        border-color: #4d4d5f;
+        color: #e0e0e0;
+    }
+
+    .recipe-create-container .form-control:focus {
+        border-color: #818cf8;
+        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
+        outline: none;
+    }
+
+    [data-theme="dark"] .recipe-create-container .form-control:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .recipe-create-container .form-label {
+        color: #495057;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    [data-theme="dark"] .recipe-create-container .form-label {
+        color: #e0e0e0;
+    }
+
+    /* Select dropdown için */
+    .recipe-create-container select.form-control {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 0.75rem center !important;
+        background-size: 16px 12px !important;
+        padding-right: 2.5rem !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+        cursor: pointer;
+    }
+
+    [data-theme="dark"] .recipe-create-container select.form-control {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    }
+
+    /* Select'lerin normal durumda mor border göstermemesi için */
+    .recipe-create-container select.form-control:not(:focus) {
+        border-color: #ced4da !important;
+        box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container select.form-control:not(:focus) {
+        border-color: #4d4d5f !important;
+        box-shadow: none !important;
+    }
+
+    /* Quick info bar içindeki select'ler için dropdown arrow */
+    .quick-info-bar .quick-info-item select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 0.5rem center !important;
+        background-size: 12px 10px !important;
+        padding-right: 1.75rem !important;
+        cursor: pointer;
+    }
+
+    [data-theme="dark"] .quick-info-bar .quick-info-item select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    }
+
+    /* Dark mode için genel düzeltmeler */
+    [data-theme="dark"] .recipe-create-container h4 {
+        color: #e0e0e0 !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container .c-grey-600 {
+        color: #a0a0b0 !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container .text-danger {
+        color: #ff6b6b !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container .form-control::placeholder {
+        color: #6d6d7d !important;
+        opacity: 0.7;
+    }
+
+    [data-theme="dark"] .recipe-create-container textarea.form-control {
+        background: #2d2d3f !important;
+        border-color: #4d4d5f !important;
+        color: #e0e0e0 !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container textarea.form-control:focus {
+        background: #2d2d3f !important;
+        border-color: #6366f1 !important;
+        color: #e0e0e0 !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container input[type="file"] {
+        background: #2d2d3f !important;
+        border-color: #4d4d5f !important;
+        color: #e0e0e0 !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container input[type="file"]::file-selector-button {
+        background: #3d3d4f !important;
+        border-color: #5d5d6f !important;
+        color: #e0e0e0 !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container input[type="file"]::file-selector-button:hover {
+        background: #4d4d5f !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container .bd-top {
+        border-top-color: #3d3d4f !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container .btn-primary {
+        background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
+        border-color: #6366f1 !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container .btn-primary:hover {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container .btn-secondary {
+        background: #3d3d4f !important;
+        border-color: #4d4d5f !important;
+        color: #e0e0e0 !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container .btn-secondary:hover {
+        background: #4d4d5f !important;
+        border-color: #5d5d6f !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container .btn-danger {
+        background: #dc3545 !important;
+        border-color: #dc3545 !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container .btn-danger:hover {
+        background: #c82333 !important;
+        border-color: #bd2130 !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container small {
+        color: #a0a0b0 !important;
+    }
+
+    [data-theme="dark"] .recipe-create-container #imagePreview img {
+        border: 1px solid #4d4d5f !important;
+    }
+
+    /* Select option'lar için dark mode */
+    [data-theme="dark"] .recipe-create-container select.form-control option {
+        background: #2d2d3f !important;
+        color: #e0e0e0 !important;
+    }
+
+    [data-theme="dark"] .quick-info-bar .quick-info-item select option {
+        background: #2d2d3f !important;
+        color: #e0e0e0 !important;
+    }
+
+    /* Tüm select'ler için genel düzeltmeler */
+    .recipe-create-container select,
+    .quick-info-bar .quick-info-item select {
+        background-color: inherit !important;
+    }
+
+    /* Select'lerin hover durumu */
+    .recipe-create-container select:hover,
+    .quick-info-bar .quick-info-item select:hover {
+        border-color: #adb5bd;
+    }
+
+    [data-theme="dark"] .recipe-create-container select:hover,
+    [data-theme="dark"] .quick-info-bar .quick-info-item select:hover {
+        border-color: #5d5d6f;
+    }
+
+    /* Layers için dark mode */
+    [data-theme="dark"] .recipe-create-container .layers {
+        color: #e0e0e0;
+    }
 </style>
 
-<div class="row gap-20">
-    <div class="col-md-12">
-        <div class="bd bgc-white p-30">
-            <div class="layers">
-                <div class="layer w-100 mB-20">
+<div class="recipe-create-container">
+    <div class="row">
+        <div class="col-12">
+            <div class="bd bgc-white p-20 recipe-create-container">
+                <div class="layers">
                     <div class="layer w-100 mB-15">
-                        <h4 class="lh-1 mB-0">Yeni Tarif Ekle</h4>
-                    </div>
-                
-
-                <form asp-action="Create" method="post" enctype="multipart/form-data">
-                    <!-- Quick Info Bar -->
-                    <div class="quick-info-bar">
-                        <div class="quick-info-item">
-                            <div class="form-check">
-                                <input asp-for="IsFeatured" class="form-check-input" type="checkbox" id="IsFeaturedTop" />
-                                <label class="form-check-label" for="IsFeaturedTop">
-                                    <i class="ti-star mR-5"></i> Öne Çıkan
-                                </label>
-                            </div>
-                        </div>
-                        <div class="quick-info-item">
-                            <label asp-for="PrepTimeMinutes" class="mB-5">
-                                <i class="ti-timer mR-5"></i> Hazırlık (dk):
-                            </label>
-                            <input asp-for="PrepTimeMinutes" class="form-control form-control-sm d-inline-block" type="number" min="0" value="0" placeholder="0" />
-                        </div>
-                        <div class="quick-info-item">
-                            <label asp-for="CookingTimeMinutes" class="mB-0">
-                                <i class="ti-time mR-5"></i> Pişirme (dk) *:
-                            </label>
-                            <input asp-for="CookingTimeMinutes" class="form-control form-control-sm d-inline-block" type="number" min="1" required placeholder="30" />
-                            <span asp-validation-for="CookingTimeMinutes" class="text-danger fsz-xs"></span>
-                        </div>
-                        <div class="quick-info-item">
-                            <label asp-for="Servings" class="mB-0">
-                                <i class="ti-user mR-5"></i> Kaç Kişilik:
-                            </label>
-                            <input asp-for="Servings" class="form-control form-control-sm d-inline-block" type="number" min="1" value="4" placeholder="4" style="width: 60px;" />
-                        </div>
-                        <div class="quick-info-item">
-                            <label asp-for="Difficulty" class="mB-0">
-                                <i class="ti-bar-chart mR-5"></i> Zorluk:
-                            </label>
-                            <select asp-for="Difficulty" class="form-control form-control-sm d-inline-block">
-                                <option value="Kolay">Kolay</option>
-                                <option value="Orta" selected>Orta</option>
-                                <option value="Zor">Zor</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row gap-20">
-                        <!-- Sol Kolon -->
-                        <div class="col-md-8">
-                            <div class="layers">
-                                <div class="layer w-100 mB-15">
-                                    <label asp-for="Title" class="form-label fw-600">Tarif Adı *</label>
-                                    <input asp-for="Title" class="form-control" required />
-                                    <span asp-validation-for="Title" class="text-danger fsz-sm"></span>
-                                </div>
-
-                                <div class="layer w-100 mB-15">
-                                    <label asp-for="Description" class="form-label fw-600">Kısa Açıklama</label>
-                                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                                    <span asp-validation-for="Description" class="text-danger fsz-sm"></span>
-                                </div>
-
-                                <div class="layer w-100 mB-15">
-                                    <label asp-for="Ingredients" class="form-label fw-600">Malzemeler *</label>
-                                    <textarea asp-for="Ingredients" class="form-control" rows="6" required 
-                                              placeholder="Her malzemeyi ayrı satıra yazın veya virgülle ayırın"></textarea>
-                                    <span asp-validation-for="Ingredients" class="text-danger fsz-sm"></span>
-                                </div>
-
-                                <div class="layer w-100 mB-15">
-                                    <label asp-for="Steps" class="form-label fw-600">Yapılış *</label>
-                                    <textarea asp-for="Steps" class="form-control" rows="8" required 
-                                              placeholder="Adım adım yapılışını yazın"></textarea>
-                                    <span asp-validation-for="Steps" class="text-danger fsz-sm"></span>
-                                </div>
-
-                                <div class="layer w-100 mB-15">
-                                    <label asp-for="Tips" class="form-label fw-600">
-                                        <i class="ti-light-bulb mR-5"></i> Püf Noktaları
-                                    </label>
-                                    <textarea asp-for="Tips" class="form-control" rows="3" 
-                                              placeholder="Tarifin püf noktalarını yazın"></textarea>
-                                </div>
-
-                                <div class="layer w-100 mB-15">
-                                    <label asp-for="AlternativeIngredients" class="form-label fw-600">
-                                        <i class="ti-exchange-vertical mR-5"></i> Alternatif Malzemeler
-                                    </label>
-                                    <textarea asp-for="AlternativeIngredients" class="form-control" rows="2" 
-                                              placeholder="Varsa alternatif malzemeleri yazın"></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Sağ Kolon -->
-                        <div class="col-md-4">
-                            <div class="layers">
-                                <div class="layer w-100 mB-15">
-                                    <label asp-for="CategoryId" class="form-label fw-600">Kategori</label>
-                                    <select asp-for="CategoryId" class="form-control">
-                                        <option value="">Kategori Seçin</option>
-                                        @foreach (var category in categories)
-                                        {
-                                            <option value="@category.Id">@category.Name</option>
-                                        }
-                                    </select>
-                                </div>
-
-                                <div class="layer w-100 mB-15">
-                                    <label class="form-label fw-600">Tarif Görseli</label>
-                                    <div class="d-flex gap-10 ai-c" style="flex-wrap: wrap;">
-                                        <input type="file" name="imageFile" id="imageFile" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="form-control" style="flex: 1; min-width: 200px;" />
-                                        <span class="c-grey-600" style="white-space: nowrap;">veya</span>
-                                        <input asp-for="ImageUrl" class="form-control" type="text" 
-                                               placeholder="https://example.com/image.jpg" id="imageUrl" style="flex: 1; min-width: 200px;" />
-                                    </div>
-                                    <small class="c-grey-600 d-block mT-5">JPG, PNG, GIF veya WebP formatında, maksimum 5MB</small>
-                                    
-                                    <!-- Görsel önizleme -->
-                                    <div id="imagePreview" class="mT-10" style="display: none;">
-                                        <img id="previewImg" src="" alt="Önizleme" class="bdrs-3" style="max-width: 100%; max-height: 200px; object-fit: cover;" />
-                                        <button type="button" id="removeImage" class="btn btn-sm btn-danger mT-5">
-                                            <i class="ti-close"></i> Görseli Kaldır
-                                        </button>
-                                    </div>
-                                </div>
-
+                        <div class="peers fxw-nw ai-c">
+                            <div class="peer peer-greed">
+                                <h4 class="lh-1 mB-0">
+                                    <i class="ti-plus mR-10"></i> Yeni Tarif Ekle
+                                </h4>
+                                <p class="c-grey-600 mT-5 fsz-sm">Lezzetli tarifinizi paylaşın ve diğer kullanıcılarla buluşturun</p>
                             </div>
                         </div>
                     </div>
-
-                    <div class="row mT-20">
-                        <div class="col-12">
-                            <div class="bd-top pT-15">
-                                <div class="peers fxw-nw gap-10" style="justify-content: flex-end;">
-                                    <div class="peer">
-                                        <button type="submit" class="btn btn-primary" style="color: white;">
-                                            <i class="ti-save mR-5"></i> Kaydet
-                                        </button>
+                    
+                    <div class="layer w-100 mB-15">
+                        <form asp-action="Create" method="post" enctype="multipart/form-data">
+                            <!-- Hızlı Bilgi Çubuğu -->
+                            <div class="layer w-100 mB-20">
+                                <div class="quick-info-bar">
+                                    <div class="quick-info-item">
+                                        <div class="form-check">
+                                            <input asp-for="IsFeatured" class="form-check-input" type="checkbox" id="IsFeaturedTop" />
+                                            <label class="form-check-label" for="IsFeaturedTop">
+                                                <i class="ti-star mR-5"></i> Öne Çıkan
+                                            </label>
+                                        </div>
                                     </div>
-                                    <div class="peer">
-                                        <a asp-controller="Recipes" asp-action="Index" class="btn btn-secondary" style="color: white;">
-                                            <i class="ti-close mR-5"></i> İptal
-                                        </a>
+                                    <div class="quick-info-item">
+                                        <label asp-for="PrepTimeMinutes" class="mB-5">
+                                            <i class="ti-timer mR-5"></i> Hazırlık (dk):
+                                        </label>
+                                        <input asp-for="PrepTimeMinutes" class="form-control form-control-sm d-inline-block" type="number" min="0" placeholder="0" />
+                                    </div>
+                                    <div class="quick-info-item">
+                                        <label asp-for="CookingTimeMinutes" class="mB-0">
+                                            <i class="ti-time mR-5"></i> Pişirme (dk) *:
+                                        </label>
+                                        <input asp-for="CookingTimeMinutes" class="form-control form-control-sm d-inline-block" type="number" min="1" required placeholder="30" />
+                                        <span asp-validation-for="CookingTimeMinutes" class="text-danger fsz-xs"></span>
+                                    </div>
+                                    <div class="quick-info-item">
+                                        <label asp-for="Servings" class="mB-0">
+                                            <i class="ti-user mR-5"></i> Kaç Kişilik:
+                                        </label>
+                                        <input asp-for="Servings" class="form-control form-control-sm d-inline-block" type="number" min="1" placeholder="4" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center;" />
+                                    </div>
+                                    <div class="quick-info-item">
+                                        <label asp-for="Difficulty" class="mB-0">
+                                            <i class="ti-settings mR-5"></i> Zorluk:
+                                        </label>
+                                        <select asp-for="Difficulty" class="form-control form-control-sm d-inline-block">
+                                            <option value="Kolay">🟢 Kolay</option>
+                                            <option value="Orta" selected>🟡 Orta</option>
+                                            <option value="Zor">🔴 Zor</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                            <div class="row">
+                                <!-- Sol Kolon -->
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="layers">
+                                        <div class="layer w-100 mB-15">
+                                            <label asp-for="Title" class="form-label fw-600">
+                                                <i class="ti-bookmark mR-5"></i> Tarif Adı *
+                                            </label>
+                                            <input asp-for="Title" class="form-control" required placeholder="Örn: Tavuklu Pilav" />
+                                            <span asp-validation-for="Title" class="text-danger fsz-sm"></span>
+                                        </div>
+
+                                        <div class="layer w-100 mB-15">
+                                            <label asp-for="Ingredients" class="form-label fw-600">
+                                                <i class="ti-shopping-cart mR-5"></i> Malzemeler *
+                                            </label>
+                                            <textarea asp-for="Ingredients" class="form-control" rows="5" required
+                                                      placeholder="Her malzemeyi ayrı satıra yazın&#10;Örn:&#10;500g tavuk göğsü&#10;2 su bardağı pilav&#10;1 adet soğan"></textarea>
+                                            <span asp-validation-for="Ingredients" class="text-danger fsz-sm"></span>
+                                        </div>
+
+                                        <div class="layer w-100 mB-15">
+                                            <label asp-for="Description" class="form-label fw-600">
+                                                <i class="ti-file-text mR-5"></i> Kısa Açıklama
+                                            </label>
+                                            <textarea asp-for="Description" class="form-control" rows="2" placeholder="Tarif hakkında kısa bir açıklama yazın"></textarea>
+                                            <span asp-validation-for="Description" class="text-danger fsz-sm"></span>
+                                        </div>
+
+                                        <div class="layer w-100 mB-15">
+                                            <label asp-for="Tips" class="form-label fw-600">
+                                                <i class="ti-light-bulb mR-5"></i> Püf Noktaları
+                                            </label>
+                                            <textarea asp-for="Tips" class="form-control" rows="3"
+                                                      placeholder="Püf noktaları"></textarea>
+                                        </div>
+                                        <div class="layer w-100 mB-15">
+                                            <label asp-for="AlternativeIngredients" class="form-label fw-600">
+                                                <i class="ti-exchange-vertical mR-5"></i> Alternatif Malzemeler
+                                            </label>
+                                            <textarea asp-for="AlternativeIngredients" class="form-control" rows="3"
+                                                      placeholder="Alternatif malzemeler"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sağ Kolon -->
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="layers">
+                                        <div class="layer w-100 mB-15">
+                                            <label asp-for="CategoryId" class="form-label fw-600">
+                                                <i class="ti-folder mR-5"></i> Kategori
+                                            </label>
+                                            <select asp-for="CategoryId" class="form-control">
+                                                <option value="">Kategori Seçin</option>
+                                                @foreach (var category in categories)
+                                                {
+                                                    <option value="@category.Id">@category.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                        <div class="layer w-100 mB-15">
+                                            <label asp-for="Steps" class="form-label fw-600">
+                                                <i class="ti-list mR-5"></i> Yapılış *
+                                            </label>
+                                            <textarea asp-for="Steps" class="form-control" rows="5" required
+                                                      placeholder="Adım adım yapılışını yazın&#10;Örn:&#10;1. Tavuğu küp küp doğrayın&#10;2. Soğanı ince ince doğrayın&#10;3. Tencereye yağ ekleyin ve kavurun"></textarea>
+                                            <span asp-validation-for="Steps" class="text-danger fsz-sm"></span>
+                                        </div>
+
+                                        <div class="layer w-100 mB-15">
+                                            <label class="form-label fw-600 mB-8">
+                                                <i class="ti-image mR-5"></i> Tarif Görseli
+                                            </label>
+                                            <div class="d-flex gap-10 ai-c" style="flex-wrap: wrap;">
+                                                <input type="file" name="imageFile" id="imageFile" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="form-control" style="flex: 1; min-width: 200px;" />
+                                                <span class="c-grey-600" style="white-space: nowrap;">veya</span>
+                                                <input asp-for="ImageUrl" class="form-control" type="text" 
+                                                       placeholder="https://example.com/image.jpg" id="imageUrl" style="flex: 1; min-width: 200px;" />
+                                            </div>
+                                            <small class="c-grey-600 d-block mT-5">JPG, PNG, GIF veya WebP formatında, maksimum 5MB</small>
+                                            
+                                            <!-- Görsel önizleme -->
+                                            <div id="imagePreview" class="mT-10" style="display: none;">
+                                                <label class="fw-600 mB-5">Yeni Görsel Önizleme:</label>
+                                                <div>
+                                                    <img id="previewImg" src="" alt="Önizleme" class="bdrs-3" style="max-width: 200px; max-height: 200px; object-fit: cover;" />
+                                                    <button type="button" id="removeImage" class="btn btn-sm btn-danger mT-5">
+                                                        <i class="ti-close"></i> Görseli Kaldır
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mT-20">
+                                <div class="bd-top pT-15">
+                                    <div class="peers fxw-nw gap-10" style="justify-content: flex-end;">
+                                        <div class="peer">
+                                            <button type="submit" class="btn btn-primary" style="color: white;">
+                                                <i class="ti-save mR-5"></i> Kaydet
+                                            </button>
+                                        </div>
+                                        <div class="peer">
+                                            <a asp-controller="Recipes" asp-action="Index" class="btn btn-secondary" style="color: white;">
+                                                <i class="ti-close mR-5"></i> İptal
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                </form>
                 </div>
             </div>
         </div>
     </div>
+
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+        <script>
+            const imageFileInput = document.getElementById('imageFile');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            const removeImageBtn = document.getElementById('removeImage');
+            const imageUrlInput = document.getElementById('imageUrl');
+
+            // Dosya seçildiğinde önizleme göster
+            if (imageFileInput) {
+                imageFileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImg.src = e.target.result;
+                            imagePreview.style.display = 'block';
+                            if (imageUrlInput) imageUrlInput.value = ''; // URL input'unu temizle
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // Görseli kaldır
+            if (removeImageBtn) {
+                removeImageBtn.addEventListener('click', function() {
+                    if (imageFileInput) imageFileInput.value = '';
+                    imagePreview.style.display = 'none';
+                    previewImg.src = '';
+                });
+            }
+
+            // URL input'u değiştiğinde dosya input'unu temizle
+            if (imageUrlInput) {
+                imageUrlInput.addEventListener('input', function() {
+                    if (this.value && imageFileInput) {
+                        imageFileInput.value = '';
+                        if (imagePreview) imagePreview.style.display = 'none';
+                    }
+                });
+            }
+        </script>
+    }
 </div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        const imageFileInput = document.getElementById('imageFile');
-        const imagePreview = document.getElementById('imagePreview');
-        const previewImg = document.getElementById('previewImg');
-        const removeImageBtn = document.getElementById('removeImage');
-        const imageUrlInput = document.getElementById('imageUrl');
-
-        // Dosya seçildiğinde önizleme göster
-        imageFileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                    imageUrlInput.value = ''; // URL input'unu temizle
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Görseli kaldır
-        removeImageBtn.addEventListener('click', function() {
-            imageFileInput.value = '';
-            imagePreview.style.display = 'none';
-            previewImg.src = '';
-        });
-
-        // URL input'u değiştiğinde dosya input'unu temizle
-        imageUrlInput.addEventListener('input', function() {
-            if (this.value) {
-                imageFileInput.value = '';
-                imagePreview.style.display = 'none';
-            }
-        });
-    </script>
-}

@@ -328,16 +328,21 @@ app.MapGet("/api/recipes/{id:int}/like", async (int id, HttpContext httpContext,
 });
 
 // Kullanıcının beğendiği tarifleri getir
-app.MapGet("/api/users/liked-recipes", async (HttpContext httpContext, IUnitOfWork unitOfWork, IRecipeService recipeService, IRatingService ratingService, ILikeService likeService) =>
+app.MapGet("/api/users/liked-recipes", async (HttpContext httpContext, IUnitOfWork unitOfWork, IRecipeService recipeService, IRatingService ratingService, ILikeService likeService, ILogger<Program> logger) =>
 {
     var userId = GetUserIdFromToken(httpContext);
     if (string.IsNullOrEmpty(userId))
     {
+        logger.LogWarning("Liked recipes endpoint: UserId is null or empty");
         return Results.Unauthorized();
     }
     
+    logger.LogInformation("Liked recipes endpoint: Fetching likes for userId: {UserId}", userId);
+    
     var likeRepository = unitOfWork.Likes;
     var likedLikes = await likeRepository.GetByUserIdAsync(userId);
+    
+    logger.LogInformation("Liked recipes endpoint: Found {Count} likes for userId: {UserId}", likedLikes.Count, userId);
     
     if (!likedLikes.Any())
     {
@@ -394,13 +399,16 @@ app.MapGet("/api/users/liked-recipes", async (HttpContext httpContext, IUnitOfWo
 }).RequireAuthorization();
 
 // Kullanıcının beğendiği tariflerde arama
-app.MapGet("/api/users/liked-recipes/search", async (string? q, HttpContext httpContext, IUnitOfWork unitOfWork, IRecipeService recipeService, IRatingService ratingService, ILikeService likeService) =>
+app.MapGet("/api/users/liked-recipes/search", async (string? q, HttpContext httpContext, IUnitOfWork unitOfWork, IRecipeService recipeService, IRatingService ratingService, ILikeService likeService, ILogger<Program> logger) =>
 {
     var userId = GetUserIdFromToken(httpContext);
     if (string.IsNullOrEmpty(userId))
     {
+        logger.LogWarning("Liked recipes search endpoint: UserId is null or empty");
         return Results.Unauthorized();
     }
+    
+    logger.LogInformation("Liked recipes search endpoint: Searching for userId: {UserId}, query: {Query}", userId, q);
     
     var likeRepository = unitOfWork.Likes;
     var likedLikes = await likeRepository.GetByUserIdAsync(userId);
@@ -745,7 +753,16 @@ app.MapGet("/api/recipes/{recipeId:int}/collections", async (int recipeId, HttpC
 // Helper method to get userId from JWT token
 static string? GetUserIdFromToken(HttpContext httpContext)
 {
-    return httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var userId = httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    
+    // Debug: Tüm claim'leri logla (sadece development'ta)
+    if (string.IsNullOrEmpty(userId) && httpContext.User?.Claims != null)
+    {
+        var allClaims = httpContext.User.Claims.Select(c => $"{c.Type}={c.Value}").ToList();
+        // Log sadece development'ta aktif olacak
+    }
+    
+    return userId;
 }
 
 static string? GetUserNameFromToken(HttpContext httpContext)

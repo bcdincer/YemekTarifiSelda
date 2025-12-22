@@ -194,7 +194,15 @@
         // apiFetch fonksiyonunu tanımla (eğer tanımlı değilse)
         if (typeof apiFetch === 'undefined') {
             window.apiFetch = async function(url, options = {}) {
-                const token = getCookie('authToken');
+                // Önce localStorage'dan, yoksa cookie'den token al
+                let token = null;
+                if (typeof localStorage !== 'undefined') {
+                    token = localStorage.getItem('authToken');
+                }
+                if (!token) {
+                    token = getCookie('authToken');
+                }
+                
                 const defaultOptions = {
                     headers: {
                         'Content-Type': 'application/json',

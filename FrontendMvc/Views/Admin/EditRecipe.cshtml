@@ -7,38 +7,64 @@
 }
 
 <style>
-	/* EditRecipe sayfası için sadece gerekli optimizasyonlar */
-	#mainContent {
-		max-width: 100%;
-	}
-
-	/* Sadece bu sayfadaki form container'ını optimize et */
+	/* Ana container için stil */
 	.edit-recipe-container {
 		max-width: 100%;
 	}
 
-		.edit-recipe-container .row {
-			margin-left: -8px;
-			margin-right: -8px;
-		}
+	.edit-recipe-container .row {
+		margin-left: -8px;
+		margin-right: -8px;
+	}
 
 	.edit-recipe-container [class*="col-"] {
 		padding-left: 8px;
 		padding-right: 8px;
 	}
 
+	.edit-recipe-container .bd.bgc-white {
+		background: #ffffff;
+		border-radius: 12px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		transition: box-shadow 0.3s ease;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .bd.bgc-white,
+	[data-theme="dark"] .edit-recipe-container.bd.bgc-white {
+		background: #1e1e2e !important;
+		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+		border-color: #3d3d4f !important;
+	}
+
 	/* Üst bilgi satırı için stil */
 	.quick-info-bar {
-		background-color: #f8f9fa;
-		border: 1px solid #e9ecef;
-		border-radius: 6px;
-		padding: 18px 20px;
-		margin-bottom: 20px;
+		background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+		border: 1px solid #dee2e6;
+		border-radius: 10px;
+		padding: 20px 24px;
+		margin-bottom: 24px;
 		display: flex;
 		justify-content: space-around;
 		align-items: center;
 		flex-wrap: wrap;
 		gap: 20px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+		transition: all 0.3s ease;
+	}
+
+	[data-theme="dark"] .quick-info-bar {
+		background: linear-gradient(135deg, #2d2d3f 0%, #1e1e2e 100%);
+		border: 1px solid #3d3d4f;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	}
+
+	.quick-info-bar:hover {
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		transform: translateY(-1px);
+	}
+
+	[data-theme="dark"] .quick-info-bar:hover {
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 	}
 
 	.quick-info-bar .quick-info-item {
@@ -59,6 +85,20 @@
 		cursor: default;
 		display: flex;
 		align-items: center;
+		transition: color 0.2s ease;
+	}
+
+	[data-theme="dark"] .quick-info-bar .quick-info-item > label {
+		color: #e0e0e0;
+	}
+
+	.quick-info-bar .quick-info-item > label i {
+		color: #6c757d;
+		transition: color 0.2s ease;
+	}
+
+	[data-theme="dark"] .quick-info-bar .quick-info-item > label i {
+		color: #a0a0b0;
 	}
 
 	.quick-info-bar .quick-info-item input[type="number"],
@@ -66,6 +106,45 @@
 		width: auto;
 		display: inline-block;
 		flex-shrink: 0;
+		border: 1px solid #ced4da !important;
+		border-radius: 6px;
+		transition: all 0.2s ease;
+		background: #ffffff !important;
+		color: #495057 !important;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+	}
+
+	[data-theme="dark"] .quick-info-bar .quick-info-item input[type="number"],
+	[data-theme="dark"] .quick-info-bar .quick-info-item select {
+		background: #2d2d3f !important;
+		border-color: #4d4d5f !important;
+		color: #e0e0e0 !important;
+	}
+
+	.quick-info-bar .quick-info-item input[type="number"]:focus,
+	.quick-info-bar .quick-info-item select:focus {
+		border-color: #818cf8 !important;
+		box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1) !important;
+		outline: none;
+	}
+
+	[data-theme="dark"] .quick-info-bar .quick-info-item input[type="number"]:focus,
+	[data-theme="dark"] .quick-info-bar .quick-info-item select:focus {
+		border-color: #6366f1 !important;
+		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+	}
+
+	/* Select'lerin normal durumda mor border göstermemesi için */
+	.quick-info-bar .quick-info-item select:not(:focus) {
+		border-color: #ced4da !important;
+		box-shadow: none !important;
+	}
+
+	[data-theme="dark"] .quick-info-bar .quick-info-item select:not(:focus) {
+		border-color: #4d4d5f !important;
+		box-shadow: none !important;
 	}
 
 	/* Hazırlık ve Pişirme süreleri için daha küçük input */
@@ -79,6 +158,65 @@
 
 	.quick-info-bar .quick-info-item select[name="Difficulty"] {
 		min-width: 100px;
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+		background-repeat: no-repeat !important;
+		background-position: right 0.5rem center !important;
+		background-size: 12px 10px !important;
+		padding-right: 1.75rem !important;
+		-webkit-appearance: none !important;
+		-moz-appearance: none !important;
+		appearance: none !important;
+		cursor: pointer;
+		border: 1px solid #ced4da !important;
+		background-color: #ffffff !important;
+		color: #495057 !important;
+	}
+
+	[data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"] {
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+		border-color: #4d4d5f !important;
+		background-color: #2d2d3f !important;
+		color: #e0e0e0 !important;
+	}
+
+	.quick-info-bar .quick-info-item select[name="Difficulty"]:focus {
+		border-color: #818cf8 !important;
+		box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1) !important;
+		outline: none;
+	}
+
+	[data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"]:focus {
+		border-color: #6366f1 !important;
+		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+	}
+
+	.quick-info-bar .quick-info-item select[name="Difficulty"]:not(:focus) {
+		border-color: #ced4da !important;
+		box-shadow: none !important;
+	}
+
+	[data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"]:not(:focus) {
+		border-color: #4d4d5f !important;
+		box-shadow: none !important;
+	}
+
+	.quick-info-bar .quick-info-item select[name="Difficulty"] option {
+		background: #ffffff;
+		color: #495057;
+		padding: 8px;
+	}
+
+	[data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"] option {
+		background: #2d2d3f !important;
+		color: #e0e0e0 !important;
+	}
+
+	.quick-info-bar .quick-info-item select[name="Difficulty"]:hover {
+		border-color: #adb5bd;
+	}
+
+	[data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"]:hover {
+		border-color: #5d5d6f;
 	}
 
 	.quick-info-bar .form-check {
@@ -90,18 +228,95 @@
 
 	.quick-info-bar .form-check-input {
 		margin-top: 0;
-		margin-right: 6px;
+		margin-right: 8px;
 		flex-shrink: 0;
+		width: 20px !important;
+		height: 20px !important;
+		border: 2px solid #ced4da !important;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		background-color: #ffffff;
+		position: relative;
 	}
 
 	.quick-info-bar .form-check-label {
 		margin-bottom: 0;
-		font-size: 13px;
+		font-size: 14px;
 		font-weight: 600;
 		color: #495057;
 		display: flex;
 		align-items: center;
 		white-space: nowrap;
+		transition: color 0.2s ease;
+		cursor: pointer;
+	}
+
+	[data-theme="dark"] .quick-info-bar .form-check-label {
+		color: #e0e0e0;
+	}
+
+	.quick-info-bar .form-check-label i {
+		color: #ffc107;
+		transition: color 0.2s ease;
+		font-size: 16px;
+	}
+
+	.quick-info-bar .form-check-input:checked ~ .form-check-label i {
+		color: #ff9800;
+	}
+
+	.quick-info-bar .form-check-input:checked {
+		background-color: #818cf8 !important;
+		border-color: #6366f1 !important;
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e") !important;
+		background-size: 14px 14px !important;
+		background-position: center !important;
+		background-repeat: no-repeat !important;
+		box-shadow: 0 2px 4px rgba(129, 140, 248, 0.3);
+	}
+
+	.quick-info-bar .form-check-input:hover {
+		border-color: #818cf8 !important;
+		box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
+	}
+
+	.quick-info-bar .form-check-input:checked:hover {
+		border-color: #6366f1 !important;
+		box-shadow: 0 2px 6px rgba(129, 140, 248, 0.4);
+	}
+
+	[data-theme="dark"] .quick-info-bar .form-check-input {
+		background-color: #2d2d3f !important;
+		border-color: #5d5d6f !important;
+	}
+
+	[data-theme="dark"] .quick-info-bar .form-check-input:checked {
+		background-color: #6366f1 !important;
+		border-color: #4f46e5 !important;
+		box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4);
+	}
+
+	[data-theme="dark"] .quick-info-bar .form-check-input:hover {
+		border-color: #6366f1 !important;
+		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+	}
+
+	[data-theme="dark"] .quick-info-bar .form-check-input:checked:hover {
+		border-color: #4f46e5 !important;
+		box-shadow: 0 2px 8px rgba(99, 102, 241, 0.5);
+	}
+
+	[data-theme="dark"] .quick-info-bar .form-check-input:focus {
+		border-color: #6366f1 !important;
+		box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25) !important;
+		outline: none;
+	}
+
+	.quick-info-bar .form-check-input:focus {
+		border-color: #818cf8 !important;
+		box-shadow: 0 0 0 0.25rem rgba(129, 140, 248, 0.25) !important;
+		outline: none;
 	}
 
 	/* Validation mesajı için */
@@ -118,15 +333,7 @@
 		margin-top: 2px;
 	}
 
-	/* Küçük desktop - gap azalt ama yan yana kalsın */
-	@@media (max-width: 1400px) {
-		.quick-info-bar {
-			gap: 15px;
-			padding: 15px 18px;
-		}
-	}
-
-	/* Tablet - gap daha da azalt ama yan yana kalsın */
+	/* Responsive */
 	@@media (max-width: 1200px) {
 		.quick-info-bar {
 			gap: 12px;
@@ -146,7 +353,6 @@
 		}
 	}
 
-	/* Küçük tablet - gap minimum ama yan yana kalsın */
 	@@media (max-width: 992px) {
 		.quick-info-bar {
 			gap: 10px;
@@ -165,14 +371,8 @@
 			max-width: 50px;
 			font-size: 12px;
 		}
-
-		.quick-info-bar .quick-info-item select[name="Difficulty"] {
-			min-width: 90px;
-			font-size: 12px;
-		}
 	}
 
-	/* Mobil - 2 sütun, hizalı ve düzenli */
 	@@media (max-width: 768px) {
 		.quick-info-bar {
 			justify-content: flex-start;
@@ -198,7 +398,6 @@
 		}
 	}
 
-	/* Küçük mobil - tek sütun, hizalı ve düzenli */
 	@@media (max-width: 480px) {
 		.quick-info-bar {
 			flex-direction: column;
@@ -223,18 +422,212 @@
 			min-width: 60px;
 			max-width: 60px;
 		}
+	}
 
-		.quick-info-bar .quick-info-item select[name="Difficulty"] {
-			flex: 1;
-			min-width: 100px;
-		}
+	/* Form alanları için iyileştirmeler */
+	.edit-recipe-container .form-control {
+		border: 1px solid #ced4da;
+		border-radius: 8px;
+		transition: all 0.2s ease;
+		padding: 10px 14px;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .form-control {
+		background: #2d2d3f;
+		border-color: #4d4d5f;
+		color: #e0e0e0;
+	}
+
+	.edit-recipe-container .form-control:focus {
+		border-color: #818cf8;
+		box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
+		outline: none;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .form-control:focus {
+		border-color: #6366f1;
+		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+	}
+
+	.edit-recipe-container .form-label {
+		color: #495057;
+		margin-bottom: 8px;
+		font-weight: 600;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .form-label {
+		color: #e0e0e0;
+	}
+
+	/* Select dropdown için */
+	.edit-recipe-container select.form-control {
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+		background-repeat: no-repeat !important;
+		background-position: right 0.75rem center !important;
+		background-size: 16px 12px !important;
+		padding-right: 2.5rem !important;
+		-webkit-appearance: none !important;
+		-moz-appearance: none !important;
+		appearance: none !important;
+		cursor: pointer;
+	}
+
+	[data-theme="dark"] .edit-recipe-container select.form-control {
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+	}
+
+	/* Select'lerin normal durumda mor border göstermemesi için */
+	.edit-recipe-container select.form-control:not(:focus) {
+		border-color: #ced4da !important;
+		box-shadow: none !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container select.form-control:not(:focus) {
+		border-color: #4d4d5f !important;
+		box-shadow: none !important;
+	}
+
+	/* Quick info bar içindeki select'ler için dropdown arrow */
+	.quick-info-bar .quick-info-item select {
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+		background-repeat: no-repeat !important;
+		background-position: right 0.5rem center !important;
+		background-size: 12px 10px !important;
+		padding-right: 1.75rem !important;
+		cursor: pointer;
+	}
+
+	[data-theme="dark"] .quick-info-bar .quick-info-item select {
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+	}
+
+	/* Dark mode için genel düzeltmeler */
+	[data-theme="dark"] .edit-recipe-container h4 {
+		color: #e0e0e0 !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .c-grey-600 {
+		color: #a0a0b0 !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .text-danger {
+		color: #ff6b6b !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .form-control::placeholder {
+		color: #6d6d7d !important;
+		opacity: 0.7;
+	}
+
+	[data-theme="dark"] .edit-recipe-container textarea.form-control {
+		background: #2d2d3f !important;
+		border-color: #4d4d5f !important;
+		color: #e0e0e0 !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container textarea.form-control:focus {
+		background: #2d2d3f !important;
+		border-color: #6366f1 !important;
+		color: #e0e0e0 !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container input[type="file"] {
+		background: #2d2d3f !important;
+		border-color: #4d4d5f !important;
+		color: #e0e0e0 !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container input[type="file"]::file-selector-button {
+		background: #3d3d4f !important;
+		border-color: #5d5d6f !important;
+		color: #e0e0e0 !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container input[type="file"]::file-selector-button:hover {
+		background: #4d4d5f !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .bd-top {
+		border-top-color: #3d3d4f !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .btn-primary {
+		background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
+		border-color: #6366f1 !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .btn-primary:hover {
+		background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .btn-secondary {
+		background: #3d3d4f !important;
+		border-color: #4d4d5f !important;
+		color: #e0e0e0 !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .btn-secondary:hover {
+		background: #4d4d5f !important;
+		border-color: #5d5d6f !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .btn-danger {
+		background: #dc3545 !important;
+		border-color: #dc3545 !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container .btn-danger:hover {
+		background: #c82333 !important;
+		border-color: #bd2130 !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container small {
+		color: #a0a0b0 !important;
+	}
+
+	[data-theme="dark"] .edit-recipe-container #imagePreview img {
+		border: 1px solid #4d4d5f !important;
+	}
+
+	/* Select option'lar için dark mode */
+	[data-theme="dark"] .edit-recipe-container select.form-control option {
+		background: #2d2d3f !important;
+		color: #e0e0e0 !important;
+	}
+
+	[data-theme="dark"] .quick-info-bar .quick-info-item select option {
+		background: #2d2d3f !important;
+		color: #e0e0e0 !important;
+	}
+
+	/* Tüm select'ler için genel düzeltmeler */
+	.edit-recipe-container select,
+	.quick-info-bar .quick-info-item select {
+		background-color: inherit !important;
+	}
+
+	/* Select'lerin hover durumu */
+	.edit-recipe-container select:hover,
+	.quick-info-bar .quick-info-item select:hover {
+		border-color: #adb5bd;
+	}
+
+	[data-theme="dark"] .edit-recipe-container select:hover,
+	[data-theme="dark"] .quick-info-bar .quick-info-item select:hover {
+		border-color: #5d5d6f;
+	}
+
+	/* Layers için dark mode */
+	[data-theme="dark"] .edit-recipe-container .layers {
+		color: #e0e0e0;
 	}
 </style>
 
 <div class="edit-recipe-container">
 	<div class="row">
 		<div class="col-12">
-			<div class="bd bgc-white p-20">
+			<div class="bd bgc-white p-20 edit-recipe-container">
 				<div class="layers">
 					<div class="layer w-100 mB-15">
 						<div class="peers fxw-nw ai-c">
@@ -242,13 +635,6 @@
 								<h4 class="lh-1 mB-0">
 									<i class="ti-pencil mR-10"></i> Tarif Düzenle
 								</h4>
-								<p class="c-grey-600 mT-5 fsz-sm">Tarif bilgilerini güncelleyebilirsiniz</p>
-							</div>
-							
-							<div class="peer">
-								<a asp-action="Recipes" class="btn btn-outline-secondary">
-									<i class="ti-arrow-left"></i> Geri Dön
-								</a>
 							</div>
 						</div>
 					</div>

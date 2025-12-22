@@ -454,6 +454,27 @@
     </script>
     <script src="~/js/auth.js"></script>
     <script>
+        // Cookie'deki token'ı localStorage'a kopyala (eğer localStorage'da yoksa)
+        (function() {
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+            
+            // Cookie'den token al
+            const cookieToken = getCookie('authToken');
+            if (cookieToken && typeof localStorage !== 'undefined') {
+                // localStorage'da yoksa veya farklıysa güncelle
+                const storedToken = localStorage.getItem('authToken');
+                if (!storedToken || storedToken !== cookieToken) {
+                    localStorage.setItem('authToken', cookieToken);
+                }
+            }
+        })();
+    </script>
+    <script>
         // Toast Notification System
         function showToast(message, type = 'info', duration = 3000) {
             const container = document.getElementById('toastContainer');

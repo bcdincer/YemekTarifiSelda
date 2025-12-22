@@ -9,19 +9,13 @@
         <div class="bd bgc-white p-20 collections-main-container">
             <div class="layers">
                 <div class="layer w-100 mB-20" style="flex-shrink: 0;">
-                    <div class="peers fxw-nw ai-c jc-sb">
-                        <div class="peer peer-greed">
-                            <h4 class="lh-1 mB-0">
-                                <i class="ti-bookmark c-blue-500 mR-10"></i>
-                                Koleksiyonlarım
-                            </h4>
-                            <p class="fsz-sm c-grey-600 mT-5">Tariflerinizi organize edin</p>
-                        </div>
-                        <div class="peer">
-                            <button type="button" class="btn btn-primary" onclick="showCreateCollectionModal()">
-                                <i class="ti-plus mR-5"></i> Yeni Koleksiyon
-                            </button>
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mB-0">
+                            <i class="ti-bookmark c-blue-500 mR-10"></i> Koleksiyonlarım
+                        </h2>
+                        <button type="button" class="btn btn-primary collection-create-btn" onclick="showCreateCollectionModal()">
+                            <i class="ti-plus mR-5"></i> Yeni Koleksiyon
+                        </button>
                     </div>
                 </div>
 
@@ -41,7 +35,7 @@
                             <i class="ti-bookmark fsz-xxl c-grey-400 d-b mB-20"></i>
                             <h4 class="c-grey-600 mB-10">Henüz koleksiyonunuz yok</h4>
                             <p class="c-grey-600 mB-30">Tariflerinizi organize etmek için koleksiyonlar oluşturun.</p>
-                            <button type="button" class="btn btn-primary" onclick="showCreateCollectionModal()">
+                            <button type="button" class="btn btn-primary collection-create-btn" onclick="showCreateCollectionModal()">
                                 <i class="ti-plus mR-5"></i> İlk Koleksiyonunuzu Oluşturun
                             </button>
                         </div>
@@ -51,18 +45,19 @@
                         <div class="row gap-20 collections-scrollable" id="collectionsContainer">
                             @foreach (var collection in Model)
                             {
-                                <div class="col-md-6 col-lg-4 mb-3 collection-item">
-                                    <a asp-controller="Recipes" asp-action="CollectionDetail" asp-route-id="@collection.Id" class="collection-card-link" style="text-decoration: none; display: block; height: 100%;">
-                                        <div class="bd bgc-white bdrs-3 ov-h collection-card" style="transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;">
-                                            <div class="p-20" style="flex: 1; display: flex; flex-direction: column;">
-                                                <div class="d-flex ai-c jc-sb mB-15">
-                                                    <h5 class="mB-0 c-grey-800 fw-600" style="transition: color 0.3s ease; flex: 1; min-width: 0;">
-                                                        <i class="ti-bookmark c-blue-500 mR-5"></i>
-                                                        <span style="word-wrap: break-word; overflow-wrap: break-word;">@collection.Name</span>
-                                                    </h5>
-                                                    <div class="dropdown mL-10" onclick="event.stopPropagation(); event.preventDefault();">
-                                                        <button class="btn btn-link p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="line-height: 1;">
-                                                            <i class="ti-more-vertical c-grey-600"></i>
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="bd bgc-white p-20 bdrs-3 collection-card" style="height: 100%; display: flex; flex-direction: column;">
+                                        <div class="collection-card-content" style="flex: 1;">
+                                            <div class="collection-title-section mB-10">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <h4 class="mB-0" style="flex: 1;">
+                                                        <a asp-controller="Recipes" asp-action="CollectionDetail" asp-route-id="@collection.Id" class="c-grey-900" style="text-decoration: none;">
+                                                            <i class="ti-bookmark c-blue-500 mR-5"></i>@collection.Name
+                                                        </a>
+                                                    </h4>
+                                                    <div class="dropdown" onclick="event.stopPropagation(); event.preventDefault();">
+                                                        <button class="btn btn-link p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="line-height: 1; color: #6c757d;">
+                                                            <i class="ti-more-vertical"></i>
                                                         </button>
                                                         <ul class="dropdown-menu dropdown-menu-end">
                                                             <li><a class="dropdown-item" href="#" onclick="event.stopPropagation(); editCollection(@collection.Id, '@Html.Raw(collection.Name.Replace("'", "\\'"))', '@Html.Raw((collection.Description ?? "").Replace("'", "\\'"))'); return false;"><i class="ti-pencil mR-5"></i> Düzenle</a></li>
@@ -71,28 +66,36 @@
                                                         </ul>
                                                     </div>
                                                 </div>
-                                                @if (!string.IsNullOrEmpty(collection.Description))
-                                                {
-                                                    <p class="fsz-sm c-grey-600 mB-15" style="flex: 1; word-wrap: break-word; overflow-wrap: break-word; min-height: 40px; line-height: 1.4;">
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(collection.Description))
+                                            {
+                                                <div class="collection-description-info mB-15">
+                                                    <p class="fsz-sm c-grey-600 mB-0" style="line-height: 1.4;">
                                                         @collection.Description
                                                     </p>
-                                                }
-                                                else
-                                                {
-                                                    <div style="flex: 1; min-height: 40px;"></div>
-                                                }
-                                                <div class="peers fxw-nw ai-c mT-auto pt-15" style="border-top: 1px solid #f0f0f0; margin-top: auto;">
-                                                    <div class="peer">
-                                                        <i class="ti-layout-list-thumb c-grey-500"></i>
-                                                        <span class="fsz-sm c-grey-600 mL-5">@collection.RecipeCount tarif</span>
-                                                    </div>
-                                                    <div class="peer mL-auto">
-                                                        <span class="fsz-xs c-grey-500">@collection.UpdatedAt.ToLocalTime().ToString("dd.MM.yyyy")</span>
-                                                    </div>
                                                 </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="collection-description-info mB-15" style="min-height: 24px;"></div>
+                                            }
+                                            <div class="d-flex justify-content-between align-items-center collection-item-info mB-15">
+                                                <p class="fsz-sm c-grey-600 mB-0">
+                                                    <i class="ti-layout-list-thumb mR-5"></i>
+                                                    @collection.RecipeCount tarif
+                                                </p>
+                                                <p class="fsz-sm c-grey-600 mB-0">
+                                                    <i class="ti-calendar mR-5"></i>
+                                                    @collection.UpdatedAt.ToLocalTime().ToString("dd.MM.yyyy")
+                                                </p>
                                             </div>
                                         </div>
-                                    </a>
+                                        <div class="collection-card-footer">
+                                            <a asp-controller="Recipes" asp-action="CollectionDetail" asp-route-id="@collection.Id" class="collection-view-btn">
+                                                <i class="ti-eye"></i> <span>Görüntüle</span>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             }
                         </div>
@@ -178,27 +181,218 @@
     }
     
     /* Gap-20 overflow özelliğini override et */
-    #collectionsContainer.collections-scrollable {
+    .collections-scrollable {
         overflow: visible !important;
     }
     
-    /* Collection Card Hover Effects */
-    .collection-card-link {
-        text-decoration: none !important;
+    /* Kartların eşit yükseklikte olması için */
+    .collections-scrollable .row {
+        display: flex;
+        flex-wrap: wrap;
     }
     
+    .collections-scrollable .row > [class*="col-"] {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Collection Card */
     .collection-card {
-        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease;
+        border: 1px solid #e0e0e0;
+        border-radius: 3px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
-    .collection-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important;
-        border-color: #c0c0c0 !important;
+    .collection-card-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
     }
     
-    .collection-card-link:hover .collection-card h5 {
-        color: #007bff !important;
+    .collection-title-section {
+        flex-shrink: 0;
+        min-height: 70px;
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    .collection-title-section > div {
+        width: 100%;
+    }
+    
+    .collection-title-section h4 {
+        line-height: 1.4;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .collection-description-info {
+        flex-shrink: 0;
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .collection-item-info {
+        flex-shrink: 0;
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .collection-card-footer {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        margin-top: auto;
+    }
+    
+    /* Dark Mode için daha belirgin ve açık border - Default açık, hover koyu */
+    /* Sadece collections container içindeki kartları hedeflemek için çok spesifik selector kullanıyoruz */
+    [data-theme="dark"] .collections-main-container .bd.bgc-white.collection-card,
+    [data-theme="dark"] .collections-main-container .collection-card.bd.bgc-white,
+    [data-theme="dark"] .collections-main-container .collection-card {
+        border: 1px solid #e5e7eb !important;
+        border-color: #e5e7eb !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    [data-theme="dark"] .collections-main-container .bd.bgc-white.collection-card:hover,
+    [data-theme="dark"] .collections-main-container .collection-card.bd.bgc-white:hover,
+    [data-theme="dark"] .collections-main-container .collection-card:hover {
+        border-color: #b0b5c0 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Collection View Button */
+    .collection-view-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        min-height: 40px;
+        height: 40px;
+        line-height: 1;
+        background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+        color: white;
+        margin-top: 15px;
+    }
+    
+    .collection-view-btn i {
+        font-size: 14px;
+        transition: transform 0.3s ease;
+        flex-shrink: 0;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .collection-view-btn span {
+        white-space: nowrap;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .collection-view-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+    }
+    
+    .collection-view-btn:hover i {
+        transform: scale(1.1);
+    }
+    
+    .collection-view-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Dark Mode Desteği */
+    [data-theme="dark"] .collection-view-btn {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: #e0e7ff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-theme="dark"] .collection-view-btn:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+    
+    /* Yeni Koleksiyon Butonu */
+    .collection-create-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .collection-create-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        color: white;
+    }
+    
+    .collection-create-btn:active {
+        transform: translateY(0);
+    }
+    
+    [data-theme="dark"] .collection-create-btn {
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-theme="dark"] .collection-create-btn:hover {
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Responsive */
+    @@media (max-width: 576px) {
+        .collection-view-btn {
+            padding: 10px 8px;
+            font-size: 12px;
+        }
+        
+        .collection-view-btn span {
+            display: none;
+        }
+        
+        .collection-view-btn i {
+            margin: 0;
+        }
+        
+        .collection-create-btn {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
     }
 
     /* Modal Styles */

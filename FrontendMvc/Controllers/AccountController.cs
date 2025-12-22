@@ -86,15 +86,20 @@ public class AccountController : Controller
                             var token = tokenElement.GetString();
                             if (!string.IsNullOrEmpty(token))
                             {
-                                // Token'ı cookie'ye kaydet
+                                // Önce eski token cookie'sini temizle
+                                Response.Cookies.Delete("authToken");
+                                
+                                // Yeni token'ı cookie'ye kaydet (HttpOnly = false çünkü JavaScript'ten okunması gerekiyor)
                                 var cookieOptions = new CookieOptions
                                 {
-                                    HttpOnly = true,
+                                    HttpOnly = false, // JavaScript'ten okunabilir olmalı
                                     Secure = Request.IsHttps,
                                     SameSite = SameSiteMode.Lax,
                                     Expires = DateTimeOffset.UtcNow.AddDays(30)
                                 };
                                 Response.Cookies.Append("authToken", token, cookieOptions);
+                                
+                                _logger.LogInformation("Auth token cookie set for user: {UserId}", user.Id);
                             }
                         }
                     }
@@ -160,6 +165,53 @@ public class AccountController : Controller
             _logger.LogInformation("User created a new account with password.");
             
             await _signInManager.SignInAsync(user, isPersistent: false);
+            
+            // Backend API'den JWT token al
+            try
+            {
+                var backendApiUrl = _configuration["BackendApi:BaseUrl"] ?? "https://localhost:7016";
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(backendApiUrl);
+                
+                var loginRequest = new
+                {
+                    userId = user.Id,
+                    userName = user.UserName ?? user.Email,
+                    email = user.Email
+                };
+                
+                var response = await client.PostAsJsonAsync("/api/auth/login", loginRequest);
+                if (response.IsSuccessStatusCode)
+                {
+                    var loginResponse = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+                    if (loginResponse.TryGetProperty("token", out var tokenElement))
+                    {
+                        var token = tokenElement.GetString();
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                            // Önce eski token cookie'sini temizle
+                            Response.Cookies.Delete("authToken");
+                            
+                            // Yeni token'ı cookie'ye kaydet (HttpOnly = false çünkü JavaScript'ten okunması gerekiyor)
+                            var cookieOptions = new CookieOptions
+                            {
+                                HttpOnly = false, // JavaScript'ten okunabilir olmalı
+                                Secure = Request.IsHttps,
+                                SameSite = SameSiteMode.Lax,
+                                Expires = DateTimeOffset.UtcNow.AddDays(30)
+                            };
+                            Response.Cookies.Append("authToken", token, cookieOptions);
+                            
+                            _logger.LogInformation("Auth token cookie set for new user: {UserId}", user.Id);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Backend API'den token alınamadı, devam ediliyor.");
+            }
+            
             return RedirectToAction("Index", "Home");
         }
 
@@ -174,6 +226,8 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Logout()
     {
+        // Token cookie'sini temizle
+        Response.Cookies.Delete("authToken");
         await _signInManager.SignOutAsync();
         _logger.LogInformation("User logged out.");
         return RedirectToAction("Index", "Home");
@@ -183,6 +237,8 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> LogoutPost()
     {
+        // Token cookie'sini temizle
+        Response.Cookies.Delete("authToken");
         await _signInManager.SignOutAsync();
         _logger.LogInformation("User logged out.");
         return RedirectToAction("Index", "Home");
