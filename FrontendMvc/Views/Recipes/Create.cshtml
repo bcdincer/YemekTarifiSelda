@@ -774,6 +774,143 @@
     [data-theme="dark"] .dynamic-list-empty {
         color: #a0a0b0;
     }
+
+    /* CKEditor için yükseklik ayarı - sabit tutmak için */
+    #ingredientsEditor {
+        min-height: 400px !important;
+        height: 400px !important;
+    }
+
+    #ingredientsEditor .ck-editor {
+        min-height: 400px !important;
+        height: auto !important;
+    }
+
+    #ingredientsEditor .ck-editor__editable {
+        min-height: 400px !important;
+        height: 400px !important;
+        max-height: 800px !important;
+        overflow-y: auto !important;
+    }
+
+    #ingredientsEditor .ck-editor__editable_inline {
+        min-height: 400px !important;
+        height: 400px !important;
+        max-height: 800px !important;
+        overflow-y: auto !important;
+    }
+
+    #ingredientsEditor .ck-editor__main {
+        min-height: 400px !important;
+    }
+
+    #ingredientsEditor .ck-content {
+        min-height: 400px !important;
+        height: 400px !important;
+        max-height: 800px !important;
+        overflow-y: auto !important;
+    }
+
+    /* Focus olduğunda yüksekliği koru */
+    #ingredientsEditor .ck-editor__editable:focus,
+    #ingredientsEditor .ck-editor__editable_inline:focus,
+    #ingredientsEditor .ck-content:focus {
+        min-height: 400px !important;
+        height: 400px !important;
+    }
+
+    /* CKEditor resize handle için stil */
+    #ingredientsEditor .ck-editor__resizer {
+        display: block !important;
+    }
+
+    /* Yazım denetimini devre dışı bırak */
+    #ingredientsEditor .ck-editor__editable,
+    #ingredientsEditor .ck-editor__editable_inline,
+    #ingredientsEditor .ck-content {
+        spellcheck: false !important;
+    }
+
+    /* Dark mode için CKEditor stilleri - Daha güçlü selector'lar */
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable,
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable.ck-focused,
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable_inline,
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable_inline.ck-focused {
+        background-color: #2d2d3f !important;
+        color: #e0e0e0 !important;
+        border-color: #3d3d4f !important;
+    }
+
+    [data-theme="dark"] #ingredientsEditor .ck-content,
+    [data-theme="dark"] #ingredientsEditor .ck-content.ck-focused {
+        background-color: #2d2d3f !important;
+        color: #e0e0e0 !important;
+    }
+
+    [data-theme="dark"] #ingredientsEditor .ck-editor__main {
+        background-color: #2d2d3f !important;
+    }
+
+    [data-theme="dark"] #ingredientsEditor .ck-editor {
+        background-color: #2d2d3f !important;
+    }
+
+    [data-theme="dark"] #ingredientsEditor .ck-toolbar {
+        background-color: #1e1e2e !important;
+        border-color: #3d3d4f !important;
+    }
+
+    [data-theme="dark"] #ingredientsEditor .ck-toolbar__separator {
+        background-color: #3d3d4f !important;
+    }
+
+    [data-theme="dark"] #ingredientsEditor .ck-button {
+        color: #e0e0e0 !important;
+    }
+
+    [data-theme="dark"] #ingredientsEditor .ck-button:hover:not(.ck-disabled) {
+        background-color: #3d3d4f !important;
+    }
+
+    [data-theme="dark"] #ingredientsEditor .ck-button.ck-on {
+        background-color: #6366f1 !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] #ingredientsEditor .ck-dropdown__panel {
+        background-color: #2d2d3f !important;
+        border-color: #3d3d4f !important;
+    }
+
+    [data-theme="dark"] #ingredientsEditor .ck-list__item {
+        color: #e0e0e0 !important;
+    }
+
+    [data-theme="dark"] #ingredientsEditor .ck-list__item:hover {
+        background-color: #3d3d4f !important;
+    }
+
+    [data-theme="dark"] #ingredientsEditor .ck-placeholder::before {
+        color: #999 !important;
+    }
+
+    /* Dark mode'da tüm yazılar için */
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable p,
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable h2,
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable h3,
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable li,
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable ul,
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable ol,
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable_inline p,
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable_inline h2,
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable_inline h3,
+    [data-theme="dark"] #ingredientsEditor .ck-editor__editable_inline li,
+    [data-theme="dark"] #ingredientsEditor .ck-content p,
+    [data-theme="dark"] #ingredientsEditor .ck-content h2,
+    [data-theme="dark"] #ingredientsEditor .ck-content h3,
+    [data-theme="dark"] #ingredientsEditor .ck-content li {
+        color: #e0e0e0 !important;
+    }
 </style>
 
 <div class="recipe-create-container">
@@ -784,10 +921,12 @@
                     <div class="layer w-100 mB-15">
                         <div class="peers fxw-nw ai-c">
                             <div class="peer peer-greed">
-                                <h4 class="lh-1 mB-0">
-                                    <i class="ti-plus mR-10"></i> Yeni Tarif Ekle
-                                </h4>
-                                <p class="c-grey-600 mT-5 fsz-sm">Lezzetli tarifinizi paylaşın ve diğer kullanıcılarla buluşturun</p>
+                                <div class="d-flex align-items-center" style="gap: 20px; flex-wrap: wrap;">
+                                    <h4 class="lh-1 mB-0" style="margin: 0;">
+                                        <i class="ti-plus mR-10"></i> Yeni Tarif Ekle
+                                    </h4>
+                                    <p class="c-grey-600 mB-0 fsz-sm" style="margin: 0;">Lezzetli tarifinizi paylaşın ve diğer kullanıcılarla buluşturun</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -849,15 +988,10 @@
                                         </div>
 
                                         <div class="layer w-100 mB-15">
-                                            <div class="d-flex justify-content-between align-items-center mB-10">
-                                                <label class="form-label fw-600 mB-0">
-                                                    <i class="ti-shopping-cart mR-5"></i> Malzemeler *
-                                                </label>
-                                                <button type="button" class="dynamic-list-add-btn" onclick="addIngredientItem()">
-                                                    <i class="ti-plus"></i> Malzeme Ekle
-                                                </button>
-                                            </div>
-                                            <div id="ingredientsList" class="dynamic-list"></div>
+                                            <label class="form-label fw-600 mB-10">
+                                                <i class="ti-shopping-cart mR-5"></i> Malzemeler *
+                                            </label>
+                                            <div id="ingredientsEditor"></div>
                                             <textarea asp-for="Ingredients" id="Ingredients" name="Ingredients" class="d-none" required></textarea>
                                             <span asp-validation-for="Ingredients" class="text-danger fsz-sm"></span>
                                         </div>
@@ -1012,17 +1146,8 @@
             }
 
             // Dinamik Liste Fonksiyonları
-            let ingredientCounter = 0;
             let stepCounter = 0;
             let draggedElement = null;
-
-            function addIngredientItem(value = '') {
-                const list = document.getElementById('ingredientsList');
-                const item = createListItem('ingredient', ingredientCounter++, value);
-                list.appendChild(item);
-                updateIngredientsTextarea();
-                makeSortable(list);
-            }
 
             function addStepItem(value = '') {
                 const list = document.getElementById('stepsList');
@@ -1052,12 +1177,10 @@
                 input.value = value;
                 input.placeholder = type === 'ingredient' ? 'Örn: 500g tavuk göğsü' : 'Örn: Tavuğu küp küp doğrayın';
                 input.addEventListener('input', () => {
-                    if (type === 'ingredient') {
-                        updateIngredientsTextarea();
-                    } else {
+                    if (type === 'step') {
                         updateStepsTextarea();
+                        updateItemNumbers(type);
                     }
-                    updateItemNumbers(type);
                 });
 
                 const removeBtn = document.createElement('div');
@@ -1065,12 +1188,10 @@
                 removeBtn.innerHTML = '<i class="ti-close"></i>';
                 removeBtn.onclick = () => {
                     item.remove();
-                    if (type === 'ingredient') {
-                        updateIngredientsTextarea();
-                    } else {
+                    if (type === 'step') {
                         updateStepsTextarea();
+                        updateItemNumbers(type);
                     }
-                    updateItemNumbers(type);
                 };
 
                 item.appendChild(dragHandle);
@@ -1096,10 +1217,8 @@
                         const rect = item.getBoundingClientRect();
                         const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
                         item.parentNode.insertBefore(draggedElement, next ? item.nextSibling : item);
-                        updateItemNumbers(type);
-                        if (type === 'ingredient') {
-                            updateIngredientsTextarea();
-                        } else {
+                        if (type === 'step') {
+                            updateItemNumbers(type);
                             updateStepsTextarea();
                         }
                     }
@@ -1115,11 +1234,7 @@
                 });
             }
 
-            function updateIngredientsTextarea() {
-                const items = document.querySelectorAll('#ingredientsList .item-input');
-                const values = Array.from(items).map(input => input.value.trim()).filter(v => v);
-                document.getElementById('Ingredients').value = values.join('\n');
-            }
+            // updateIngredientsTextarea fonksiyonu artık gerekli değil - CKEditor kullanılıyor
 
             function updateStepsTextarea() {
                 const items = document.querySelectorAll('#stepsList .item-input');
@@ -1135,14 +1250,241 @@
             const form = document.querySelector('form');
             if (form) {
                 form.addEventListener('submit', (e) => {
-                    updateIngredientsTextarea();
+                    // CKEditor içeriğini textarea'ya aktar (HTML'i düz metne çevir)
+                    if (ingredientsEditor) {
+                        const htmlData = ingredientsEditor.getData();
+                        // HTML'i düz metne çevir, satırları koru
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = htmlData;
+                        
+                        // HTML elementlerini satırlara çevir
+                        let plainText = '';
+                        const processNode = (node) => {
+                            if (node.nodeType === Node.TEXT_NODE) {
+                                plainText += node.textContent;
+                            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                                const tagName = node.tagName.toLowerCase();
+                                if (tagName === 'p' || tagName === 'div' || tagName === 'h2' || tagName === 'h3') {
+                                    if (plainText && !plainText.endsWith('\n')) {
+                                        plainText += '\n';
+                                    }
+                                    Array.from(node.childNodes).forEach(processNode);
+                                    if (plainText && !plainText.endsWith('\n')) {
+                                        plainText += '\n';
+                                    }
+                                } else if (tagName === 'li') {
+                                    plainText += '• ';
+                                    Array.from(node.childNodes).forEach(processNode);
+                                    plainText += '\n';
+                                } else if (tagName === 'ul' || tagName === 'ol') {
+                                    Array.from(node.childNodes).forEach(processNode);
+                                } else {
+                                    Array.from(node.childNodes).forEach(processNode);
+                                }
+                            }
+                        };
+                        
+                        Array.from(tempDiv.childNodes).forEach(processNode);
+                        document.getElementById('Ingredients').value = plainText.trim();
+                    }
                     updateStepsTextarea();
                 });
             }
 
-            // Sayfa yüklendiğinde varsayılan olarak bir boş item ekle
+            // CKEditor için Malzemeler editörü
+            let ingredientsEditor;
+            
+            // Sayfa yüklendiğinde CKEditor'ü başlat
             document.addEventListener('DOMContentLoaded', () => {
-                addIngredientItem();
+                // Malzemeler için CKEditor
+                if (typeof ClassicEditor !== 'undefined') {
+                    ClassicEditor
+                        .create(document.querySelector('#ingredientsEditor'), {
+                            toolbar: {
+                                items: [
+                                    'heading', '|',
+                                    'bold', 'italic', '|',
+                                    'bulletedList', 'numberedList', '|',
+                                    'undo', 'redo'
+                                ]
+                            },
+                            heading: {
+                                options: [
+                                    { model: 'paragraph', title: 'Paragraf', class: 'ck-heading_paragraph' },
+                                    { model: 'heading2', view: 'h2', title: 'Başlık 2', class: 'ck-heading_heading2' },
+                                    { model: 'heading3', view: 'h3', title: 'Başlık 3', class: 'ck-heading_heading3' }
+                                ]
+                            },
+                            language: 'tr',
+                            placeholder: 'Örn:\n\nHamuru için;\n• 125 g tereyağı\n• 1,5 su bardağı su\n• 1 su bardağı + 1 yemek kaşığı un\n\nKreması için;\n• 4 su bardağı süt\n• 1 su bardağı şeker',
+                            // Resize özelliğini aktif et
+                            resizeOptions: {
+                                handle: 'south',
+                                minHeight: 300,
+                                maxHeight: 1000
+                            },
+                            // Yazım denetimini devre dışı bırak
+                            removePlugins: ['SpellChecker']
+                        })
+                        .then(editor => {
+                            ingredientsEditor = editor;
+                            
+                            // Editör yüksekliğini ayarla ve koru
+                            const setEditorHeight = () => {
+                                const editorElement = editor.ui.getEditableElement();
+                                if (editorElement) {
+                                    editorElement.style.minHeight = '400px';
+                                    editorElement.style.height = '400px';
+                                    editorElement.style.maxHeight = '800px';
+                                    editorElement.style.overflowY = 'auto';
+                                    // Yazım denetimini devre dışı bırak
+                                    editorElement.setAttribute('spellcheck', 'false');
+                                }
+                                
+                                // View element'ine de yükseklik ayarla
+                                const editableElement = editor.editing.view.domRoots.get(editor.editing.view.document.getRoot());
+                                if (editableElement) {
+                                    editableElement.style.minHeight = '400px';
+                                    editableElement.style.height = '400px';
+                                }
+                            };
+                            
+                            // Dark mode stillerini uygula
+                            const applyDarkModeStyles = () => {
+                                const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+                                if (isDarkMode) {
+                                    const editorElement = editor.ui.getEditableElement();
+                                    if (editorElement) {
+                                        editorElement.style.backgroundColor = '#2d2d3f';
+                                        editorElement.style.color = '#e0e0e0';
+                                        editorElement.style.borderColor = '#3d3d4f';
+                                    }
+                                    
+                                    // View element'ine de uygula
+                                    const editableElement = editor.editing.view.domRoots.get(editor.editing.view.document.getRoot());
+                                    if (editableElement) {
+                                        editableElement.style.backgroundColor = '#2d2d3f';
+                                        editableElement.style.color = '#e0e0e0';
+                                    }
+                                    
+                                    // CKEditor container'ına da uygula
+                                    const editorContainer = document.querySelector('#ingredientsEditor .ck-editor');
+                                    if (editorContainer) {
+                                        editorContainer.style.backgroundColor = '#2d2d3f';
+                                    }
+                                    
+                                    // Toolbar'a da uygula
+                                    const toolbar = document.querySelector('#ingredientsEditor .ck-toolbar');
+                                    if (toolbar) {
+                                        toolbar.style.backgroundColor = '#1e1e2e';
+                                        toolbar.style.borderColor = '#3d3d4f';
+                                    }
+                                }
+                            };
+                            
+                            // İlk yüklemede ayarla
+                            setEditorHeight();
+                            setTimeout(applyDarkModeStyles, 100);
+                            
+                            // Theme değişikliğini dinle
+                            const themeObserver = new MutationObserver(() => {
+                                applyDarkModeStyles();
+                            });
+                            
+                            themeObserver.observe(document.documentElement, {
+                                attributes: true,
+                                attributeFilter: ['data-theme']
+                            });
+                            
+                            // Focus olduğunda yüksekliği koru ve dark mode stillerini uygula
+                            editor.editing.view.document.on('change:isFocused', () => {
+                                setTimeout(() => {
+                                    setEditorHeight();
+                                    applyDarkModeStyles();
+                                }, 10);
+                            });
+                            
+                            // İçerik değiştiğinde yüksekliği koru ve dark mode stillerini uygula
+                            editor.model.document.on('change:data', () => {
+                                setTimeout(() => {
+                                    setEditorHeight();
+                                    applyDarkModeStyles();
+                                }, 10);
+                            });
+                            
+                            // Tüm editable elementlere spellcheck=false ekle
+                            const editableElements = editor.editing.view.domConverter.viewToDom(editor.editing.view.document.getRoot());
+                            if (editableElements) {
+                                editableElements.setAttribute('spellcheck', 'false');
+                            }
+                            
+                            // Observer ile yüksekliği sürekli kontrol et
+                            const observer = new MutationObserver(() => {
+                                setEditorHeight();
+                            });
+                            
+                            const editorContainer = document.querySelector('#ingredientsEditor .ck-editor');
+                            if (editorContainer) {
+                                observer.observe(editorContainer, {
+                                    attributes: true,
+                                    attributeFilter: ['style', 'class'],
+                                    childList: true,
+                                    subtree: true
+                                });
+                            }
+                            
+                            // Mevcut içeriği yükle (eğer varsa - edit modunda)
+                            const existingContent = document.getElementById('Ingredients').value;
+                            if (existingContent) {
+                                editor.setData(existingContent);
+                            }
+                            
+                            // İçerik değiştiğinde textarea'yı güncelle
+                            editor.model.document.on('change:data', () => {
+                                const htmlData = editor.getData();
+                                // HTML'i düz metne çevir, satırları koru
+                                const tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = htmlData;
+                                
+                                // HTML elementlerini satırlara çevir
+                                let plainText = '';
+                                const processNode = (node) => {
+                                    if (node.nodeType === Node.TEXT_NODE) {
+                                        plainText += node.textContent;
+                                    } else if (node.nodeType === Node.ELEMENT_NODE) {
+                                        const tagName = node.tagName.toLowerCase();
+                                        if (tagName === 'p' || tagName === 'div' || tagName === 'h2' || tagName === 'h3') {
+                                            if (plainText && !plainText.endsWith('\n')) {
+                                                plainText += '\n';
+                                            }
+                                            Array.from(node.childNodes).forEach(processNode);
+                                            if (plainText && !plainText.endsWith('\n')) {
+                                                plainText += '\n';
+                                            }
+                                        } else if (tagName === 'li') {
+                                            plainText += '• ';
+                                            Array.from(node.childNodes).forEach(processNode);
+                                            plainText += '\n';
+                                        } else if (tagName === 'ul' || tagName === 'ol') {
+                                            Array.from(node.childNodes).forEach(processNode);
+                                        } else {
+                                            Array.from(node.childNodes).forEach(processNode);
+                                        }
+                                    }
+                                };
+                                
+                                Array.from(tempDiv.childNodes).forEach(processNode);
+                                document.getElementById('Ingredients').value = plainText.trim();
+                            });
+                        })
+                        .catch(error => {
+                            console.error('CKEditor yüklenirken hata:', error);
+                        });
+                } else {
+                    console.error('CKEditor yüklenmedi!');
+                }
+                
+                // Adımlar için varsayılan item ekle
                 addStepItem();
             });
         </script>

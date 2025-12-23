@@ -101,6 +101,28 @@
         border-bottom-color: var(--c-border) !important;
     }
     
+    /* Breadcrumb dark mode stilleri */
+    [data-theme="dark"] .breadcrumb {
+        color: var(--c-text-base) !important;
+    }
+    
+    [data-theme="dark"] .breadcrumb-item a {
+        color: var(--c-text-link) !important;
+    }
+    
+    [data-theme="dark"] .breadcrumb-item a:hover {
+        color: var(--c-text-link-hover, #818cf8) !important;
+    }
+    
+    [data-theme="dark"] .breadcrumb-item.active {
+        color: var(--c-text-muted, #9ca3af) !important;
+    }
+    
+    [data-theme="dark"] .breadcrumb-item + .breadcrumb-item::before {
+        color: var(--c-text-muted, #9ca3af) !important;
+        content: "/" !important;
+    }
+    
     .numbered-steps-container {
         counter-reset: item-counter;
     }
@@ -1016,14 +1038,66 @@
             const newServings = parseFloat(input.value);
             
             if (!newServings || newServings < 1 || newServings > 20) {
-                alert('Lütfen geçerli bir kişi sayısı girin (1-20 arası)');
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Geçersiz Kişi Sayısı',
+                        text: 'Lütfen geçerli bir kişi sayısı girin (1-20 arası)',
+                        confirmButtonColor: '#3085d6'
+                    });
+                } else {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Geçersiz Kişi Sayısı',
+                            text: 'Lütfen geçerli bir kişi sayısı girin (1-20 arası)',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    } else {
+                        alert('Lütfen geçerli bir kişi sayısı girin (1-20 arası)');
+                    }
+                }
                 input.focus();
                 return;
             }
             
             if (newServings === originalServings) {
                 // Kişi sayısı değişmemişse uyarı ver
-                if (confirm('Kişi sayısı değişmedi. Yine de hesaplamak istiyor musunuz?')) {
+                let shouldCalculate = false;
+                
+                if (typeof Swal !== 'undefined') {
+                    const result = await Swal.fire({
+                        icon: 'question',
+                        title: 'Kişi Sayısı Değişmedi',
+                        text: 'Kişi sayısı değişmedi. Yine de hesaplamak istiyor musunuz?',
+                        showCancelButton: true,
+                        confirmButtonText: 'Evet, Hesapla',
+                        cancelButtonText: 'İptal',
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        reverseButtons: true
+                    });
+                    shouldCalculate = result.isConfirmed;
+                } else {
+                    if (typeof Swal !== 'undefined') {
+                        const result = await Swal.fire({
+                            icon: 'question',
+                            title: 'Kişi Sayısı Değişmedi',
+                            text: 'Kişi sayısı değişmedi. Yine de hesaplamak istiyor musunuz?',
+                            showCancelButton: true,
+                            confirmButtonText: 'Evet, Hesapla',
+                            cancelButtonText: 'İptal',
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            reverseButtons: true
+                        });
+                        shouldCalculate = result.isConfirmed;
+                    } else {
+                        shouldCalculate = confirm('Kişi sayısı değişmedi. Yine de hesaplamak istiyor musunuz?');
+                    }
+                }
+                
+                if (shouldCalculate) {
                     // Kullanıcı onayladıysa devam et
                 } else {
                     return;
@@ -1044,7 +1118,16 @@
                 console.log(`Malzemeler ${method} başarıyla güncellendi`);
             } catch (error) {
                 console.error('Error adjusting servings:', error);
-                alert('Malzemeler hesaplanırken bir hata oluştu. Lütfen tekrar deneyin.');
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata Oluştu',
+                        text: 'Malzemeler hesaplanırken bir hata oluştu. Lütfen tekrar deneyin.',
+                        confirmButtonColor: '#3085d6'
+                    });
+                } else {
+                    alert('Malzemeler hesaplanırken bir hata oluştu. Lütfen tekrar deneyin.');
+                }
             } finally {
                 calculateBtn.disabled = false;
                 calculateBtn.innerHTML = originalBtnText;
@@ -1182,17 +1265,38 @@
             }
         });
 
-        // Giriş yapma uyarısı ve yönlendirme fonksiyonu
+        // Giriş yapma uyarısı ve yönlendirme fonksiyonu (SweetAlert2 ile)
         function requireLogin(message) {
             console.log('🔐 requireLogin çağrıldı - Mesaj:', message);
-            const confirmed = confirm(message + '\n\nGiriş sayfasına yönlendirilmek ister misiniz?');
-            console.log('Kullanıcı seçimi:', confirmed ? 'OK' : 'Cancel');
-            if (confirmed) {
-                console.log('🔄 Login sayfasına yönlendiriliyor...');
-                window.location.href = '/Account/Login';
+            
+            // SweetAlert2 kullan
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Giriş Gerekli',
+                    text: message,
+                    showCancelButton: true,
+                    confirmButtonText: 'Giriş Yap',
+                    cancelButtonText: 'İptal',
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        console.log('🔄 Login sayfasına yönlendiriliyor...');
+                        window.location.href = '/Account/Login';
+                    } else {
+                        console.log('❌ Kullanıcı iptal etti');
+                    }
+                });
             } else {
-                console.log('❌ Kullanıcı iptal etti');
+                // Fallback: Eğer SweetAlert2 yüklenmemişse normal confirm kullan
+                const confirmed = confirm(message + '\n\nGiriş sayfasına yönlendirilmek ister misiniz?');
+                if (confirmed) {
+                    window.location.href = '/Account/Login';
+                }
             }
+            
             return false; // İşlemi durdur
         }
     </script>
@@ -1418,7 +1522,22 @@
                         const clickRating = starIndex + 1; // 1, 2, 3, 4, 5
                         
                         // Confirm mesajı
-                        const confirmed = confirm(`Bu tarife ${clickRating} yıldız vermek istediğinizden emin misiniz?`);
+                        if (typeof Swal !== 'undefined') {
+                            const result = await Swal.fire({
+                                icon: 'question',
+                                title: 'Puan Vermek İstediğinize Emin misiniz?',
+                                html: `Bu tarife <strong>${clickRating} yıldız</strong> vermek istediğinize emin misiniz?`,
+                                showCancelButton: true,
+                                confirmButtonText: 'Evet, Puan Ver',
+                                cancelButtonText: 'İptal',
+                                confirmButtonColor: '#3085d6',
+                                cancelButtonColor: '#d33',
+                                reverseButtons: true
+                            });
+                            confirmed = result.isConfirmed;
+                        } else {
+                            confirmed = confirm(`Bu tarife ${clickRating} yıldız vermek istediğinizden emin misiniz?`);
+                        }
                         
                         if (!confirmed) {
                             // Kullanıcı iptal etti, ortalama puana dön
@@ -1909,7 +2028,16 @@
                     }
                 } catch (error) {
                     console.error('Error toggling recipe in collection:', error);
-                    alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Hata Oluştu',
+                            text: 'Bir hata oluştu. Lütfen tekrar deneyin.',
+                            confirmButtonColor: '#3085d6'
+                        });
+                    } else {
+                        alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+                    }
                 }
             }
 
@@ -2428,7 +2556,26 @@
 
             // Yorum sil
             async function deleteComment(commentId) {
-                if (!confirm('Bu yorumu silmek istediğinize emin misiniz?')) {
+                let confirmed = false;
+                
+                if (typeof Swal !== 'undefined') {
+                    const result = await Swal.fire({
+                        icon: 'warning',
+                        title: 'Yorumu Silmek İstediğinize Emin misiniz?',
+                        text: 'Bu işlem geri alınamaz.',
+                        showCancelButton: true,
+                        confirmButtonText: 'Evet, Sil',
+                        cancelButtonText: 'İptal',
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        reverseButtons: true
+                    });
+                    confirmed = result.isConfirmed;
+                } else {
+                    confirmed = confirm('Bu yorumu silmek istediğinize emin misiniz?');
+                }
+                
+                if (!confirmed) {
                     return;
                 }
 
