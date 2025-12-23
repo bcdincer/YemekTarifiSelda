@@ -135,6 +135,7 @@
     .recipe-section .row {
         display: flex;
         flex-wrap: wrap;
+        align-items: stretch;
     }
     
     .recipe-section .col-lg-6,
@@ -143,8 +144,53 @@
         flex-direction: column;
     }
     
+    /* Malzemeler ve Yapılış container'ları - eşit yükseklik için */
+    .numbered-ingredients-container,
+    .numbered-steps-container {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 400px;
+        height: auto;
+    }
+    
     .recipe-section .bd.bgc-grey-50 {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 400px;
+        height: auto;
+    }
+    
+    /* İçerik alanlarının tam yüksekliği kullanması için */
+    #ingredientsViewer {
         flex: 1;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    #ingredientsViewer .ql-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 400px;
+    }
+    
+    #ingredientsViewer .ql-editor {
+        flex: 1;
+        min-height: 380px;
+    }
+    
+    #ingredientsList {
+        flex: 1;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Yapılış adımları container'ı */
+    .numbered-steps-container {
         display: flex;
         flex-direction: column;
     }
@@ -484,7 +530,36 @@
                         </div>
                     </div>
 
-                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    @if (Model.Images != null && Model.Images.Any())
+                    {
+                        <div class="layer w-100 mB-20">
+                            <!-- Ana fotoğraf -->
+                            @{
+                                var primaryImage = Model.Images.FirstOrDefault(img => img.IsPrimary) ?? Model.Images.First();
+                            }
+                            <img id="recipeImage" src="@primaryImage.ImageUrl" alt="@Model.Title" class="w-100 bdrs-3" style="max-height: 350px; object-fit: cover; cursor: pointer;" title="Beğenmek için çift tıklayın">
+                            
+                            <!-- Çoklu fotoğraflar (galeri) -->
+                            @if (Model.Images.Count > 1)
+                            {
+                                <div class="mT-15">
+                                    <div class="d-flex gap-10" style="flex-wrap: wrap; overflow-x: auto;">
+                                        @foreach (var img in Model.Images.OrderBy(i => i.DisplayOrder))
+                                        {
+                                            <div class="recipe-thumbnail @(img.IsPrimary ? "active" : "")" style="position: relative; width: 80px; height: 80px; flex-shrink: 0; cursor: pointer; border: 2px solid @(img.IsPrimary ? "#6366f1" : "transparent"); border-radius: 8px; overflow: hidden;" onclick="changeMainImage('@img.ImageUrl', this)">
+                                                <img src="@img.ImageUrl" alt="Fotoğraf @(img.DisplayOrder + 1)" style="width: 100%; height: 100%; object-fit: cover;">
+                                                @if (img.IsPrimary)
+                                                {
+                                                    <div style="position: absolute; top: 5px; right: 5px; background: #6366f1; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px;">Ana</div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
                         <div class="layer w-100 mB-20">
                             <img id="recipeImage" src="@Model.ImageUrl" alt="@Model.Title" class="w-100 bdrs-3" style="max-height: 350px; object-fit: cover; cursor: pointer;" title="Beğenmek için çift tıklayın">
@@ -574,8 +649,11 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="bd bgc-grey-50 p-20 bdrs-3 numbered-ingredients-container" style="height: 100%;">
-                                    <ul class="list-group" id="ingredientsList" style="list-style: none; padding: 0; margin: 0;">
+                                <div class="bd bgc-grey-50 p-20 bdrs-3 numbered-ingredients-container">
+                                    <!-- Quill editörü read-only modda göster -->
+                                    <div id="ingredientsViewer"></div>
+                                    <!-- Fallback: Eğer Quill yüklenemezse düz metin göster -->
+                                    <ul class="list-group d-none" id="ingredientsList" style="list-style: none; padding: 0; margin: 0;">
                                         @foreach (var ingredient in Model.Ingredients.Split(new[] { '\n', '\r', ',' }, StringSplitOptions.RemoveEmptyEntries).Where(i => !string.IsNullOrWhiteSpace(i)))
                                         {
                                             <li class="numbered-ingredient" data-original="@ingredient.Trim()" style="border-bottom: 1px solid #e0e0e0; padding: 8px 0;">@ingredient.Trim()</li>
@@ -589,7 +667,7 @@
                                 <h5 class="mB-15">
                                     <i class="ti-list c-green-500"></i> Yapılış
                                 </h5>
-                                <div class="bd bgc-grey-50 p-20 bdrs-3 numbered-steps-container" style="height: 100%;">
+                                <div class="bd bgc-grey-50 p-20 bdrs-3 numbered-steps-container">
                                     @{
                                         var steps = Model.Steps.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
                                             .Where(s => !string.IsNullOrWhiteSpace(s))
@@ -1015,6 +1093,275 @@
     <!-- QR Code Library -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     
+    <!-- Quill Editor for Ingredients (Read-Only) -->
+    <script>
+        // Quill editörünü read-only modda başlat
+        function initIngredientsViewer() {
+            if (typeof Quill === 'undefined') {
+                console.warn('Quill kütüphanesi yüklenemedi, düz metin gösterimi kullanılacak');
+                document.getElementById('ingredientsList').classList.remove('d-none');
+                return;
+            }
+
+            try {
+                const ingredientsViewer = new Quill('#ingredientsViewer', {
+                    modules: {
+                        toolbar: false // Toolbar yok, read-only
+                    },
+                    readOnly: true,
+                    theme: 'snow'
+                });
+
+                // Yükseklik ayarları - Başlangıçta minimum, sonra eşitleme fonksiyonu ayarlayacak
+                const qlContainer = document.querySelector('#ingredientsViewer .ql-container');
+                const qlEditor = document.querySelector('#ingredientsViewer .ql-editor');
+                if (qlContainer) {
+                    qlContainer.style.minHeight = '400px';
+                    qlContainer.style.overflowY = 'auto';
+                }
+                if (qlEditor) {
+                    qlEditor.style.minHeight = '380px';
+                    qlEditor.setAttribute('spellcheck', 'false');
+                }
+
+                // Dark mode uygulama
+                const applyDarkModeStyles = () => {
+                    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+                    if (qlEditor) {
+                        if (isDarkMode) {
+                            qlEditor.style.backgroundColor = '#2d2d3f';
+                            qlEditor.style.color = '#e0e0e0';
+                        } else {
+                            qlEditor.style.backgroundColor = '#f5f5f5';
+                            qlEditor.style.color = '#333';
+                        }
+                    }
+                    const qlContainer = document.querySelector('#ingredientsViewer .ql-container');
+                    if (qlContainer) {
+                        if (isDarkMode) {
+                            qlContainer.style.borderColor = '#3d3d4f';
+                        } else {
+                            qlContainer.style.borderColor = '#ccc';
+                        }
+                    }
+                };
+
+                applyDarkModeStyles();
+                const themeObserver = new MutationObserver(() => applyDarkModeStyles());
+                themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+                // Ingredients içeriğini yükle
+                const ingredientsText = @Html.Raw(Json.Serialize(Model.Ingredients ?? ""));
+                
+                // Plain text'i HTML'e çevir
+                const convertPlainTextToHtml = (plainText) => {
+                    if (!plainText) return '<p><br></p>';
+                    const lines = plainText.split('\n').filter(line => line.trim());
+                    let html = '';
+                    let inList = false;
+                    
+                    lines.forEach(line => {
+                        const trimmed = line.trim();
+                        if (trimmed.startsWith('• ') || trimmed.startsWith('- ')) {
+                            if (!inList) {
+                                html += '<ul>';
+                                inList = true;
+                            }
+                            const content = trimmed.replace(/^[•\-]\s*/, '');
+                            html += `<li>${content}</li>`;
+                        } else {
+                            if (inList) {
+                                html += '</ul>';
+                                inList = false;
+                            }
+                            html += `<p>${trimmed}</p>`;
+                        }
+                    });
+                    if (inList) {
+                        html += '</ul>';
+                    }
+                    return html || '<p><br></p>';
+                };
+
+                // İçeriği yükle
+                let ingredientsHtml = ingredientsText;
+                // Eğer HTML değilse (HTML tag'leri yoksa), plain text olarak kabul et
+                if (!ingredientsHtml || (typeof ingredientsHtml === 'string' && !ingredientsHtml.includes('<') && !ingredientsHtml.includes('>'))) {
+                    ingredientsHtml = convertPlainTextToHtml(ingredientsText);
+                }
+                
+                ingredientsViewer.root.innerHTML = ingredientsHtml;
+                
+                // İçerik yüklendikten sonra yükseklik eşitlemeyi çağır
+                setTimeout(() => {
+                    if (typeof equalizeHeights === 'function') {
+                        equalizeHeights();
+                    }
+                }, 200);
+            } catch (err) {
+                console.error('Quill viewer yüklenirken hata:', err);
+                document.getElementById('ingredientsList').classList.remove('d-none');
+                
+                // Hata durumunda da yükseklik eşitlemeyi çağır
+                setTimeout(() => {
+                    if (typeof equalizeHeights === 'function') {
+                        equalizeHeights();
+                    }
+                }, 200);
+            }
+        }
+
+        // Debounce fonksiyonu - çok sık çağrılmayı önler
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Malzemeler ve Yapılış bölümlerinin yüksekliğini eşitle
+        let isEqualizing = false; // Sonsuz döngüyü önlemek için flag
+        let lastEqualizedHeight = 0; // Son eşitlenen yüksekliği sakla
+        
+        function equalizeHeights() {
+            if (isEqualizing) return; // Zaten eşitleme yapılıyorsa çık
+            
+            const ingredientsContainer = document.querySelector('.numbered-ingredients-container');
+            const stepsContainer = document.querySelector('.numbered-steps-container');
+            
+            if (!ingredientsContainer || !stepsContainer) return;
+            
+            isEqualizing = true;
+            
+            try {
+                // Minimum yükseklik 400px
+                const minHeight = 400;
+                
+                // Yapılış bölümünün gerçek yüksekliğini al
+                // offsetHeight kullan - padding ve border dahil
+                const stepsHeight = stepsContainer.offsetHeight;
+                
+                // Eğer offsetHeight 0 veya çok küçükse, scrollHeight kullan
+                const actualStepsHeight = stepsHeight > 50 ? stepsHeight : stepsContainer.scrollHeight;
+                
+                // Daha büyük olanı seç (minimum 400px veya yapılış yüksekliği)
+                const targetHeight = Math.max(minHeight, actualStepsHeight);
+                
+                // Eğer yükseklik değişmediyse işlem yapma
+                if (Math.abs(lastEqualizedHeight - targetHeight) < 2) {
+                    isEqualizing = false;
+                    return;
+                }
+                
+                lastEqualizedHeight = targetHeight;
+                
+                // Her iki bölüme de aynı yüksekliği uygula
+                // height kullanarak kesin yükseklik ayarla
+                ingredientsContainer.style.height = targetHeight + 'px';
+                ingredientsContainer.style.minHeight = targetHeight + 'px';
+                ingredientsContainer.style.maxHeight = targetHeight + 'px';
+                stepsContainer.style.height = targetHeight + 'px';
+                stepsContainer.style.minHeight = targetHeight + 'px';
+                stepsContainer.style.maxHeight = targetHeight + 'px';
+                
+                // Quill editor container'ını da ayarla (padding: 20px üst + 20px alt = 40px)
+                const qlContainer = document.querySelector('#ingredientsViewer .ql-container');
+                if (qlContainer) {
+                    const containerPadding = 40; // p-20 = 20px üst + 20px alt
+                    const editorHeight = targetHeight - containerPadding;
+                    qlContainer.style.height = editorHeight + 'px';
+                    qlContainer.style.minHeight = editorHeight + 'px';
+                }
+                
+                // Quill editor içeriğini de ayarla
+                const qlEditor = document.querySelector('#ingredientsViewer .ql-editor');
+                if (qlEditor) {
+                    const containerPadding = 40; // p-20 = 20px üst + 20px alt
+                    const editorContentHeight = targetHeight - containerPadding - 20; // Container border için ekstra 20px
+                    qlEditor.style.minHeight = editorContentHeight + 'px';
+                }
+                
+                // Ingredients list için de ayarla (Quill yüklenmediyse)
+                const ingredientsList = document.getElementById('ingredientsList');
+                if (ingredientsList && !ingredientsList.classList.contains('d-none')) {
+                    const containerPadding = 40; // p-20 = 20px üst + 20px alt
+                    ingredientsList.style.minHeight = (targetHeight - containerPadding) + 'px';
+                }
+            } finally {
+                // Kısa bir gecikme ile flag'i sıfırla
+                setTimeout(() => {
+                    isEqualizing = false;
+                }, 150);
+            }
+        }
+        
+        // Debounced versiyonu
+        const debouncedEqualizeHeights = debounce(equalizeHeights, 300);
+        
+        // Sayfa yüklendiğinde başlat
+        document.addEventListener('DOMContentLoaded', () => {
+            initIngredientsViewer();
+            
+            // Yükseklik eşitlemeyi birkaç kez çağır (içerik yüklendikçe)
+            setTimeout(() => {
+                equalizeHeights();
+            }, 300);
+            
+            setTimeout(() => {
+                equalizeHeights();
+            }, 800);
+            
+            setTimeout(() => {
+                equalizeHeights();
+            }, 1500);
+            
+            // Resize için debounced versiyonu kullan
+            window.addEventListener('resize', debouncedEqualizeHeights);
+            
+            // ResizeObserver ile yapılış bölümünün boyut değişikliklerini izle (daha performanslı)
+            if (window.ResizeObserver) {
+                const stepsContainer = document.querySelector('.numbered-steps-container');
+                if (stepsContainer) {
+                    const resizeObserver = new ResizeObserver(() => {
+                        debouncedEqualizeHeights();
+                    });
+                    resizeObserver.observe(stepsContainer);
+                }
+            } else {
+                // Fallback: MutationObserver (eski tarayıcılar için)
+                let observerTimeout;
+                const observer = new MutationObserver((mutations) => {
+                    // Sadece gerçek içerik değişikliklerini kontrol et (style değişikliklerini değil)
+                    const hasContentChange = mutations.some(mutation => 
+                        mutation.type === 'childList' && mutation.addedNodes.length > 0
+                    );
+                    
+                    if (hasContentChange) {
+                        clearTimeout(observerTimeout);
+                        observerTimeout = setTimeout(() => {
+                            debouncedEqualizeHeights();
+                        }, 200);
+                    }
+                });
+                
+                const stepsContainer = document.querySelector('.numbered-steps-container');
+                if (stepsContainer) {
+                    // Sadece childList değişikliklerini izle, style değişikliklerini değil
+                    observer.observe(stepsContainer, {
+                        childList: true,
+                        subtree: true,
+                        attributes: false // Style değişikliklerini izleme - sonsuz döngüyü önler
+                    });
+                }
+            }
+        });
+    </script>
+
     <!-- Servings Calculator - Herkes için erişilebilir -->
     <script>
         // API Base URL - Global
@@ -2965,6 +3312,23 @@
                 // Fotoğrafa çift tıklama ile beğenme
                 const recipeImage = document.getElementById('recipeImage');
                 if (recipeImage) {
+                    // Ana fotoğrafı değiştir
+                    window.changeMainImage = function(newImageUrl, clickedElement) {
+                        const recipeImage = document.getElementById('recipeImage');
+                        if (recipeImage) {
+                            recipeImage.src = newImageUrl;
+                            // Aktif thumbnail'ı güncelle
+                            document.querySelectorAll('.recipe-thumbnail').forEach(thumb => {
+                                thumb.classList.remove('active');
+                                thumb.style.borderColor = 'transparent';
+                            });
+                            if (clickedElement) {
+                                clickedElement.classList.add('active');
+                                clickedElement.style.borderColor = '#6366f1';
+                            }
+                        }
+                    };
+
                     recipeImage.addEventListener('dblclick', async function(e) {
                         await toggleLike(e);
                     });

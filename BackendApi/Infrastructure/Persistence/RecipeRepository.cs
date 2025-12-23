@@ -12,8 +12,11 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
     public async Task<List<Recipe>> GetAllAsync()
         => await _context.Recipes
             .Include(r => r.Category)
+            .Include(r => r.Author)
             .Include(r => r.Ingredients.OrderBy(i => i.Order))
             .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync();
 
@@ -21,8 +24,11 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
     {
         var query = _context.Recipes
             .Include(r => r.Category)
+            .Include(r => r.Author)
             .Include(r => r.Ingredients.OrderBy(i => i.Order))
             .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
             .OrderByDescending(r => r.CreatedAt);
         
         var totalCount = await query.CountAsync();
@@ -38,8 +44,11 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
     public async Task<Recipe?> GetByIdAsync(int id)
         => await _context.Recipes
             .Include(r => r.Category)
+            .Include(r => r.Author)
             .Include(r => r.Ingredients.OrderBy(i => i.Order))
             .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
             .FirstOrDefaultAsync(r => r.Id == id);
 
     public async Task AddAsync(Recipe recipe)
@@ -64,6 +73,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
             .Include(r => r.Category)
             .Include(r => r.Ingredients.OrderBy(i => i.Order))
             .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
             .Where(r => r.IsFeatured)
             .OrderByDescending(r => r.CreatedAt)
             .Take(count)
@@ -74,6 +84,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
             .Include(r => r.Category)
             .Include(r => r.Ingredients.OrderBy(i => i.Order))
             .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
             .OrderByDescending(r => r.ViewCount)
             .ThenByDescending(r => r.CreatedAt)
             .Take(count)
@@ -91,6 +102,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
             .Include(r => r.Category)
             .Include(r => r.Ingredients.OrderBy(i => i.Order))
             .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
             .Skip(skip)
             .Take(1)
             .FirstOrDefaultAsync();
@@ -101,6 +113,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
             .Include(r => r.Category)
             .Include(r => r.Ingredients.OrderBy(i => i.Order))
             .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
             .Where(r => r.CategoryId == categoryId)
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync();
@@ -111,7 +124,40 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
             .Include(r => r.Category)
             .Include(r => r.Ingredients.OrderBy(i => i.Order))
             .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
             .Where(r => r.CategoryId == categoryId)
+            .OrderByDescending(r => r.CreatedAt);
+        
+        var totalCount = await query.CountAsync();
+        
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        
+        return (items, totalCount);
+    }
+
+    public async Task<List<Recipe>> GetByAuthorIdAsync(int authorId)
+        => await _context.Recipes
+            .Include(r => r.Category)
+            .Include(r => r.Author)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
+            .Where(r => r.AuthorId == authorId)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+
+    public async Task<(List<Recipe> Items, int TotalCount)> GetByAuthorIdPagedAsync(int authorId, int pageNumber, int pageSize)
+    {
+        var query = _context.Recipes
+            .Include(r => r.Category)
+            .Include(r => r.Author)
+            .Include(r => r.Ingredients.OrderBy(i => i.Order))
+            .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
+            .Where(r => r.AuthorId == authorId)
             .OrderByDescending(r => r.CreatedAt);
         
         var totalCount = await query.CountAsync();
@@ -131,6 +177,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
             .Include(r => r.Category)
             .Include(r => r.Ingredients.OrderBy(i => i.Order))
             .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
             .Where(r => 
                 r.Title.ToLower().Contains(term) ||
                 r.Description.ToLower().Contains(term) ||
@@ -150,6 +197,7 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
             .Include(r => r.Category)
             .Include(r => r.Ingredients.OrderBy(i => i.Order))
             .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder))
             .Where(r => 
                 r.Title.ToLower().Contains(term) ||
                 r.Description.ToLower().Contains(term) ||
@@ -194,7 +242,8 @@ public class RecipeRepository(AppDbContext context) : IRecipeRepository
         IQueryable<Recipe> query = _context.Recipes
             .Include(r => r.Category)
             .Include(r => r.Ingredients.OrderBy(i => i.Order))
-            .Include(r => r.Steps.OrderBy(s => s.Order));
+            .Include(r => r.Steps.OrderBy(s => s.Order))
+            .Include(r => r.Images.OrderBy(img => img.DisplayOrder));
 
         // Arama terimi filtresi
         if (!string.IsNullOrWhiteSpace(searchTerm))

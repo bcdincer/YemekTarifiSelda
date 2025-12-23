@@ -20,11 +20,15 @@ public class CreateRecipeDto
     public int CookingTimeMinutes { get; set; }
     public int Servings { get; set; }
     public string Difficulty { get; set; } = "Orta";
-    public string? ImageUrl { get; set; }
+    public string? ImageUrl { get; set; } // Backward compatibility için
+    public List<string>? ImageUrls { get; set; } // Çoklu fotoğraf URL'leri
+    public int? PrimaryImageIndex { get; set; } // Hangi fotoğraf ana fotoğraf olacak (0-based index)
+    public List<int>? RemovedImageIds { get; set; } // Silinecek fotoğraf ID'leri
     public string? Tips { get; set; }
     public string? AlternativeIngredients { get; set; }
     public string? NutritionInfo { get; set; }
     public int? CategoryId { get; set; }
+    public int? AuthorId { get; set; }
     public bool IsFeatured { get; set; }
 }
 

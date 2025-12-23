@@ -10,6 +10,20 @@
         <div class="bd bgc-white p-30 bdrs-3 mT-50">
             <h4 class="mB-30 c-grey-900">Giriş Yap</h4>
             
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    <i class="ti-alert mR-5"></i>@TempData["ErrorMessage"]
+                </div>
+            }
+            
+            @if (TempData["InfoMessage"] != null)
+            {
+                <div class="alert alert-info" role="alert">
+                    <i class="ti-info-alt mR-5"></i>@TempData["InfoMessage"]
+                </div>
+            }
+            
             <form asp-action="Login" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger mB-20"></div>
                 

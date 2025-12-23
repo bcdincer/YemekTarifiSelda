@@ -166,6 +166,133 @@ app.MapGet("/api/recipes", async (IRecipeService service, int pageNumber = 1, in
 app.MapGet("/api/recipes/{id:int}", async (int id, IRecipeService service) =>
     await service.GetByIdAsync(id) is { } recipe ? Results.Ok(recipe) : Results.NotFound());
 
+// S3 Test endpoint (CORS kontrolü için)
+app.MapGet("/api/s3/test", async (IS3Service s3Service, ILogger<Program> logger) =>
+{
+    try
+    {
+        // S3 bağlantısını test et
+        var testUrl = s3Service.GetFileUrl("test/connection.txt");
+        return Results.Ok(new { 
+            message = "S3 service is configured correctly",
+            bucketUrl = testUrl,
+            timestamp = DateTime.UtcNow
+        });
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "S3 service test failed");
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: 500
+        );
+    }
+});
+
+// S3 File Upload endpoint
+app.MapPost("/api/upload/image", async (HttpContext httpContext, HttpRequest request, IS3Service s3Service, ILogger<Program> logger) =>
+{
+    var userId = GetUserIdFromToken(httpContext);
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Results.Unauthorized();
+    }
+
+    // Dosya kontrolü
+    if (!request.HasFormContentType)
+    {
+        return Results.BadRequest(new { error = "Request must be multipart/form-data" });
+    }
+
+    var form = await request.ReadFormAsync();
+    var file = form.Files["file"];
+    
+    if (file == null || file.Length == 0)
+    {
+        return Results.BadRequest(new { error = "No file uploaded" });
+    }
+
+    // Güvenlik: Dosya tipi kontrolü
+    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+    var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+    
+    if (!allowedExtensions.Contains(extension))
+    {
+        return Results.BadRequest(new { error = "Only JPG, PNG, GIF, or WebP files are allowed" });
+    }
+
+    // Güvenlik: Dosya boyutu kontrolü (5MB)
+    if (file.Length > 5 * 1024 * 1024)
+    {
+        return Results.BadRequest(new { error = "File size must be less than 5MB" });
+    }
+
+    // Güvenlik: MIME type kontrolü
+    var allowedMimeTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp" };
+    if (!allowedMimeTypes.Contains(file.ContentType.ToLowerInvariant()))
+    {
+        return Results.BadRequest(new { error = "Invalid file type" });
+    }
+
+    try
+    {
+        // S3'e yükle
+        using var stream = file.OpenReadStream();
+        var url = await s3Service.UploadFileAsync(stream, file.FileName, file.ContentType);
+        
+        logger.LogInformation("File uploaded to S3 by user {UserId}: {Url}", userId, url);
+        
+        return Results.Ok(new { url });
+    }
+    catch (Amazon.S3.AmazonS3Exception s3Ex)
+    {
+        logger.LogError(s3Ex, "S3 error uploading file: {ErrorCode}, {Message}", s3Ex.ErrorCode, s3Ex.Message);
+        return Results.Problem(
+            detail: $"S3 error: {s3Ex.Message}",
+            statusCode: 500
+        );
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error uploading file to S3: {ExceptionType}, {Message}", ex.GetType().Name, ex.Message);
+        return Results.Problem(
+            detail: $"An error occurred while uploading the file: {ex.Message}",
+            statusCode: 500
+        );
+    }
+}).DisableAntiforgery().RequireAuthorization();
+
+// S3'ten görsel silme endpoint'i
+app.MapDelete("/api/upload/image", async (string url, IS3Service s3Service, ILogger<Program> logger) =>
+{
+    if (string.IsNullOrWhiteSpace(url))
+    {
+        return Results.BadRequest(new { error = "URL is required" });
+    }
+
+    try
+    {
+        var deleted = await s3Service.DeleteFileAsync(url);
+        if (deleted)
+        {
+            logger.LogInformation("Image deleted from S3: {Url}", url);
+            return Results.Ok(new { message = "Image deleted successfully" });
+        }
+        else
+        {
+            return Results.NotFound(new { error = "Image not found or could not be deleted" });
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error deleting image from S3: {Url}", url);
+        return Results.Problem(
+            detail: $"An error occurred while deleting the image: {ex.Message}",
+            statusCode: 500
+        );
+    }
+}).DisableAntiforgery().RequireAuthorization();
+
 app.MapPost("/api/recipes", async (CreateRecipeDto dto, IValidator<CreateRecipeDto> validator, IRecipeService service) =>
 {
     // FluentValidation
@@ -210,7 +337,7 @@ app.MapPut("/api/recipes/{id:int}", async (int id, CreateRecipeDto dto, IValidat
     {
         // DTO'dan Recipe entity'sine map et
         var recipe = dto.ToEntity();
-        var updated = await service.UpdateAsync(id, recipe);
+        var updated = await service.UpdateAsync(id, recipe, dto);
         return updated ? Results.NoContent() : Results.NotFound();
     }
     catch (Exception ex)
@@ -599,6 +726,198 @@ app.MapDelete("/api/categories/{id:int}", async (int id, ICategoryService servic
 {
     var deleted = await service.DeleteAsync(id);
     return deleted ? Results.NoContent() : Results.NotFound();
+});
+
+// Author endpoint'leri
+app.MapGet("/api/authors", async (IAuthorService service, int pageNumber = 1, int pageSize = 10) =>
+{
+    if (pageNumber <= 0) pageNumber = 1;
+    if (pageSize <= 0 || pageSize > 100) pageSize = 10;
+    
+    return Results.Ok(await service.GetAllPagedAsync(pageNumber, pageSize));
+});
+
+app.MapGet("/api/authors/active", async (IAuthorService service) =>
+    Results.Ok(await service.GetActiveAuthorsAsync()));
+
+// ÖNEMLİ: /api/authors/user/{userId} endpoint'i /api/authors/{id:int} endpoint'inden ÖNCE olmalı
+// Aksi halde "user" string'i int olarak parse edilmeye çalışılır
+app.MapGet("/api/authors/user/{userId}", async (string userId, IAuthorService service) =>
+    await service.GetByUserIdAsync(userId) is { } author ? Results.Ok(author) : Results.NotFound());
+
+app.MapGet("/api/authors/{id:int}", async (int id, IAuthorService service) =>
+    await service.GetByIdAsync(id) is { } author ? Results.Ok(author) : Results.NotFound());
+
+app.MapGet("/api/authors/{id:int}/recipes", async (int id, IRecipeService recipeService, int pageNumber = 1, int pageSize = 10) =>
+{
+    if (pageNumber <= 0) pageNumber = 1;
+    if (pageSize <= 0 || pageSize > 100) pageSize = 10;
+    
+    return Results.Ok(await recipeService.GetByAuthorIdPagedAsync(id, pageNumber, pageSize));
+});
+
+app.MapPost("/api/authors/become-author", async (CreateAuthorDto dto, HttpContext httpContext, IAuthorService service) =>
+{
+    var userId = GetUserIdFromToken(httpContext);
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Results.Unauthorized();
+    }
+    
+    try
+    {
+        var success = await service.BecomeAuthorAsync(userId, dto);
+        if (success)
+        {
+            var author = await service.GetByUserIdAsync(userId);
+            return Results.Created($"/api/authors/{author?.Id}", author);
+        }
+        return Results.BadRequest(new { error = "Failed to become author" });
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: 500
+        );
+    }
+}).RequireAuthorization();
+
+app.MapPut("/api/authors/{id:int}", async (int id, UpdateAuthorDto dto, HttpContext httpContext, IAuthorService service) =>
+{
+    var userId = GetUserIdFromToken(httpContext);
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Results.Unauthorized();
+    }
+    
+    // Sadece kendi profilini güncelleyebilir
+    var author = await service.GetByIdAsync(id);
+    if (author == null)
+    {
+        return Results.NotFound();
+    }
+    
+    if (author.UserId != userId)
+    {
+        return Results.Forbid();
+    }
+    
+    try
+    {
+        var updated = await service.UpdateAsync(id, dto);
+        return updated ? Results.NoContent() : Results.NotFound();
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: 500
+        );
+    }
+}).RequireAuthorization();
+
+// Blog endpoint'leri
+app.MapGet("/api/blog", async (IBlogPostService service, int pageNumber = 1, int pageSize = 10) =>
+{
+    if (pageNumber <= 0) pageNumber = 1;
+    if (pageSize <= 0 || pageSize > 100) pageSize = 10;
+    
+    return Results.Ok(await service.GetPublishedPagedAsync(pageNumber, pageSize));
+});
+
+app.MapGet("/api/blog/{id:int}", async (int id, IBlogPostService service) =>
+    await service.GetByIdAsync(id) is { } blogPost ? Results.Ok(blogPost) : Results.NotFound());
+
+app.MapGet("/api/blog/featured", async (IBlogPostService service, int count = 6) =>
+    Results.Ok(await service.GetFeaturedAsync(count)));
+
+app.MapGet("/api/blog/recent", async (IBlogPostService service, int count = 6) =>
+    Results.Ok(await service.GetRecentAsync(count)));
+
+app.MapGet("/api/blog/author/{authorId:int}", async (int authorId, IBlogPostService service, int pageNumber = 1, int pageSize = 10) =>
+{
+    if (pageNumber <= 0) pageNumber = 1;
+    if (pageSize <= 0 || pageSize > 100) pageSize = 10;
+    
+    return Results.Ok(await service.GetByAuthorIdPagedAsync(authorId, pageNumber, pageSize));
+});
+
+app.MapGet("/api/blog/search", async (string q, IBlogPostService service, int pageNumber = 1, int pageSize = 10) =>
+{
+    if (string.IsNullOrWhiteSpace(q))
+        return Results.BadRequest(new { error = "Search term is required" });
+    
+    if (pageNumber <= 0) pageNumber = 1;
+    if (pageSize <= 0 || pageSize > 100) pageSize = 10;
+    
+    return Results.Ok(await service.SearchPagedAsync(q, pageNumber, pageSize));
+});
+
+app.MapPost("/api/blog", async (CreateBlogPostDto dto, HttpContext httpContext, IBlogPostService service) =>
+{
+    var userId = GetUserIdFromToken(httpContext);
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Results.Unauthorized();
+    }
+    
+    try
+    {
+        var created = await service.CreateAsync(dto);
+        return Results.Created($"/api/blog/{created.Id}", created);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: 500
+        );
+    }
+}).RequireAuthorization();
+
+app.MapPut("/api/blog/{id:int}", async (int id, UpdateBlogPostDto dto, HttpContext httpContext, IBlogPostService service) =>
+{
+    var userId = GetUserIdFromToken(httpContext);
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Results.Unauthorized();
+    }
+    
+    try
+    {
+        var updated = await service.UpdateAsync(id, dto);
+        return updated ? Results.NoContent() : Results.NotFound();
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: 500
+        );
+    }
+}).RequireAuthorization();
+
+app.MapDelete("/api/blog/{id:int}", async (int id, HttpContext httpContext, IBlogPostService service) =>
+{
+    var userId = GetUserIdFromToken(httpContext);
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Results.Unauthorized();
+    }
+    
+    var deleted = await service.DeleteAsync(id);
+    return deleted ? Results.NoContent() : Results.NotFound();
+}).RequireAuthorization();
+
+app.MapPost("/api/blog/{id:int}/view", async (int id, IBlogPostService service) =>
+{
+    await service.IncrementViewCountAsync(id);
+    return Results.Ok();
 });
 
 // Collection endpoint'leri

@@ -29,7 +29,8 @@ public class RecipeViewModel
     [JsonConverter(typeof(DifficultyJsonConverter))]
     public string Difficulty { get; set; } = "Orta";
     
-    public string? ImageUrl { get; set; }
+    public string? ImageUrl { get; set; } // Backward compatibility için (ana fotoğraf)
+    public List<RecipeImageViewModel> Images { get; set; } = new(); // Çoklu fotoğraflar
     public string? Tips { get; set; }
     public string? AlternativeIngredients { get; set; }
     public string? NutritionInfo { get; set; }
@@ -40,6 +41,8 @@ public class RecipeViewModel
     public bool IsFeatured { get; set; }
     public int? CategoryId { get; set; }
     public CategoryViewModel? Category { get; set; }
+    public int? AuthorId { get; set; }
+    public AuthorViewModel? Author { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

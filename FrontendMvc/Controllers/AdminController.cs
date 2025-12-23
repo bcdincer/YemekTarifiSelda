@@ -111,25 +111,21 @@ public class AdminController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditRecipe(int id, RecipeViewModel model, IFormFile? imageFile)
+    public async Task<IActionResult> EditRecipe(int id, RecipeViewModel model, IFormFile? imageFile, string? imageUrlsJson, string? removedImageIds, int? primaryImageIndex)
     {
         var client = CreateApiClient();
         var categories = await client.GetFromJsonAsync<List<CategoryViewModel>>("/api/categories", JsonOptions) 
                          ?? new List<CategoryViewModel>();
         ViewBag.Categories = categories;
 
-        // Mevcut tarifi al (ImageUrl'i korumak için)
+        // Mevcut tarifi al
         var existingRecipe = await client.GetFromJsonAsync<RecipeViewModel>($"/api/recipes/{id}", JsonOptions);
         if (existingRecipe == null)
         {
             return NotFound();
         }
-        var currentImageUrl = existingRecipe.ImageUrl;
         
-        // Yeni yüklenen dosya için ImageUrl'i sakla
-        string? newImageUrl = null;
-
-        // Dosya yüklendiyse kaydet (öncelik dosya yüklemede)
+        // Eski tek dosya desteği (backward compatibility) - S3'e yükle
         if (imageFile != null && imageFile.Length > 0)
         {
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
@@ -147,30 +143,55 @@ public class AdminController : Controller
                 return View(model);
             }
 
-            // Klasörü oluştur
-            var imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "recipes");
-            Directory.CreateDirectory(imagesPath);
-
-            // Benzersiz dosya adı oluştur
-            var fileName = $"{Guid.NewGuid()}{extension}";
-            var filePath = Path.Combine(imagesPath, fileName);
-
-            // Dosyayı kaydet
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            // S3'e yükle
+            try
             {
-                await imageFile.CopyToAsync(stream);
+                using var content = new MultipartFormDataContent();
+                using var fileStream = imageFile.OpenReadStream();
+                content.Add(new StreamContent(fileStream), "file", imageFile.FileName);
+                
+                var uploadResponse = await client.PostAsync("/api/upload/image", content);
+                if (uploadResponse.IsSuccessStatusCode)
+                {
+                    var result = await uploadResponse.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(JsonOptions);
+                    if (result.TryGetProperty("url", out var urlElement))
+                    {
+                        var uploadedUrl = urlElement.GetString();
+                        if (!string.IsNullOrWhiteSpace(uploadedUrl))
+                        {
+                            model.ImageUrl = uploadedUrl;
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("ImageFile", "Fotoğraf yüklendi ancak URL alınamadı.");
+                            return View(model);
+                        }
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("ImageFile", "Fotoğraf yüklendi ancak yanıt formatı hatalı.");
+                        return View(model);
+                    }
+                }
+                else
+                {
+                    var errorContent = await uploadResponse.Content.ReadAsStringAsync();
+                    var statusCode = uploadResponse.StatusCode;
+                    ModelState.AddModelError("ImageFile", $"Fotoğraf yüklenirken hata oluştu (Status: {statusCode}): {errorContent}");
+                    return View(model);
+                }
             }
-
-            // Yeni URL'i sakla
-            newImageUrl = $"/images/recipes/{fileName}";
-            model.ImageUrl = newImageUrl;
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("ImageFile", $"Fotoğraf yüklenirken hata oluştu: {ex.Message}");
+                return View(model);
+            }
         }
         else if (string.IsNullOrWhiteSpace(model.ImageUrl))
         {
             // Dosya yüklenmedi ve ImageUrl input'u boşsa, mevcut ImageUrl'i koru
-            model.ImageUrl = currentImageUrl;
+            model.ImageUrl = existingRecipe.ImageUrl;
         }
-        // Eğer model.ImageUrl doluysa (URL input'undan geliyorsa), onu kullan (zaten model'de var)
 
         // Malzemeleri ve adımları string'den listeye çevir
         var ingredientsList = string.IsNullOrWhiteSpace(model.Ingredients)
@@ -187,6 +208,69 @@ public class AdminController : Controller
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .ToList();
 
+        // Çoklu fotoğraf desteği - imageUrlsJson'dan URL'leri al
+        List<string>? imageUrls = null;
+        if (!string.IsNullOrWhiteSpace(imageUrlsJson))
+        {
+            try
+            {
+                imageUrls = System.Text.Json.JsonSerializer.Deserialize<List<string>>(imageUrlsJson, JsonOptions);
+            }
+            catch
+            {
+                // JSON parse hatası - görmezden gel
+            }
+        }
+        
+        // Silinen fotoğraf ID'lerini al
+        List<int>? removedImageIdsList = null;
+        if (!string.IsNullOrWhiteSpace(removedImageIds))
+        {
+            try
+            {
+                removedImageIdsList = System.Text.Json.JsonSerializer.Deserialize<List<int>>(removedImageIds, JsonOptions);
+            }
+            catch
+            {
+                // JSON parse hatası - görmezden gel
+            }
+        }
+        
+        // Silinen fotoğrafları S3'ten sil (eğer S3 URL'leri ise)
+        if (removedImageIdsList != null && removedImageIdsList.Any() && existingRecipe.Images != null)
+        {
+            var imagesToDelete = existingRecipe.Images
+                .Where(img => removedImageIdsList.Contains(img.Id))
+                .ToList();
+            
+            foreach (var image in imagesToDelete)
+            {
+                // S3 URL'si ise S3'ten sil
+                if (!string.IsNullOrWhiteSpace(image.ImageUrl) && 
+                    (image.ImageUrl.StartsWith("http://") || image.ImageUrl.StartsWith("https://")))
+                {
+                    try
+                    {
+                        var deleteUrl = $"/api/upload/image?url={Uri.EscapeDataString(image.ImageUrl)}";
+                        var deleteResponse = await client.DeleteAsync(deleteUrl);
+                        if (deleteResponse.IsSuccessStatusCode)
+                        {
+                            // Image deleted successfully
+                        }
+                        else
+                        {
+                            // Failed to delete - log but continue
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // S3'ten silme hatası olsa bile devam et
+                        // Log error but don't throw
+                    }
+                }
+            }
+        }
+        
         // RecipeViewModel'den CreateRecipeDto formatına mapping yap
         var updateDto = new
         {
@@ -198,7 +282,9 @@ public class AdminController : Controller
             CookingTimeMinutes = model.CookingTimeMinutes,
             Servings = model.Servings,
             Difficulty = model.Difficulty ?? "Orta",
-            ImageUrl = string.IsNullOrWhiteSpace(model.ImageUrl) ? null : model.ImageUrl,
+            ImageUrl = string.IsNullOrWhiteSpace(model.ImageUrl) ? null : model.ImageUrl, // Backward compatibility
+            ImageUrls = imageUrls, // Çoklu fotoğraf URL'leri
+            PrimaryImageIndex = primaryImageIndex, // Ana fotoğraf index'i
             Tips = string.IsNullOrWhiteSpace(model.Tips) ? null : model.Tips,
             AlternativeIngredients = string.IsNullOrWhiteSpace(model.AlternativeIngredients) ? null : model.AlternativeIngredients,
             NutritionInfo = string.IsNullOrWhiteSpace(model.NutritionInfo) ? null : model.NutritionInfo,
@@ -215,13 +301,9 @@ public class AdminController : Controller
         catch (Exception ex)
         {
             ModelState.AddModelError(string.Empty, $"Tarif güncellenirken bir hata oluştu: {ex.Message}");
-            if (!string.IsNullOrEmpty(newImageUrl))
+            if (string.IsNullOrWhiteSpace(model.ImageUrl))
             {
-                model.ImageUrl = newImageUrl;
-            }
-            else if (string.IsNullOrWhiteSpace(model.ImageUrl))
-            {
-                model.ImageUrl = currentImageUrl;
+                model.ImageUrl = existingRecipe.ImageUrl;
             }
             return View(model);
         }
@@ -260,14 +342,10 @@ public class AdminController : Controller
                 ModelState.AddModelError(string.Empty, $"Tarif güncellenirken bir hata oluştu: {errorContent}");
             }
             
-            // Hata durumunda, yeni yüklenen görsel varsa model'de koru
-            if (!string.IsNullOrEmpty(newImageUrl))
+            // Hata durumunda, mevcut ImageUrl'i koru
+            if (string.IsNullOrWhiteSpace(model.ImageUrl))
             {
-                model.ImageUrl = newImageUrl;
-            }
-            else if (string.IsNullOrWhiteSpace(model.ImageUrl))
-            {
-                model.ImageUrl = currentImageUrl;
+                model.ImageUrl = existingRecipe.ImageUrl;
             }
             
             return View(model);

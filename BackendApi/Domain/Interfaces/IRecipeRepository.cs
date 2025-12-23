@@ -12,6 +12,8 @@ public interface IRecipeRepository
     Task<Recipe?> GetRandomAsync();
     Task<List<Recipe>> GetByCategoryAsync(int categoryId);
     Task<(List<Recipe> Items, int TotalCount)> GetByCategoryPagedAsync(int categoryId, int pageNumber, int pageSize);
+    Task<List<Recipe>> GetByAuthorIdAsync(int authorId);
+    Task<(List<Recipe> Items, int TotalCount)> GetByAuthorIdPagedAsync(int authorId, int pageNumber, int pageSize);
     Task<List<Recipe>> SearchAsync(string searchTerm);
     Task<(List<Recipe> Items, int TotalCount)> SearchPagedAsync(string searchTerm, int pageNumber, int pageSize);
     Task<(List<Recipe> Items, int TotalCount)> SearchWithFiltersAsync(

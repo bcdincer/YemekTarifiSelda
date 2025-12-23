@@ -87,8 +87,9 @@
     <!-- Adminator CSS ve JS -->
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- CKEditor 5 -->
-    <script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+    <!-- Quill editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script defer="defer" src="~/adminator/dist/main.js"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -96,6 +97,7 @@
     <!-- Font dosyalarının doğru yüklendiğinden emin olmak için -->
     <link rel="preload" href="~/adminator/dist/assets/static/fonts/icons/themify/themify.woff" as="font" type="font/woff" crossorigin>
     <link rel="preload" href="~/adminator/dist/assets/static/fonts/icons/fontawesome/fontawesome-webfont.woff" as="font" type="font/woff" crossorigin>
+    @RenderSection("Styles", required: false)
 </head>
 <body class="app">
     <div id="loader">
@@ -162,6 +164,14 @@
                             <span class="title">Tüm Tarifler</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="sidebar-link" asp-controller="Blog" asp-action="Index">
+                            <span class="icon-holder">
+                                <i class="c-orange-500 ti-file"></i>
+                            </span>
+                            <span class="title">Blog</span>
+                        </a>
+                    </li>
                     
                     <!-- Kullanıcı İşlemleri (Giriş yapmış kullanıcılar için) -->
                     @if (SignInManager.IsSignedIn(User))
@@ -212,6 +222,30 @@
                                     <i class="c-green-500 ti-shopping-cart"></i>
                                 </span>
                                 <span class="title">Alışveriş Listeleri</span>
+                            </a>
+                        </li>
+                        <li class="nav-item mT-20">
+                            <a class="sidebar-link" asp-controller="Author" asp-action="BecomeAuthor">
+                                <span class="icon-holder">
+                                    <i class="c-purple-500 ti-pencil"></i>
+                                </span>
+                                <span class="title">Yazar Ol</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="sidebar-link" asp-controller="Author" asp-action="MyRecipes">
+                                <span class="icon-holder">
+                                    <i class="c-brown-500 ti-book"></i>
+                                </span>
+                                <span class="title">Tariflerim</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="sidebar-link" asp-controller="Author" asp-action="Authors">
+                                <span class="icon-holder">
+                                    <i class="c-indigo-500 ti-user"></i>
+                                </span>
+                                <span class="title">Yazarlar</span>
                             </a>
                         </li>
                         @if (User.IsInRole("Admin"))

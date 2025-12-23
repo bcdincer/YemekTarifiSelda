@@ -4,6 +4,8 @@ public interface IUnitOfWork : IDisposable
 {
     IRecipeRepository Recipes { get; }
     ICategoryRepository Categories { get; }
+    IAuthorRepository Authors { get; }
+    IBlogPostRepository BlogPosts { get; }
     IRatingRepository Ratings { get; }
     ILikeRepository Likes { get; }
     ICollectionRepository Collections { get; }
@@ -14,6 +16,7 @@ public interface IUnitOfWork : IDisposable
     IMealPlanItemRepository MealPlanItems { get; }
     IShoppingListRepository ShoppingLists { get; }
     IShoppingListItemRepository ShoppingListItems { get; }
+    IRecipeImageRepository RecipeImages { get; }
 
     /// <summary>
     /// Tüm değişiklikleri kaydeder ve transaction'ı commit eder

@@ -59,7 +59,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRecipeService, RecipeService>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<IAuthorRepository, AuthorRepository>();
+        services.AddScoped<IAuthorService, AuthorService>();
+        services.AddScoped<IBlogPostRepository, BlogPostRepository>();
+        services.AddScoped<IBlogPostService, BlogPostService>();
         services.AddScoped<IRatingRepository, RatingRepository>();
+        
+        // AWS S3 Service
+        services.AddSingleton<IS3Service, S3Service>();
         services.AddScoped<IRatingService, RatingService>();
         services.AddScoped<ILikeRepository, LikeRepository>();
         services.AddScoped<ILikeService, LikeService>();

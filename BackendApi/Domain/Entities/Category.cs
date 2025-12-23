@@ -11,5 +11,6 @@ public class Category
     
     // Navigation property
     public List<Recipe> Recipes { get; set; } = new();
+    public List<BlogPost> BlogPosts { get; set; } = new();
 }
 

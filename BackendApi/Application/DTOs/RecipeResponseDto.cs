@@ -20,7 +20,8 @@ public class RecipeResponseDto
     public int CookingTimeMinutes { get; set; }
     public int Servings { get; set; }
     public string Difficulty { get; set; } = string.Empty;
-    public string? ImageUrl { get; set; }
+    public string? ImageUrl { get; set; } // Backward compatibility için (ana fotoğraf)
+    public List<RecipeImageDto> Images { get; set; } = new(); // Çoklu fotoğraflar
     public string? Tips { get; set; }
     public string? AlternativeIngredients { get; set; }
     public string? NutritionInfo { get; set; }
@@ -31,6 +32,8 @@ public class RecipeResponseDto
     public bool IsFeatured { get; set; }
     public int? CategoryId { get; set; }
     public CategoryDto? Category { get; set; }
+    public int? AuthorId { get; set; }
+    public AuthorDto? Author { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }
@@ -55,5 +58,14 @@ public class StepDto
     public int Id { get; set; }
     public string Description { get; set; } = string.Empty;
     public int Order { get; set; }
+}
+
+public class AuthorDto
+{
+    public int Id { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
+    public string? Bio { get; set; }
+    public string? ProfileImageUrl { get; set; }
 }
 

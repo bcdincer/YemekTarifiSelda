@@ -6,14 +6,16 @@ using BackendApi.Domain.Interfaces;
 
 namespace BackendApi.Application.Services;
 
-public class RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger, IEventPublisher eventPublisher, IRatingService ratingService, ILikeService likeService) : IRecipeService
+public class RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger, IEventPublisher eventPublisher, IRatingService ratingService, ILikeService likeService, IS3Service? s3Service = null) : IRecipeService
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ILogger<RecipeService> _logger = logger;
     private readonly IEventPublisher _eventPublisher = eventPublisher;
     private readonly IRatingService _ratingService = ratingService;
     private readonly ILikeService _likeService = likeService;
+    private readonly IS3Service? _s3Service = s3Service;
     private IRecipeRepository Repository => _unitOfWork.Recipes;
+    private IRecipeImageRepository ImageRepository => _unitOfWork.RecipeImages;
 
     public async Task<List<RecipeResponseDto>> GetAllAsync()
     {
@@ -63,6 +65,19 @@ public class RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger
     public async Task<PagedResult<RecipeResponseDto>> GetByCategoryPagedAsync(int categoryId, int pageNumber, int pageSize)
     {
         var (items, totalCount) = await Repository.GetByCategoryPagedAsync(categoryId, pageNumber, pageSize);
+        var dtoItems = await MapRecipesWithRealTimeRatingsAsync(items);
+        return new PagedResult<RecipeResponseDto>(dtoItems, totalCount, pageNumber, pageSize);
+    }
+
+    public async Task<List<RecipeResponseDto>> GetByAuthorIdAsync(int authorId)
+    {
+        var recipes = await Repository.GetByAuthorIdAsync(authorId);
+        return await MapRecipesWithRealTimeRatingsAsync(recipes);
+    }
+
+    public async Task<PagedResult<RecipeResponseDto>> GetByAuthorIdPagedAsync(int authorId, int pageNumber, int pageSize)
+    {
+        var (items, totalCount) = await Repository.GetByAuthorIdPagedAsync(authorId, pageNumber, pageSize);
         var dtoItems = await MapRecipesWithRealTimeRatingsAsync(items);
         return new PagedResult<RecipeResponseDto>(dtoItems, totalCount, pageNumber, pageSize);
     }
@@ -223,7 +238,7 @@ public class RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger
         }
     }
 
-    public async Task<bool> UpdateAsync(int id, Recipe updated)
+    public async Task<bool> UpdateAsync(int id, Recipe updated, CreateRecipeDto? dto = null)
     {
         try
         {
@@ -232,6 +247,40 @@ public class RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger
             {
                 _logger.LogWarning("Recipe with id {RecipeId} not found for update", id);
                 return false;
+            }
+
+            // Mevcut fotoğrafları yükle
+            var existingImages = await ImageRepository.GetByRecipeIdAsync(id);
+            
+            // Silinecek fotoğrafları belirle ve S3'ten sil
+            if (dto?.RemovedImageIds != null && dto.RemovedImageIds.Any())
+            {
+                var imagesToDelete = existingImages
+                    .Where(img => dto.RemovedImageIds.Contains(img.Id))
+                    .ToList();
+                
+                foreach (var image in imagesToDelete)
+                {
+                    // S3 URL'si ise S3'ten sil
+                    if (_s3Service != null && 
+                        !string.IsNullOrWhiteSpace(image.ImageUrl) && 
+                        (image.ImageUrl.StartsWith("http://") || image.ImageUrl.StartsWith("https://")))
+                    {
+                        try
+                        {
+                            await _s3Service.DeleteFileAsync(image.ImageUrl);
+                            _logger.LogInformation("Image deleted from S3: {ImageUrl}", image.ImageUrl);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to delete image from S3: {ImageUrl}", image.ImageUrl);
+                            // S3'ten silme hatası olsa bile devam et
+                        }
+                    }
+                    
+                    // Veritabanından sil
+                    await ImageRepository.DeleteAsync(image);
+                }
             }
 
             // Update properties using DTO mapping (SRP: Mapping logic separated)
@@ -248,8 +297,33 @@ public class RecipeService(IUnitOfWork unitOfWork, ILogger<RecipeService> logger
             existing.AlternativeIngredients = updated.AlternativeIngredients;
             existing.NutritionInfo = updated.NutritionInfo;
             existing.CategoryId = updated.CategoryId;
+            existing.AuthorId = updated.AuthorId;
             existing.IsFeatured = updated.IsFeatured;
             existing.UpdatedAt = DateTime.UtcNow;
+
+            // Yeni fotoğrafları ekle (RecipeMapper.ToEntity zaten Images'ı oluşturuyor)
+            // Mevcut fotoğrafları temizle (silinmeyenler hariç)
+            var remainingImageIds = existingImages
+                .Where(img => dto?.RemovedImageIds == null || !dto.RemovedImageIds.Contains(img.Id))
+                .Select(img => img.Id)
+                .ToList();
+            
+            // Yeni fotoğrafları ekle
+            if (updated.Images != null && updated.Images.Any())
+            {
+                foreach (var img in updated.Images)
+                {
+                    img.RecipeId = existing.Id;
+                    await ImageRepository.AddAsync(img);
+                }
+            }
+            
+            // Mevcut fotoğrafları temizle (silinmeyenler hariç - zaten RecipeMapper.ToEntity yeni Images oluşturdu)
+            // Tüm mevcut fotoğrafları sil (yeni fotoğraflar zaten eklendi)
+            if (existingImages.Any())
+            {
+                await ImageRepository.DeleteRangeAsync(existingImages);
+            }
 
             await Repository.UpdateAsync(existing);
             await _unitOfWork.SaveChangesAsync();

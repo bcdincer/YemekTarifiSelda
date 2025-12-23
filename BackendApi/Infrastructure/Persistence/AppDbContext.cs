@@ -7,6 +7,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Recipe> Recipes => Set<Recipe>();
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Author> Authors => Set<Author>();
+    public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
     public DbSet<RecipeRating> RecipeRatings => Set<RecipeRating>();
     public DbSet<RecipeLike> RecipeLikes => Set<RecipeLike>();
     public DbSet<Collection> Collections => Set<Collection>();
@@ -19,6 +21,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ShoppingListItem> ShoppingListItems => Set<ShoppingListItem>();
     public DbSet<RecipeIngredient> RecipeIngredients => Set<RecipeIngredient>();
     public DbSet<RecipeStep> RecipeSteps => Set<RecipeStep>();
+    public DbSet<RecipeImage> RecipeImages => Set<RecipeImage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,6 +33,65 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .WithMany(c => c.Recipes)
             .HasForeignKey(r => r.CategoryId)
             .OnDelete(DeleteBehavior.SetNull); // Kategori silinirse tarifler null olur
+
+        // Recipe - Author ilişkisi
+        modelBuilder.Entity<Recipe>()
+            .HasOne(r => r.Author)
+            .WithMany(a => a.Recipes)
+            .HasForeignKey(r => r.AuthorId)
+            .OnDelete(DeleteBehavior.SetNull); // Yazar silinirse tarifler null olur
+
+        // Recipe - RecipeImage ilişkisi
+        modelBuilder.Entity<RecipeImage>()
+            .HasOne(ri => ri.Recipe)
+            .WithMany(r => r.Images)
+            .HasForeignKey(ri => ri.RecipeId)
+            .OnDelete(DeleteBehavior.Cascade); // Tarif silinirse fotoğraflar da silinir
+
+        // RecipeImage index'leri
+        modelBuilder.Entity<RecipeImage>()
+            .HasIndex(ri => ri.RecipeId);
+        
+        modelBuilder.Entity<RecipeImage>()
+            .HasIndex(ri => ri.IsPrimary);
+        
+        modelBuilder.Entity<RecipeImage>()
+            .HasIndex(ri => ri.DisplayOrder);
+
+        // BlogPost - Author ilişkisi
+        modelBuilder.Entity<BlogPost>()
+            .HasOne(b => b.Author)
+            .WithMany(a => a.BlogPosts)
+            .HasForeignKey(b => b.AuthorId)
+            .OnDelete(DeleteBehavior.SetNull); // Yazar silinirse blog yazıları null olur
+
+        // BlogPost - Category ilişkisi
+        modelBuilder.Entity<BlogPost>()
+            .HasOne(b => b.Category)
+            .WithMany(c => c.BlogPosts)
+            .HasForeignKey(b => b.CategoryId)
+            .OnDelete(DeleteBehavior.SetNull); // Kategori silinirse blog yazıları null olur
+
+        // Author - UserId unique index (bir kullanıcı sadece bir yazar olabilir)
+        modelBuilder.Entity<Author>()
+            .HasIndex(a => a.UserId)
+            .IsUnique();
+
+        // BlogPost index'leri (performans için)
+        modelBuilder.Entity<BlogPost>()
+            .HasIndex(b => b.IsPublished);
+        
+        modelBuilder.Entity<BlogPost>()
+            .HasIndex(b => b.IsFeatured);
+        
+        modelBuilder.Entity<BlogPost>()
+            .HasIndex(b => b.CreatedAt);
+        
+        modelBuilder.Entity<BlogPost>()
+            .HasIndex(b => b.AuthorId);
+        
+        modelBuilder.Entity<BlogPost>()
+            .HasIndex(b => b.CategoryId);
 
         // Difficulty enum'ını string olarak sakla
         modelBuilder.Entity<Recipe>()

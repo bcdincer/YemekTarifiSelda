@@ -1,0 +1,110 @@
+@model FrontendMvc.Models.Blog.BlogPostViewModel
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="row gap-20">
+    <div class="col-12">
+        <div class="bd bgc-white p-20">
+            <!-- Görsel ve Banner -->
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <div class="mB-30" style="position: relative;">
+                    <img src="@Model.ImageUrl" alt="@Model.Title" class="w-100" style="height: 400px; object-fit: cover; border-radius: 8px;">
+                    @if (!string.IsNullOrEmpty(Model.ImageBanner))
+                    {
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 0 0 8px 8px;">
+                            <h3 class="mB-0">@Model.ImageBanner</h3>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Yazar Bilgisi -->
+            @if (Model.Author != null)
+            {
+                <div class="mB-20">
+                    <div class="peers fxw-nw ai-c">
+                        @if (!string.IsNullOrEmpty(Model.Author.ProfileImageUrl))
+                        {
+                            <div class="peer mR-15">
+                                <img src="@Model.Author.ProfileImageUrl" alt="@Model.Author.DisplayName" 
+                                     style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                            </div>
+                        }
+                        <div class="peer peer-greed">
+                            <div class="fw-600 fsz-lg">@Model.Author.DisplayName</div>
+                            @if (!string.IsNullOrEmpty(Model.Author.Bio))
+                            {
+                                <div class="text-muted">@Model.Author.Bio</div>
+                            }
+                        </div>
+                        <div class="peer">
+                            <span class="text-muted">
+                                @Model.PublishedAt?.ToString("dd.MM.yyyy") ?? @Model.CreatedAt.ToString("dd.MM.yyyy")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Başlık -->
+            <h1 class="mB-20">@Model.Title</h1>
+
+            <!-- İstatistikler -->
+            <div class="peers fxw-nw ai-c mB-30" style="border-top: 1px solid #eee; border-bottom: 1px solid #eee; padding: 15px 0;">
+                <div class="peer mR-30">
+                    <i class="ti-heart"></i> @Model.LikeCount Beğeni
+                </div>
+                <div class="peer mR-30">
+                    <i class="ti-comment"></i> @Model.CommentCount Yorum
+                </div>
+                <div class="peer">
+                    <i class="ti-eye"></i> @(Model.ViewCount > 1000 ? $"{Model.ViewCount / 1000.0:F1}K" : Model.ViewCount.ToString()) Görüntülenme
+                </div>
+            </div>
+
+            <!-- İçerik -->
+            <div class="blog-content">
+                @Html.Raw(Model.Content)
+            </div>
+
+            <!-- Kategori -->
+            @if (Model.Category != null)
+            {
+                <div class="mT-30">
+                    <span class="badge bg-primary">@Model.Category.Name</span>
+                </div>
+            }
+
+            <!-- Geri Dön -->
+            <div class="mT-30">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="ti-arrow-left"></i> Blog Listesine Dön
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .blog-content {
+        line-height: 1.8;
+        font-size: 16px;
+    }
+    .blog-content h2, .blog-content h3, .blog-content h4 {
+        margin-top: 30px;
+        margin-bottom: 15px;
+    }
+    .blog-content p {
+        margin-bottom: 20px;
+    }
+    .blog-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+</style>
+

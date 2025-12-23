@@ -1,0 +1,79 @@
+@model FrontendMvc.Models.Recipes.BecomeAuthorViewModel
+
+@{
+    ViewData["Title"] = "Yazar Ol";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="bd bgc-white p-30">
+                <h2 class="mB-20">
+                    <i class="ti-pencil mR-10"></i> Yazar Ol
+                </h2>
+                <p class="c-grey-600 mB-30">
+                    Tariflerinizi paylaşmak için yazar olun. Yazar olduktan sonra kendi tariflerinizi oluşturabilir ve paylaşabilirsiniz.
+                </p>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success" role="alert">
+                        @TempData["SuccessMessage"]
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <form asp-action="BecomeAuthor" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mB-20"></div>
+
+                    <div class="form-group mB-20">
+                        <label asp-for="DisplayName" class="form-label fw-600">
+                            <i class="ti-user mR-5"></i> Görünen Ad *
+                        </label>
+                        <input asp-for="DisplayName" class="form-control" placeholder="Örn: Ahmet Yılmaz" />
+                        <span asp-validation-for="DisplayName" class="text-danger"></span>
+                        <small class="form-text text-muted">Bu isim tariflerinizde görünecektir</small>
+                    </div>
+
+                    <div class="form-group mB-20">
+                        <label asp-for="Bio" class="form-label fw-600">
+                            <i class="ti-file-text mR-5"></i> Biyografi
+                        </label>
+                        <textarea asp-for="Bio" class="form-control" rows="4" placeholder="Kendiniz hakkında kısa bir bilgi yazın..."></textarea>
+                        <span asp-validation-for="Bio" class="text-danger"></span>
+                        <small class="form-text text-muted">Maksimum 500 karakter</small>
+                    </div>
+
+                    <div class="form-group mB-30">
+                        <label asp-for="ProfileImageUrl" class="form-label fw-600">
+                            <i class="ti-image mR-5"></i> Profil Fotoğrafı URL
+                        </label>
+                        <input asp-for="ProfileImageUrl" class="form-control" type="url" placeholder="https://example.com/profile.jpg" />
+                        <span asp-validation-for="ProfileImageUrl" class="text-danger"></span>
+                        <small class="form-text text-muted">Profil fotoğrafınızın URL'ini girin (opsiyonel)</small>
+                    </div>
+
+                    <div class="d-flex gap-10">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ti-check mR-5"></i> Yazar Ol
+                        </button>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                            <i class="ti-close mR-5"></i> İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

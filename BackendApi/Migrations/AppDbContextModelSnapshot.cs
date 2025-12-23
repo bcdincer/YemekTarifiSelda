@@ -22,6 +22,116 @@ namespace BackendApi.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("BackendApi.Domain.Entities.Author", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Bio")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ProfileImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Authors");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.BlogPost", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AuthorId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CommentCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Excerpt")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageBanner")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("IsFeatured");
+
+                    b.HasIndex("IsPublished");
+
+                    b.ToTable("BlogPosts");
+                });
+
             modelBuilder.Entity("BackendApi.Domain.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -229,6 +339,9 @@ namespace BackendApi.Migrations
                     b.Property<string>("AlternativeIngredients")
                         .HasColumnType("text");
 
+                    b.Property<int?>("AuthorId")
+                        .HasColumnType("integer");
+
                     b.Property<double?>("AverageRating")
                         .HasColumnType("double precision");
 
@@ -293,6 +406,8 @@ namespace BackendApi.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AuthorId");
+
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("CreatedAt");
@@ -354,6 +469,41 @@ namespace BackendApi.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("RecipeComments");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.RecipeImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("RecipeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DisplayOrder");
+
+                    b.HasIndex("IsPrimary");
+
+                    b.HasIndex("RecipeId");
+
+                    b.ToTable("RecipeImages");
                 });
 
             modelBuilder.Entity("BackendApi.Domain.Entities.RecipeIngredient", b =>
@@ -549,6 +699,23 @@ namespace BackendApi.Migrations
                     b.ToTable("ShoppingListItems");
                 });
 
+            modelBuilder.Entity("BackendApi.Domain.Entities.BlogPost", b =>
+                {
+                    b.HasOne("BackendApi.Domain.Entities.Author", "Author")
+                        .WithMany("BlogPosts")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("BackendApi.Domain.Entities.Category", "Category")
+                        .WithMany("BlogPosts")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("BackendApi.Domain.Entities.CollectionRecipe", b =>
                 {
                     b.HasOne("BackendApi.Domain.Entities.Collection", "Collection")
@@ -600,10 +767,17 @@ namespace BackendApi.Migrations
 
             modelBuilder.Entity("BackendApi.Domain.Entities.Recipe", b =>
                 {
+                    b.HasOne("BackendApi.Domain.Entities.Author", "Author")
+                        .WithMany("Recipes")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("BackendApi.Domain.Entities.Category", "Category")
                         .WithMany("Recipes")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Author");
 
                     b.Navigation("Category");
                 });
@@ -622,6 +796,17 @@ namespace BackendApi.Migrations
                         .IsRequired();
 
                     b.Navigation("ParentComment");
+
+                    b.Navigation("Recipe");
+                });
+
+            modelBuilder.Entity("BackendApi.Domain.Entities.RecipeImage", b =>
+                {
+                    b.HasOne("BackendApi.Domain.Entities.Recipe", "Recipe")
+                        .WithMany("Images")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Recipe");
                 });
@@ -691,8 +876,17 @@ namespace BackendApi.Migrations
                     b.Navigation("ShoppingList");
                 });
 
+            modelBuilder.Entity("BackendApi.Domain.Entities.Author", b =>
+                {
+                    b.Navigation("BlogPosts");
+
+                    b.Navigation("Recipes");
+                });
+
             modelBuilder.Entity("BackendApi.Domain.Entities.Category", b =>
                 {
+                    b.Navigation("BlogPosts");
+
                     b.Navigation("Recipes");
                 });
 
@@ -708,6 +902,8 @@ namespace BackendApi.Migrations
 
             modelBuilder.Entity("BackendApi.Domain.Entities.Recipe", b =>
                 {
+                    b.Navigation("Images");
+
                     b.Navigation("Ingredients");
 
                     b.Navigation("Steps");

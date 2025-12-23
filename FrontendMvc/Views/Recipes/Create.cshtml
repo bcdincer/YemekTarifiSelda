@@ -5,913 +5,9 @@
     var categories = ViewBag.Categories as List<FrontendMvc.Models.Recipes.CategoryViewModel> ?? new();
 }
 
-<style>
-    /* Ana container için stil */
-    .recipe-create-container {
-        max-width: 100%;
-    }
-
-    .recipe-create-container .row {
-        margin-left: -8px;
-        margin-right: -8px;
-    }
-
-    .recipe-create-container [class*="col-"] {
-        padding-left: 8px;
-        padding-right: 8px;
-    }
-
-    .recipe-create-container .bd.bgc-white {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        transition: box-shadow 0.3s ease;
-    }
-
-    [data-theme="dark"] .recipe-create-container .bd.bgc-white,
-    [data-theme="dark"] .recipe-create-container.bd.bgc-white {
-        background: #1e1e2e !important;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-        border-color: #3d3d4f !important;
-    }
-
-    /* Üst bilgi satırı için stil */
-    .quick-info-bar {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border: 1px solid #dee2e6;
-        border-radius: 10px;
-        padding: 20px 24px;
-        margin-bottom: 24px;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 20px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-    }
-
-    [data-theme="dark"] .quick-info-bar {
-        background: linear-gradient(135deg, #2d2d3f 0%, #1e1e2e 100%);
-        border: 1px solid #3d3d4f;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-
-    .quick-info-bar:hover {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transform: translateY(-1px);
-    }
-
-    [data-theme="dark"] .quick-info-bar:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    }
-
-    .quick-info-bar .quick-info-item {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex: 0 1 auto;
-        min-width: 0;
-    }
-
-    .quick-info-bar .quick-info-item > label {
-        margin-bottom: 0;
-        margin-right: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        color: #495057;
-        white-space: nowrap;
-        cursor: default;
-        display: flex;
-        align-items: center;
-        transition: color 0.2s ease;
-    }
-
-    [data-theme="dark"] .quick-info-bar .quick-info-item > label {
-        color: #e0e0e0;
-    }
-
-    .quick-info-bar .quick-info-item > label i {
-        color: #6c757d;
-        transition: color 0.2s ease;
-    }
-
-    [data-theme="dark"] .quick-info-bar .quick-info-item > label i {
-        color: #a0a0b0;
-    }
-
-    .quick-info-bar .quick-info-item input[type="number"],
-    .quick-info-bar .quick-info-item select {
-        width: auto;
-        display: inline-block;
-        flex-shrink: 0;
-        border: 1px solid #ced4da !important;
-        border-radius: 6px;
-        transition: all 0.2s ease;
-        background: #ffffff !important;
-        color: #495057 !important;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-    }
-
-    [data-theme="dark"] .quick-info-bar .quick-info-item input[type="number"],
-    [data-theme="dark"] .quick-info-bar .quick-info-item select {
-        background: #2d2d3f !important;
-        border-color: #4d4d5f !important;
-        color: #e0e0e0 !important;
-    }
-
-    .quick-info-bar .quick-info-item input[type="number"]:focus,
-    .quick-info-bar .quick-info-item select:focus {
-        border-color: #818cf8 !important;
-        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1) !important;
-        outline: none;
-    }
-
-    [data-theme="dark"] .quick-info-bar .quick-info-item input[type="number"]:focus,
-    [data-theme="dark"] .quick-info-bar .quick-info-item select:focus {
-        border-color: #6366f1 !important;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
-    }
-
-    /* Select'lerin normal durumda mor border göstermemesi için */
-    .quick-info-bar .quick-info-item select:not(:focus) {
-        border-color: #ced4da !important;
-        box-shadow: none !important;
-    }
-
-    [data-theme="dark"] .quick-info-bar .quick-info-item select:not(:focus) {
-        border-color: #4d4d5f !important;
-        box-shadow: none !important;
-    }
-
-    /* Hazırlık ve Pişirme süreleri için daha küçük input */
-    .quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
-    .quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
-        width: 60px;
-        min-width: 60px;
-        max-width: 60px;
-        text-align: center;
-    }
-
-    .quick-info-bar .quick-info-item select[name="Difficulty"] {
-        min-width: 100px;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-        background-repeat: no-repeat !important;
-        background-position: right 0.5rem center !important;
-        background-size: 12px 10px !important;
-        padding-right: 1.75rem !important;
-        -webkit-appearance: none !important;
-        -moz-appearance: none !important;
-        appearance: none !important;
-        cursor: pointer;
-        border: 1px solid #ced4da !important;
-        background-color: #ffffff !important;
-        color: #495057 !important;
-    }
-
-    [data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"] {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-        border-color: #4d4d5f !important;
-        background-color: #2d2d3f !important;
-        color: #e0e0e0 !important;
-    }
-
-    .quick-info-bar .quick-info-item select[name="Difficulty"]:focus {
-        border-color: #818cf8 !important;
-        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1) !important;
-        outline: none;
-    }
-
-    [data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"]:focus {
-        border-color: #6366f1 !important;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
-    }
-
-    .quick-info-bar .quick-info-item select[name="Difficulty"]:not(:focus) {
-        border-color: #ced4da !important;
-        box-shadow: none !important;
-    }
-
-    [data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"]:not(:focus) {
-        border-color: #4d4d5f !important;
-        box-shadow: none !important;
-    }
-
-    .quick-info-bar .quick-info-item select[name="Difficulty"] option {
-        background: #ffffff;
-        color: #495057;
-        padding: 8px;
-    }
-
-    [data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"] option {
-        background: #2d2d3f !important;
-        color: #e0e0e0 !important;
-    }
-
-    .quick-info-bar .quick-info-item select[name="Difficulty"]:hover {
-        border-color: #adb5bd;
-    }
-
-    [data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"]:hover {
-        border-color: #5d5d6f;
-    }
-
-    .quick-info-bar .form-check {
-        display: flex;
-        align-items: center;
-        margin: 0;
-        padding: 0;
-    }
-
-    .quick-info-bar .form-check-input {
-        margin-top: 0;
-        margin-right: 8px;
-        flex-shrink: 0;
-        width: 20px !important;
-        height: 20px !important;
-        border: 2px solid #ced4da !important;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        background-color: #ffffff;
-        position: relative;
-    }
-
-    .quick-info-bar .form-check-label {
-        margin-bottom: 0;
-        font-size: 14px;
-        font-weight: 600;
-        color: #495057;
-        display: flex;
-        align-items: center;
-        white-space: nowrap;
-        transition: color 0.2s ease;
-        cursor: pointer;
-    }
-
-    [data-theme="dark"] .quick-info-bar .form-check-label {
-        color: #e0e0e0;
-    }
-
-    .quick-info-bar .form-check-label i {
-        color: #ffc107;
-        transition: color 0.2s ease;
-        font-size: 16px;
-    }
-
-    .quick-info-bar .form-check-input:checked ~ .form-check-label i {
-        color: #ff9800;
-    }
-
-    .quick-info-bar .form-check-input:checked {
-        background-color: #818cf8 !important;
-        border-color: #6366f1 !important;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e") !important;
-        background-size: 14px 14px !important;
-        background-position: center !important;
-        background-repeat: no-repeat !important;
-        box-shadow: 0 2px 4px rgba(129, 140, 248, 0.3);
-    }
-
-    .quick-info-bar .form-check-input:hover {
-        border-color: #818cf8 !important;
-        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
-    }
-
-    .quick-info-bar .form-check-input:checked:hover {
-        border-color: #6366f1 !important;
-        box-shadow: 0 2px 6px rgba(129, 140, 248, 0.4);
-    }
-
-    [data-theme="dark"] .quick-info-bar .form-check-input {
-        background-color: #2d2d3f !important;
-        border-color: #5d5d6f !important;
-    }
-
-    [data-theme="dark"] .quick-info-bar .form-check-input:checked {
-        background-color: #6366f1 !important;
-        border-color: #4f46e5 !important;
-        box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4);
-    }
-
-    [data-theme="dark"] .quick-info-bar .form-check-input:hover {
-        border-color: #6366f1 !important;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
-
-    [data-theme="dark"] .quick-info-bar .form-check-input:checked:hover {
-        border-color: #4f46e5 !important;
-        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.5);
-    }
-
-    [data-theme="dark"] .quick-info-bar .form-check-input:focus {
-        border-color: #6366f1 !important;
-        box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25) !important;
-        outline: none;
-    }
-
-    .quick-info-bar .form-check-input:focus {
-        border-color: #818cf8 !important;
-        box-shadow: 0 0 0 0.25rem rgba(129, 140, 248, 0.25) !important;
-        outline: none;
-    }
-
-    /* Validation mesajı için */
-    .quick-info-bar .quick-info-item {
-        position: relative;
-    }
-
-    .quick-info-bar .text-danger {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        white-space: nowrap;
-        font-size: 11px;
-        margin-top: 2px;
-    }
-
-    /* Responsive */
-    @@media (max-width: 1200px) {
-        .quick-info-bar {
-            gap: 12px;
-            padding: 15px;
-        }
-
-        .quick-info-bar .quick-info-item > label {
-            font-size: 12px;
-            margin-right: 6px;
-        }
-
-        .quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
-        .quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
-            width: 55px;
-            min-width: 55px;
-            max-width: 55px;
-        }
-    }
-
-    @@media (max-width: 992px) {
-        .quick-info-bar {
-            gap: 10px;
-            padding: 12px 15px;
-        }
-
-        .quick-info-bar .quick-info-item > label {
-            font-size: 11px;
-            margin-right: 5px;
-        }
-
-        .quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
-        .quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
-            width: 50px;
-            min-width: 50px;
-            max-width: 50px;
-            font-size: 12px;
-        }
-    }
-
-    @@media (max-width: 768px) {
-        .quick-info-bar {
-            justify-content: flex-start;
-            gap: 12px;
-            padding: 15px;
-        }
-
-        .quick-info-bar .quick-info-item {
-            flex: 0 1 calc(50% - 6px);
-            min-width: 0;
-            justify-content: flex-start;
-        }
-
-        .quick-info-bar .quick-info-item > label {
-            font-size: 12px;
-        }
-
-        .quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
-        .quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
-            width: 55px;
-            min-width: 55px;
-            max-width: 55px;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .quick-info-bar {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 12px;
-            padding: 15px;
-        }
-
-        .quick-info-bar .quick-info-item {
-            flex: 1 1 auto;
-            justify-content: space-between;
-            width: 100%;
-        }
-
-        .quick-info-bar .quick-info-item > label {
-            flex-shrink: 0;
-        }
-
-        .quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
-        .quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
-            width: 60px;
-            min-width: 60px;
-            max-width: 60px;
-        }
-    }
-
-    /* Form alanları için iyileştirmeler */
-    .recipe-create-container .form-control {
-        border: 1px solid #ced4da;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        padding: 10px 14px;
-    }
-
-    [data-theme="dark"] .recipe-create-container .form-control {
-        background: #2d2d3f;
-        border-color: #4d4d5f;
-        color: #e0e0e0;
-    }
-
-    .recipe-create-container .form-control:focus {
-        border-color: #818cf8;
-        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
-        outline: none;
-    }
-
-    [data-theme="dark"] .recipe-create-container .form-control:focus {
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
-
-    .recipe-create-container .form-label {
-        color: #495057;
-        margin-bottom: 8px;
-        font-weight: 600;
-    }
-
-    [data-theme="dark"] .recipe-create-container .form-label {
-        color: #e0e0e0;
-    }
-
-    /* Select dropdown için */
-    .recipe-create-container select.form-control {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-        background-repeat: no-repeat !important;
-        background-position: right 0.75rem center !important;
-        background-size: 16px 12px !important;
-        padding-right: 2.5rem !important;
-        -webkit-appearance: none !important;
-        -moz-appearance: none !important;
-        appearance: none !important;
-        cursor: pointer;
-    }
-
-    [data-theme="dark"] .recipe-create-container select.form-control {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-    }
-
-    /* Select'lerin normal durumda mor border göstermemesi için */
-    .recipe-create-container select.form-control:not(:focus) {
-        border-color: #ced4da !important;
-        box-shadow: none !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container select.form-control:not(:focus) {
-        border-color: #4d4d5f !important;
-        box-shadow: none !important;
-    }
-
-    /* Quick info bar içindeki select'ler için dropdown arrow */
-    .quick-info-bar .quick-info-item select {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-        background-repeat: no-repeat !important;
-        background-position: right 0.5rem center !important;
-        background-size: 12px 10px !important;
-        padding-right: 1.75rem !important;
-        cursor: pointer;
-    }
-
-    [data-theme="dark"] .quick-info-bar .quick-info-item select {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-    }
-
-    /* Dark mode için genel düzeltmeler */
-    [data-theme="dark"] .recipe-create-container h4 {
-        color: #e0e0e0 !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container .c-grey-600 {
-        color: #a0a0b0 !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container .text-danger {
-        color: #ff6b6b !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container .form-control::placeholder {
-        color: #6d6d7d !important;
-        opacity: 0.7;
-    }
-
-    [data-theme="dark"] .recipe-create-container textarea.form-control {
-        background: #2d2d3f !important;
-        border-color: #4d4d5f !important;
-        color: #e0e0e0 !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container textarea.form-control:focus {
-        background: #2d2d3f !important;
-        border-color: #6366f1 !important;
-        color: #e0e0e0 !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container input[type="file"] {
-        background: #2d2d3f !important;
-        border-color: #4d4d5f !important;
-        color: #e0e0e0 !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container input[type="file"]::file-selector-button {
-        background: #3d3d4f !important;
-        border-color: #5d5d6f !important;
-        color: #e0e0e0 !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container input[type="file"]::file-selector-button:hover {
-        background: #4d4d5f !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container .bd-top {
-        border-top-color: #3d3d4f !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container .btn-primary {
-        background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
-        border-color: #6366f1 !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container .btn-primary:hover {
-        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container .btn-secondary {
-        background: #3d3d4f !important;
-        border-color: #4d4d5f !important;
-        color: #e0e0e0 !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container .btn-secondary:hover {
-        background: #4d4d5f !important;
-        border-color: #5d5d6f !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container .btn-danger {
-        background: #dc3545 !important;
-        border-color: #dc3545 !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container .btn-danger:hover {
-        background: #c82333 !important;
-        border-color: #bd2130 !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container small {
-        color: #a0a0b0 !important;
-    }
-
-    [data-theme="dark"] .recipe-create-container #imagePreview img {
-        border: 1px solid #4d4d5f !important;
-    }
-
-    /* Select option'lar için dark mode */
-    [data-theme="dark"] .recipe-create-container select.form-control option {
-        background: #2d2d3f !important;
-        color: #e0e0e0 !important;
-    }
-
-    [data-theme="dark"] .quick-info-bar .quick-info-item select option {
-        background: #2d2d3f !important;
-        color: #e0e0e0 !important;
-    }
-
-    /* Tüm select'ler için genel düzeltmeler */
-    .recipe-create-container select,
-    .quick-info-bar .quick-info-item select {
-        background-color: inherit !important;
-    }
-
-    /* Select'lerin hover durumu */
-    .recipe-create-container select:hover,
-    .quick-info-bar .quick-info-item select:hover {
-        border-color: #adb5bd;
-    }
-
-    [data-theme="dark"] .recipe-create-container select:hover,
-    [data-theme="dark"] .quick-info-bar .quick-info-item select:hover {
-        border-color: #5d5d6f;
-    }
-
-    /* Layers için dark mode */
-    [data-theme="dark"] .recipe-create-container .layers {
-        color: #e0e0e0;
-    }
-
-    /* Dinamik Liste Stilleri */
-    .dynamic-list {
-        margin-top: 10px;
-    }
-
-    .dynamic-list-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
-        padding: 10px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-        transition: all 0.2s ease;
-    }
-
-    .dynamic-list-item:hover {
-        background: #e9ecef;
-        border-color: #dee2e6;
-    }
-
-    [data-theme="dark"] .dynamic-list-item {
-        background: #2d2d3f;
-        border-color: #3d3d4f;
-    }
-
-    [data-theme="dark"] .dynamic-list-item:hover {
-        background: #3d3d4f;
-        border-color: #4d4d5f;
-    }
-
-    .dynamic-list-item.dragging {
-        opacity: 0.5;
-        transform: scale(0.98);
-    }
-
-    .dynamic-list-item .drag-handle {
-        cursor: move;
-        color: #6c757d;
-        font-size: 18px;
-        padding: 5px;
-        display: flex;
-        align-items: center;
-        flex-shrink: 0;
-    }
-
-    .dynamic-list-item .drag-handle:hover {
-        color: #495057;
-    }
-
-    [data-theme="dark"] .dynamic-list-item .drag-handle {
-        color: #a0a0b0;
-    }
-
-    [data-theme="dark"] .dynamic-list-item .drag-handle:hover {
-        color: #e0e0e0;
-    }
-
-    .dynamic-list-item .item-number {
-        font-weight: 600;
-        color: #495057;
-        min-width: 24px;
-        text-align: center;
-        flex-shrink: 0;
-    }
-
-    [data-theme="dark"] .dynamic-list-item .item-number {
-        color: #e0e0e0;
-    }
-
-    .dynamic-list-item .item-input {
-        flex: 1;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        padding: 8px 12px;
-        font-size: 14px;
-        transition: all 0.2s ease;
-    }
-
-    .dynamic-list-item .item-input:focus {
-        border-color: #818cf8;
-        box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
-        outline: none;
-    }
-
-    [data-theme="dark"] .dynamic-list-item .item-input {
-        background: #1e1e2e;
-        border-color: #4d4d5f;
-        color: #e0e0e0;
-    }
-
-    [data-theme="dark"] .dynamic-list-item .item-input:focus {
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
-
-    .dynamic-list-item .item-remove {
-        cursor: pointer;
-        color: #dc3545;
-        font-size: 18px;
-        padding: 5px;
-        display: flex;
-        align-items: center;
-        flex-shrink: 0;
-        transition: all 0.2s ease;
-    }
-
-    .dynamic-list-item .item-remove:hover {
-        color: #c82333;
-        transform: scale(1.1);
-    }
-
-    .dynamic-list-add-btn {
-        margin-top: 10px;
-        padding: 10px 20px;
-        background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .dynamic-list-add-btn:hover {
-        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    }
-
-    [data-theme="dark"] .dynamic-list-add-btn {
-        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-    }
-
-    [data-theme="dark"] .dynamic-list-add-btn:hover {
-        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
-    }
-
-    .dynamic-list-empty {
-        text-align: center;
-        padding: 20px;
-        color: #6c757d;
-        font-style: italic;
-    }
-
-    [data-theme="dark"] .dynamic-list-empty {
-        color: #a0a0b0;
-    }
-
-    /* CKEditor için yükseklik ayarı - sabit tutmak için */
-    #ingredientsEditor {
-        min-height: 400px !important;
-        height: 400px !important;
-    }
-
-    #ingredientsEditor .ck-editor {
-        min-height: 400px !important;
-        height: auto !important;
-    }
-
-    #ingredientsEditor .ck-editor__editable {
-        min-height: 400px !important;
-        height: 400px !important;
-        max-height: 800px !important;
-        overflow-y: auto !important;
-    }
-
-    #ingredientsEditor .ck-editor__editable_inline {
-        min-height: 400px !important;
-        height: 400px !important;
-        max-height: 800px !important;
-        overflow-y: auto !important;
-    }
-
-    #ingredientsEditor .ck-editor__main {
-        min-height: 400px !important;
-    }
-
-    #ingredientsEditor .ck-content {
-        min-height: 400px !important;
-        height: 400px !important;
-        max-height: 800px !important;
-        overflow-y: auto !important;
-    }
-
-    /* Focus olduğunda yüksekliği koru */
-    #ingredientsEditor .ck-editor__editable:focus,
-    #ingredientsEditor .ck-editor__editable_inline:focus,
-    #ingredientsEditor .ck-content:focus {
-        min-height: 400px !important;
-        height: 400px !important;
-    }
-
-    /* CKEditor resize handle için stil */
-    #ingredientsEditor .ck-editor__resizer {
-        display: block !important;
-    }
-
-    /* Yazım denetimini devre dışı bırak */
-    #ingredientsEditor .ck-editor__editable,
-    #ingredientsEditor .ck-editor__editable_inline,
-    #ingredientsEditor .ck-content {
-        spellcheck: false !important;
-    }
-
-    /* Dark mode için CKEditor stilleri - Daha güçlü selector'lar */
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable,
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable.ck-focused,
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable_inline,
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable_inline.ck-focused {
-        background-color: #2d2d3f !important;
-        color: #e0e0e0 !important;
-        border-color: #3d3d4f !important;
-    }
-
-    [data-theme="dark"] #ingredientsEditor .ck-content,
-    [data-theme="dark"] #ingredientsEditor .ck-content.ck-focused {
-        background-color: #2d2d3f !important;
-        color: #e0e0e0 !important;
-    }
-
-    [data-theme="dark"] #ingredientsEditor .ck-editor__main {
-        background-color: #2d2d3f !important;
-    }
-
-    [data-theme="dark"] #ingredientsEditor .ck-editor {
-        background-color: #2d2d3f !important;
-    }
-
-    [data-theme="dark"] #ingredientsEditor .ck-toolbar {
-        background-color: #1e1e2e !important;
-        border-color: #3d3d4f !important;
-    }
-
-    [data-theme="dark"] #ingredientsEditor .ck-toolbar__separator {
-        background-color: #3d3d4f !important;
-    }
-
-    [data-theme="dark"] #ingredientsEditor .ck-button {
-        color: #e0e0e0 !important;
-    }
-
-    [data-theme="dark"] #ingredientsEditor .ck-button:hover:not(.ck-disabled) {
-        background-color: #3d3d4f !important;
-    }
-
-    [data-theme="dark"] #ingredientsEditor .ck-button.ck-on {
-        background-color: #6366f1 !important;
-        color: #ffffff !important;
-    }
-
-    [data-theme="dark"] #ingredientsEditor .ck-dropdown__panel {
-        background-color: #2d2d3f !important;
-        border-color: #3d3d4f !important;
-    }
-
-    [data-theme="dark"] #ingredientsEditor .ck-list__item {
-        color: #e0e0e0 !important;
-    }
-
-    [data-theme="dark"] #ingredientsEditor .ck-list__item:hover {
-        background-color: #3d3d4f !important;
-    }
-
-    [data-theme="dark"] #ingredientsEditor .ck-placeholder::before {
-        color: #999 !important;
-    }
-
-    /* Dark mode'da tüm yazılar için */
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable p,
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable h2,
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable h3,
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable li,
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable ul,
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable ol,
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable_inline p,
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable_inline h2,
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable_inline h3,
-    [data-theme="dark"] #ingredientsEditor .ck-editor__editable_inline li,
-    [data-theme="dark"] #ingredientsEditor .ck-content p,
-    [data-theme="dark"] #ingredientsEditor .ck-content h2,
-    [data-theme="dark"] #ingredientsEditor .ck-content h3,
-    [data-theme="dark"] #ingredientsEditor .ck-content li {
-        color: #e0e0e0 !important;
-    }
-</style>
+@section Styles {
+    <link rel="stylesheet" href="~/css/recipe-form.css" />
+}
 
 <div class="recipe-create-container">
     <div class="row">
@@ -921,20 +17,17 @@
                     <div class="layer w-100 mB-15">
                         <div class="peers fxw-nw ai-c">
                             <div class="peer peer-greed">
-                                <div class="d-flex align-items-center" style="gap: 20px; flex-wrap: wrap;">
-                                    <h4 class="lh-1 mB-0" style="margin: 0;">
-                                        <i class="ti-plus mR-10"></i> Yeni Tarif Ekle
-                                    </h4>
-                                    <p class="c-grey-600 mB-0 fsz-sm" style="margin: 0;">Lezzetli tarifinizi paylaşın ve diğer kullanıcılarla buluşturun</p>
-                                </div>
+                                <h4 class="lh-1 mB-0">
+                                    <i class="ti-plus mR-10"></i> Yeni Tarif Ekle
+                                </h4>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="layer w-100 mB-15">
                         <form asp-action="Create" method="post" enctype="multipart/form-data">
                             <!-- Hızlı Bilgi Çubuğu -->
-                            <div class="layer w-100 mB-20">
+                            <div class="layer w-100 mB-5">
                                 <div class="quick-info-bar">
                                     <div class="quick-info-item">
                                         <div class="form-check">
@@ -945,7 +38,7 @@
                                         </div>
                                     </div>
                                     <div class="quick-info-item">
-                                        <label asp-for="PrepTimeMinutes" class="mB-5">
+                                        <label asp-for="PrepTimeMinutes" class="mB-0">
                                             <i class="ti-timer mR-5"></i> Hazırlık (dk):
                                         </label>
                                         <input asp-for="PrepTimeMinutes" class="form-control form-control-sm d-inline-block" type="number" min="0" placeholder="0" />
@@ -988,15 +81,16 @@
                                         </div>
 
                                         <div class="layer w-100 mB-15">
-                                            <label class="form-label fw-600 mB-10">
+                                            <label asp-for="Ingredients" class="form-label fw-600">
                                                 <i class="ti-shopping-cart mR-5"></i> Malzemeler *
                                             </label>
+                                            <div style="margin-top:22px;"></div>
                                             <div id="ingredientsEditor"></div>
                                             <textarea asp-for="Ingredients" id="Ingredients" name="Ingredients" class="d-none" required></textarea>
                                             <span asp-validation-for="Ingredients" class="text-danger fsz-sm"></span>
                                         </div>
 
-                                        <div class="layer w-100 mB-15">
+                                        <div class="layer w-100 mB-20">
                                             <label asp-for="Description" class="form-label fw-600">
                                                 <i class="ti-file-text mR-5"></i> Kısa Açıklama
                                             </label>
@@ -1011,13 +105,7 @@
                                             <textarea asp-for="Tips" class="form-control" rows="3"
                                                       placeholder="Püf noktaları"></textarea>
                                         </div>
-                                        <div class="layer w-100 mB-15">
-                                            <label asp-for="AlternativeIngredients" class="form-label fw-600">
-                                                <i class="ti-exchange-vertical mR-5"></i> Alternatif Malzemeler
-                                            </label>
-                                            <textarea asp-for="AlternativeIngredients" class="form-control" rows="3"
-                                                      placeholder="Alternatif malzemeler"></textarea>
-                                        </div>
+
                                     </div>
                                 </div>
 
@@ -1053,47 +141,62 @@
 
                                         <div class="layer w-100 mB-15">
                                             <label class="form-label fw-600 mB-8">
-                                                <i class="ti-image mR-5"></i> Tarif Görseli
+                                                <i class="ti-image mR-5"></i> Tarif Görselleri
                                             </label>
-                                            <div class="d-flex gap-10 ai-c" style="flex-wrap: wrap;">
-                                                <input type="file" name="imageFile" id="imageFile" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="form-control" style="flex: 1; min-width: 200px;" />
-                                                <span class="c-grey-600" style="white-space: nowrap;">veya</span>
-                                                <input asp-for="ImageUrl" class="form-control" type="text" 
-                                                       placeholder="https://example.com/image.jpg" id="imageUrl" style="flex: 1; min-width: 200px;" />
-                                            </div>
-                                            <small class="c-grey-600 d-block mT-5">JPG, PNG, GIF veya WebP formatında, maksimum 5MB</small>
+                                            <small class="c-grey-600 d-block mB-10">Birden çok fotoğraf ekleyebilirsiniz. Birini ana fotoğraf olarak seçebilirsiniz.</small>
                                             
-                                            <!-- Görsel önizleme -->
-                                            <div id="imagePreview" class="mT-10" style="display: none;">
-                                                <label class="fw-600 mB-5">Yeni Görsel Önizleme:</label>
-                                                <div>
-                                                    <img id="previewImg" src="" alt="Önizleme" class="bdrs-3" style="max-width: 200px; max-height: 200px; object-fit: cover;" />
-                                                    <button type="button" id="removeImage" class="btn btn-sm btn-danger mT-5">
-                                                        <i class="ti-close"></i> Görseli Kaldır
+                                            <!-- Çoklu dosya yükleme -->
+                                            <div class="mB-10">
+                                                <input type="file" name="imageFiles" id="imageFiles" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="form-control" multiple />
+                                                <small class="c-grey-600 d-block mT-5">JPG, PNG, GIF veya WebP formatında, maksimum 5MB (birden çok seçebilirsiniz)</small>
+                                            </div>
+                                            
+                                            <!-- URL ile ekleme -->
+                                            <div class="mB-10">
+                                                <div class="d-flex gap-10 ai-c" style="flex-wrap: wrap;">
+                                                    <input type="text" id="imageUrlInput" class="form-control" placeholder="https://example.com/image.jpg" style="flex: 1; min-width: 200px;" />
+                                                    <button type="button" id="addImageUrl" class="btn btn-sm btn-outline-primary">
+                                                        <i class="ti-plus"></i> URL Ekle
                                                     </button>
                                                 </div>
                                             </div>
+                                            
+                                            <!-- Yüklenen görseller listesi -->
+                                            <div id="imagesList" class="mT-15">
+                                                <!-- Görseller buraya eklenecek -->
+                                            </div>
+                                            
+                                            <!-- Hidden input for image URLs -->
+                                            <input type="hidden" id="imageUrlsJson" name="imageUrlsJson" />
+                                            <input type="hidden" id="primaryImageIndex" name="primaryImageIndex" value="0" />
+                                        </div>
+                                        <div class="layer w-100 mB-15">
+                                            <label asp-for="AlternativeIngredients" class="form-label fw-600">
+                                                <i class="ti-exchange-vertical mR-5"></i> Alternatif Malzemeler
+                                            </label>
+                                            <textarea asp-for="AlternativeIngredients" class="form-control" rows="3"
+                                                      placeholder="Alternatif malzemeler"></textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row mT-20">
-                                <div class="bd-top pT-15">
-                                    <div class="peers fxw-nw gap-10" style="justify-content: flex-end;">
-                                        <div class="peer">
-                                            <button type="submit" class="btn btn-primary" style="color: white;">
-                                                <i class="ti-save mR-5"></i> Kaydet
-                                            </button>
-                                        </div>
-                                        <div class="peer">
-                                            <a asp-controller="Recipes" asp-action="Index" class="btn btn-secondary" style="color: white;">
-                                                <i class="ti-close mR-5"></i> İptal
-                                            </a>
+                                <div class="row mT-20">
+                                    <div class="bd-top pT-15">
+                                        <div class="peers fxw-nw gap-10" style="justify-content: flex-end;">
+                                            <div class="peer">
+                                                <button type="submit" class="btn btn-primary" style="color: white;">
+                                                    <i class="ti-save mR-5"></i> Kaydet
+                                                </button>
+                                            </div>
+                                            <div class="peer">
+                                                <a asp-controller="Recipes" asp-action="Index" class="btn btn-secondary" style="color: white;">
+                                                    <i class="ti-close mR-5"></i> İptal
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                         </form>
                     </div>
                 </div>
@@ -1103,390 +206,312 @@
 
     @section Scripts {
         <partial name="_ValidationScriptsPartial" />
+        <script src="~/js/recipe-form.js"></script>
         <script>
-            const imageFileInput = document.getElementById('imageFile');
-            const imagePreview = document.getElementById('imagePreview');
-            const previewImg = document.getElementById('previewImg');
-            const removeImageBtn = document.getElementById('removeImage');
-            const imageUrlInput = document.getElementById('imageUrl');
+            // Çoklu fotoğraf yönetimi
+            let uploadedImages = [];
+            let primaryImageIndex = 0;
 
-            // Dosya seçildiğinde önizleme göster
-            if (imageFileInput) {
-                imageFileInput.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
+            const imageFilesInput = document.getElementById('imageFiles');
+            const imageUrlInput = document.getElementById('imageUrlInput');
+            const addImageUrlBtn = document.getElementById('addImageUrl');
+            const imagesList = document.getElementById('imagesList');
+            const imageUrlsJsonInput = document.getElementById('imageUrlsJson');
+            const primaryImageIndexInput = document.getElementById('primaryImageIndex');
+
+            // Dosya seçildiğinde
+            if (imageFilesInput) {
+                imageFilesInput.addEventListener('change', function(e) {
+                    const files = Array.from(e.target.files);
+                    files.forEach(file => {
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert(`${file.name} dosyası 5MB'dan büyük!`);
+                            return;
+                        }
                         const reader = new FileReader();
                         reader.onload = function(e) {
-                            previewImg.src = e.target.result;
-                            imagePreview.style.display = 'block';
-                            if (imageUrlInput) imageUrlInput.value = ''; // URL input'unu temizle
+                            const imageData = {
+                                url: e.target.result,
+                                file: file,
+                                isFile: true,
+                                isPrimary: uploadedImages.length === 0
+                            };
+                            uploadedImages.push(imageData);
+                            if (uploadedImages.length === 1) {
+                                primaryImageIndex = 0;
+                                primaryImageIndexInput.value = '0';
+                            }
+                            renderImagesList();
                         };
                         reader.readAsDataURL(file);
-                    }
+                    });
                 });
             }
+
+            // URL ile ekleme
+            if (addImageUrlBtn && imageUrlInput) {
+                addImageUrlBtn.addEventListener('click', function() {
+                    const url = imageUrlInput.value.trim();
+                    if (!url) {
+                        alert('Lütfen geçerli bir URL giriniz!');
+                        return;
+                    }
+                    const imageData = {
+                        url: url,
+                        isFile: false,
+                        isPrimary: uploadedImages.length === 0
+                    };
+                    uploadedImages.push(imageData);
+                    if (uploadedImages.length === 1) {
+                        primaryImageIndex = 0;
+                        primaryImageIndexInput.value = '0';
+                    }
+                    imageUrlInput.value = '';
+                    renderImagesList();
+                });
+            }
+
+            // Görselleri render et
+            function renderImagesList() {
+                if (!imagesList) return;
+                
+                imagesList.innerHTML = '';
+                
+                uploadedImages.forEach((img, index) => {
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'image-item mB-10 p-10 bd bgc-grey-50';
+                    imageItem.style.cssText = 'display: flex; align-items: center; gap: 15px; border-radius: 8px;';
+                    
+                    imageItem.innerHTML = `
+                        <div style="position: relative; width: 100px; height: 100px; flex-shrink: 0;">
+                            <img src="${img.url}" alt="Görsel ${index + 1}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
+                            ${img.isPrimary ? '<span class="badge bg-primary" style="position: absolute; top: 5px; left: 5px;">Ana Fotoğraf</span>' : ''}
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="fw-600 mB-5">Görsel ${index + 1}</div>
+                            <div class="fsz-sm text-muted mB-10">${img.isFile ? 'Yüklenecek dosya' : 'URL'}</div>
+                            <div class="d-flex gap-10">
+                                <button type="button" class="btn btn-sm ${img.isPrimary ? 'btn-primary' : 'btn-outline-primary'}" onclick="setPrimaryImage(${index})">
+                                    <i class="ti-star"></i> ${img.isPrimary ? 'Ana Fotoğraf' : 'Ana Fotoğraf Yap'}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="removeImage(${index})">
+                                    <i class="ti-close"></i> Kaldır
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    imagesList.appendChild(imageItem);
+                });
+                
+                // Hidden input'u güncelle
+                if (imageUrlsJsonInput) {
+                    const urls = uploadedImages.map(img => img.url);
+                    imageUrlsJsonInput.value = JSON.stringify(urls);
+                }
+            }
+
+            // Ana fotoğraf seç
+            window.setPrimaryImage = function(index) {
+                uploadedImages.forEach((img, i) => {
+                    img.isPrimary = i === index;
+                });
+                primaryImageIndex = index;
+                primaryImageIndexInput.value = index.toString();
+                renderImagesList();
+            };
 
             // Görseli kaldır
-            if (removeImageBtn) {
-                removeImageBtn.addEventListener('click', function() {
-                    if (imageFileInput) imageFileInput.value = '';
-                    imagePreview.style.display = 'none';
-                    previewImg.src = '';
-                });
-            }
-
-            // URL input'u değiştiğinde dosya input'unu temizle
-            if (imageUrlInput) {
-                imageUrlInput.addEventListener('input', function() {
-                    if (this.value && imageFileInput) {
-                        imageFileInput.value = '';
-                        if (imagePreview) imagePreview.style.display = 'none';
-                    }
-                });
-            }
-
-            // Dinamik Liste Fonksiyonları
-            let stepCounter = 0;
-            let draggedElement = null;
-
-            function addStepItem(value = '') {
-                const list = document.getElementById('stepsList');
-                const item = createListItem('step', stepCounter++, value);
-                list.appendChild(item);
-                updateStepsTextarea();
-                makeSortable(list);
-            }
-
-            function createListItem(type, index, value = '') {
-                const item = document.createElement('div');
-                item.className = 'dynamic-list-item';
-                item.dataset.index = index;
-                item.draggable = true;
-
-                const dragHandle = document.createElement('div');
-                dragHandle.className = 'drag-handle';
-                dragHandle.innerHTML = '<i class="ti-menu"></i>';
-
-                const number = document.createElement('div');
-                number.className = 'item-number';
-                number.textContent = (document.querySelectorAll(`#${type}sList .dynamic-list-item`).length + 1) + '.';
-
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.className = 'item-input';
-                input.value = value;
-                input.placeholder = type === 'ingredient' ? 'Örn: 500g tavuk göğsü' : 'Örn: Tavuğu küp küp doğrayın';
-                input.addEventListener('input', () => {
-                    if (type === 'step') {
-                        updateStepsTextarea();
-                        updateItemNumbers(type);
-                    }
-                });
-
-                const removeBtn = document.createElement('div');
-                removeBtn.className = 'item-remove';
-                removeBtn.innerHTML = '<i class="ti-close"></i>';
-                removeBtn.onclick = () => {
-                    item.remove();
-                    if (type === 'step') {
-                        updateStepsTextarea();
-                        updateItemNumbers(type);
-                    }
-                };
-
-                item.appendChild(dragHandle);
-                item.appendChild(number);
-                item.appendChild(input);
-                item.appendChild(removeBtn);
-
-                // Drag & Drop event listeners
-                item.addEventListener('dragstart', (e) => {
-                    draggedElement = item;
-                    item.classList.add('dragging');
-                    e.dataTransfer.effectAllowed = 'move';
-                });
-
-                item.addEventListener('dragend', () => {
-                    item.classList.remove('dragging');
-                    draggedElement = null;
-                });
-
-                item.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    if (draggedElement && draggedElement !== item) {
-                        const rect = item.getBoundingClientRect();
-                        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
-                        item.parentNode.insertBefore(draggedElement, next ? item.nextSibling : item);
-                        if (type === 'step') {
-                            updateItemNumbers(type);
-                            updateStepsTextarea();
+            window.removeImage = function(index) {
+                if (confirm('Bu görseli kaldırmak istediğinize emin misiniz?')) {
+                    uploadedImages.splice(index, 1);
+                    if (uploadedImages.length > 0) {
+                        if (primaryImageIndex >= uploadedImages.length) {
+                            primaryImageIndex = 0;
                         }
+                        uploadedImages[primaryImageIndex].isPrimary = true;
+                        primaryImageIndexInput.value = primaryImageIndex.toString();
+                    } else {
+                        primaryImageIndex = 0;
+                        primaryImageIndexInput.value = '0';
                     }
-                });
+                    renderImagesList();
+                }
+            };
 
-                return item;
-            }
-
-            function updateItemNumbers(type) {
-                const items = document.querySelectorAll(`#${type}sList .dynamic-list-item`);
-                items.forEach((item, index) => {
-                    item.querySelector('.item-number').textContent = (index + 1) + '.';
-                });
-            }
-
-            // updateIngredientsTextarea fonksiyonu artık gerekli değil - CKEditor kullanılıyor
-
-            function updateStepsTextarea() {
-                const items = document.querySelectorAll('#stepsList .item-input');
-                const values = Array.from(items).map(input => input.value.trim()).filter(v => v);
-                document.getElementById('Steps').value = values.join('\n');
-            }
-
-            function makeSortable(list) {
-                // Sortable functionality is handled by drag & drop event listeners
-            }
-
-            // Form submit edilmeden önce textarea'ları güncelle
+            // Form submit edilmeden önce görselleri S3'e yükle
             const form = document.querySelector('form');
             if (form) {
-                form.addEventListener('submit', (e) => {
-                    // CKEditor içeriğini textarea'ya aktar (HTML'i düz metne çevir)
-                    if (ingredientsEditor) {
-                        const htmlData = ingredientsEditor.getData();
-                        // HTML'i düz metne çevir, satırları koru
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = htmlData;
-                        
-                        // HTML elementlerini satırlara çevir
-                        let plainText = '';
-                        const processNode = (node) => {
-                            if (node.nodeType === Node.TEXT_NODE) {
-                                plainText += node.textContent;
-                            } else if (node.nodeType === Node.ELEMENT_NODE) {
-                                const tagName = node.tagName.toLowerCase();
-                                if (tagName === 'p' || tagName === 'div' || tagName === 'h2' || tagName === 'h3') {
-                                    if (plainText && !plainText.endsWith('\n')) {
-                                        plainText += '\n';
-                                    }
-                                    Array.from(node.childNodes).forEach(processNode);
-                                    if (plainText && !plainText.endsWith('\n')) {
-                                        plainText += '\n';
-                                    }
-                                } else if (tagName === 'li') {
-                                    plainText += '• ';
-                                    Array.from(node.childNodes).forEach(processNode);
-                                    plainText += '\n';
-                                } else if (tagName === 'ul' || tagName === 'ol') {
-                                    Array.from(node.childNodes).forEach(processNode);
-                                } else {
-                                    Array.from(node.childNodes).forEach(processNode);
-                                }
-                            }
-                        };
-                        
-                        Array.from(tempDiv.childNodes).forEach(processNode);
-                        document.getElementById('Ingredients').value = plainText.trim();
+                const submitHandler = async function(e) {
+                    console.log('Form submit event tetiklendi');
+                    e.preventDefault(); // Önce S3'e yükleyelim
+                    
+                    // Form validation kontrolü
+                    if (!form.checkValidity()) {
+                        console.error('Form validation hatası var');
+                        form.reportValidity();
+                        return;
                     }
-                    updateStepsTextarea();
-                });
-            }
-
-            // CKEditor için Malzemeler editörü
-            let ingredientsEditor;
-            
-            // Sayfa yüklendiğinde CKEditor'ü başlat
-            document.addEventListener('DOMContentLoaded', () => {
-                // Malzemeler için CKEditor
-                if (typeof ClassicEditor !== 'undefined') {
-                    ClassicEditor
-                        .create(document.querySelector('#ingredientsEditor'), {
-                            toolbar: {
-                                items: [
-                                    'heading', '|',
-                                    'bold', 'italic', '|',
-                                    'bulletedList', 'numberedList', '|',
-                                    'undo', 'redo'
-                                ]
-                            },
-                            heading: {
-                                options: [
-                                    { model: 'paragraph', title: 'Paragraf', class: 'ck-heading_paragraph' },
-                                    { model: 'heading2', view: 'h2', title: 'Başlık 2', class: 'ck-heading_heading2' },
-                                    { model: 'heading3', view: 'h3', title: 'Başlık 3', class: 'ck-heading_heading3' }
-                                ]
-                            },
-                            language: 'tr',
-                            placeholder: 'Örn:\n\nHamuru için;\n• 125 g tereyağı\n• 1,5 su bardağı su\n• 1 su bardağı + 1 yemek kaşığı un\n\nKreması için;\n• 4 su bardağı süt\n• 1 su bardağı şeker',
-                            // Resize özelliğini aktif et
-                            resizeOptions: {
-                                handle: 'south',
-                                minHeight: 300,
-                                maxHeight: 1000
-                            },
-                            // Yazım denetimini devre dışı bırak
-                            removePlugins: ['SpellChecker']
-                        })
-                        .then(editor => {
-                            ingredientsEditor = editor;
-                            
-                            // Editör yüksekliğini ayarla ve koru
-                            const setEditorHeight = () => {
-                                const editorElement = editor.ui.getEditableElement();
-                                if (editorElement) {
-                                    editorElement.style.minHeight = '400px';
-                                    editorElement.style.height = '400px';
-                                    editorElement.style.maxHeight = '800px';
-                                    editorElement.style.overflowY = 'auto';
-                                    // Yazım denetimini devre dışı bırak
-                                    editorElement.setAttribute('spellcheck', 'false');
-                                }
-                                
-                                // View element'ine de yükseklik ayarla
-                                const editableElement = editor.editing.view.domRoots.get(editor.editing.view.document.getRoot());
-                                if (editableElement) {
-                                    editableElement.style.minHeight = '400px';
-                                    editableElement.style.height = '400px';
-                                }
-                            };
-                            
-                            // Dark mode stillerini uygula
-                            const applyDarkModeStyles = () => {
-                                const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
-                                if (isDarkMode) {
-                                    const editorElement = editor.ui.getEditableElement();
-                                    if (editorElement) {
-                                        editorElement.style.backgroundColor = '#2d2d3f';
-                                        editorElement.style.color = '#e0e0e0';
-                                        editorElement.style.borderColor = '#3d3d4f';
-                                    }
-                                    
-                                    // View element'ine de uygula
-                                    const editableElement = editor.editing.view.domRoots.get(editor.editing.view.document.getRoot());
-                                    if (editableElement) {
-                                        editableElement.style.backgroundColor = '#2d2d3f';
-                                        editableElement.style.color = '#e0e0e0';
-                                    }
-                                    
-                                    // CKEditor container'ına da uygula
-                                    const editorContainer = document.querySelector('#ingredientsEditor .ck-editor');
-                                    if (editorContainer) {
-                                        editorContainer.style.backgroundColor = '#2d2d3f';
-                                    }
-                                    
-                                    // Toolbar'a da uygula
-                                    const toolbar = document.querySelector('#ingredientsEditor .ck-toolbar');
-                                    if (toolbar) {
-                                        toolbar.style.backgroundColor = '#1e1e2e';
-                                        toolbar.style.borderColor = '#3d3d4f';
-                                    }
-                                }
-                            };
-                            
-                            // İlk yüklemede ayarla
-                            setEditorHeight();
-                            setTimeout(applyDarkModeStyles, 100);
-                            
-                            // Theme değişikliğini dinle
-                            const themeObserver = new MutationObserver(() => {
-                                applyDarkModeStyles();
-                            });
-                            
-                            themeObserver.observe(document.documentElement, {
-                                attributes: true,
-                                attributeFilter: ['data-theme']
-                            });
-                            
-                            // Focus olduğunda yüksekliği koru ve dark mode stillerini uygula
-                            editor.editing.view.document.on('change:isFocused', () => {
-                                setTimeout(() => {
-                                    setEditorHeight();
-                                    applyDarkModeStyles();
-                                }, 10);
-                            });
-                            
-                            // İçerik değiştiğinde yüksekliği koru ve dark mode stillerini uygula
-                            editor.model.document.on('change:data', () => {
-                                setTimeout(() => {
-                                    setEditorHeight();
-                                    applyDarkModeStyles();
-                                }, 10);
-                            });
-                            
-                            // Tüm editable elementlere spellcheck=false ekle
-                            const editableElements = editor.editing.view.domConverter.viewToDom(editor.editing.view.document.getRoot());
-                            if (editableElements) {
-                                editableElements.setAttribute('spellcheck', 'false');
-                            }
-                            
-                            // Observer ile yüksekliği sürekli kontrol et
-                            const observer = new MutationObserver(() => {
-                                setEditorHeight();
-                            });
-                            
-                            const editorContainer = document.querySelector('#ingredientsEditor .ck-editor');
-                            if (editorContainer) {
-                                observer.observe(editorContainer, {
-                                    attributes: true,
-                                    attributeFilter: ['style', 'class'],
-                                    childList: true,
-                                    subtree: true
-                                });
-                            }
-                            
-                            // Mevcut içeriği yükle (eğer varsa - edit modunda)
-                            const existingContent = document.getElementById('Ingredients').value;
-                            if (existingContent) {
-                                editor.setData(existingContent);
-                            }
-                            
-                            // İçerik değiştiğinde textarea'yı güncelle
-                            editor.model.document.on('change:data', () => {
-                                const htmlData = editor.getData();
-                                // HTML'i düz metne çevir, satırları koru
+                    
+                    // ÖNEMLİ: Form submit edilmeden önce Ingredients ve Steps textarea'larını güncelle
+                    // Quill editöründen içeriği al
+                    if (typeof ingredientsQuill !== 'undefined' && ingredientsQuill) {
+                        const ingredientsTextarea = document.getElementById('Ingredients');
+                        if (ingredientsTextarea) {
+                            const htmlData = ingredientsQuill.root.innerHTML;
+                            if (typeof convertHtmlToPlainText === 'function') {
+                                const plain = convertHtmlToPlainText(htmlData);
+                                ingredientsTextarea.value = plain;
+                                console.log('Ingredients güncellendi:', plain.substring(0, 50) + '...');
+                            } else {
+                                // Fallback: HTML'den text çıkar
                                 const tempDiv = document.createElement('div');
                                 tempDiv.innerHTML = htmlData;
+                                ingredientsTextarea.value = tempDiv.textContent || tempDiv.innerText || '';
+                                console.log('Ingredients güncellendi (fallback)');
+                            }
+                        } else {
+                            console.error('Ingredients textarea bulunamadı!');
+                        }
+                    } else {
+                        console.warn('ingredientsQuill tanımlı değil');
+                    }
+                    
+                    // Steps textarea'sını güncelle
+                    if (typeof updateStepsTextarea === 'function') {
+                        updateStepsTextarea();
+                        const stepsTextarea = document.getElementById('Steps');
+                        if (stepsTextarea) {
+                            console.log('Steps güncellendi:', stepsTextarea.value.substring(0, 50) + '...');
+                        }
+                    } else {
+                        // Fallback: Manuel olarak güncelle
+                        const stepsList = document.getElementById('stepsList');
+                        const stepsTextarea = document.getElementById('Steps');
+                        if (stepsList && stepsTextarea) {
+                            const items = stepsList.querySelectorAll('.item-input');
+                            const values = Array.from(items).map(input => input.value.trim()).filter(v => v);
+                            stepsTextarea.value = values.join('\n');
+                            console.log('Steps güncellendi (fallback):', stepsTextarea.value.substring(0, 50) + '...');
+                        } else {
+                            console.error('Steps textarea veya list bulunamadı!');
+                        }
+                    }
+                    
+                    // Dosya yükleme için önce S3'e yükle
+                    const filesToUpload = [];
+                    uploadedImages.forEach(img => {
+                        if (img.isFile && img.file) {
+                            filesToUpload.push(img);
+                        }
+                    });
+                    
+                    console.log('Yüklenecek dosya sayısı:', filesToUpload.length);
+                    
+                    // Dosyaları S3'e yükle
+                    if (filesToUpload.length > 0) {
+                        console.log('Dosyalar S3\'e yükleniyor...');
+                        const uploadPromises = filesToUpload.map(async (imgData, index) => {
+                            try {
+                                const formData = new FormData();
+                                formData.append('file', imgData.file);
                                 
-                                // HTML elementlerini satırlara çevir
-                                let plainText = '';
-                                const processNode = (node) => {
-                                    if (node.nodeType === Node.TEXT_NODE) {
-                                        plainText += node.textContent;
-                                    } else if (node.nodeType === Node.ELEMENT_NODE) {
-                                        const tagName = node.tagName.toLowerCase();
-                                        if (tagName === 'p' || tagName === 'div' || tagName === 'h2' || tagName === 'h3') {
-                                            if (plainText && !plainText.endsWith('\n')) {
-                                                plainText += '\n';
-                                            }
-                                            Array.from(node.childNodes).forEach(processNode);
-                                            if (plainText && !plainText.endsWith('\n')) {
-                                                plainText += '\n';
-                                            }
-                                        } else if (tagName === 'li') {
-                                            plainText += '• ';
-                                            Array.from(node.childNodes).forEach(processNode);
-                                            plainText += '\n';
-                                        } else if (tagName === 'ul' || tagName === 'ol') {
-                                            Array.from(node.childNodes).forEach(processNode);
-                                        } else {
-                                            Array.from(node.childNodes).forEach(processNode);
+                                // Token'ı al
+                                let token = '';
+                                if (typeof getAuthToken === 'function') {
+                                    token = getAuthToken();
+                                } else if (typeof localStorage !== 'undefined') {
+                                    token = localStorage.getItem('authToken') || '';
+                                }
+                                
+                                const headers = {};
+                                if (token) {
+                                    headers['Authorization'] = `Bearer ${token}`;
+                                }
+                                
+                                // Backend API URL'ini al
+                                const apiBaseUrl = window.API_BASE_URL || 'https://localhost:7016';
+                                const uploadUrl = `${apiBaseUrl}/api/upload/image`;
+                                
+                                const response = await fetch(uploadUrl, {
+                                    method: 'POST',
+                                    headers: headers,
+                                    body: formData
+                                });
+                                
+                                if (response.ok) {
+                                    const result = await response.json();
+                                    if (result.url) {
+                                        // Base64 URL'yi S3 URL'i ile değiştir
+                                        const oldIndex = uploadedImages.findIndex(img => img === imgData);
+                                        if (oldIndex !== -1) {
+                                            uploadedImages[oldIndex].url = result.url;
+                                            uploadedImages[oldIndex].isFile = false; // Artık URL
                                         }
+                                        return result.url;
                                     }
-                                };
-                                
-                                Array.from(tempDiv.childNodes).forEach(processNode);
-                                document.getElementById('Ingredients').value = plainText.trim();
-                            });
-                        })
-                        .catch(error => {
-                            console.error('CKEditor yüklenirken hata:', error);
+                                } else {
+                                    const error = await response.text();
+                                    console.error('S3 upload failed:', error);
+                                    throw new Error(`Upload failed: ${error}`);
+                                }
+                            } catch (error) {
+                                console.error('Error uploading to S3:', error);
+                                throw error;
+                            }
                         });
-                } else {
-                    console.error('CKEditor yüklenmedi!');
-                }
-                
-                // Adımlar için varsayılan item ekle
-                addStepItem();
-            });
+                        
+                        try {
+                            await Promise.all(uploadPromises);
+                            console.log('Tüm dosyalar S3\'e yüklendi');
+                            // Tüm dosyalar yüklendi, şimdi formu submit et
+                            renderImagesList();
+                            
+                            // imageFiles input'unu temizle (artık S3'e yüklendi, backend'e göndermeye gerek yok)
+                            if (imageFilesInput) {
+                                imageFilesInput.value = '';
+                            }
+                            
+                            // imageUrlsJson ve primaryImageIndex'i güncelle
+                            if (imageUrlsJsonInput) {
+                                const urls = uploadedImages.map(img => img.url);
+                                imageUrlsJsonInput.value = JSON.stringify(urls);
+                                console.log('Image URLs güncellendi:', urls.length, 'görsel');
+                            }
+                            
+                            // Form submit etmeden önce bir saniye bekle (UI güncellemesi için)
+                            console.log('Form submit ediliyor (dosyalar yüklendikten sonra)...');
+                            setTimeout(() => {
+                                // Event listener'ı kaldır (sonsuz döngüyü önlemek için)
+                                form.removeEventListener('submit', submitHandler);
+                                // Programatik submit - event listener'lar çalışmaz
+                                form.submit();
+                            }, 500);
+                        } catch (error) {
+                            alert('Fotoğraflar yüklenirken hata oluştu: ' + error.message);
+                            console.error('Upload error:', error);
+                            // Hata olsa bile formu submit et (kullanıcı tekrar deneyebilir)
+                            // form.submit();
+                        }
+                    } else {
+                        // Yüklenecek dosya yok, direkt submit et
+                        console.log('Yüklenecek dosya yok, form direkt submit ediliyor...');
+                        
+                        // imageUrlsJson ve primaryImageIndex'i güncelle
+                        if (imageUrlsJsonInput && uploadedImages.length > 0) {
+                            const urls = uploadedImages.map(img => img.url);
+                            imageUrlsJsonInput.value = JSON.stringify(urls);
+                            console.log('Image URLs güncellendi:', urls.length, 'görsel');
+                        }
+                        
+                        // Event listener'ı kaldır (sonsuz döngüyü önlemek için)
+                        form.removeEventListener('submit', submitHandler);
+                        // Programatik submit - event listener'lar çalışmaz
+                        form.submit();
+                    }
+                };
+                form.addEventListener('submit', submitHandler);
+            }
         </script>
     }
 </div>

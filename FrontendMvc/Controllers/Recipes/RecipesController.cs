@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using FrontendMvc.Models.Recipes;
@@ -121,7 +122,36 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
     [Authorize]
     public async Task<IActionResult> Create()
     {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            TempData["ErrorMessage"] = "Tarif eklemek için önce giriş yapmanız gerekiyor.";
+            return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("Create", "Recipes") });
+        }
+
+        // Kullanıcının yazar olup olmadığını kontrol et
         var client = CreateApiClient();
+        AuthorViewModel? author = null;
+        try
+        {
+            var response = await client.GetAsync($"/api/authors/user/{userId}");
+            if (response.IsSuccessStatusCode)
+            {
+                author = await response.Content.ReadFromJsonAsync<AuthorViewModel>(JsonOptions);
+            }
+        }
+        catch (HttpRequestException)
+        {
+            // 404 veya başka bir hata - yazar değil
+            author = null;
+        }
+
+        if (author == null || !author.IsActive)
+        {
+            TempData["InfoMessage"] = "Tarif eklemek için önce yazar olmanız gerekiyor.";
+            return RedirectToAction("BecomeAuthor", "Author");
+        }
+
         var categories = await client.GetFromJsonAsync<List<CategoryViewModel>>("/api/categories") 
                          ?? new List<CategoryViewModel>();
         ViewBag.Categories = categories;
@@ -131,7 +161,7 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(RecipeViewModel model, IFormFile? imageFile)
+    public async Task<IActionResult> Create(RecipeViewModel model, IFormFile? imageFile, IFormFile[]? imageFiles, string? imageUrlsJson, int? primaryImageIndex)
     {
         var client = CreateApiClient();
         var categories = await client.GetFromJsonAsync<List<CategoryViewModel>>("/api/categories") 
@@ -143,10 +173,41 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
             return View(model);
         }
 
-        // Dosya yüklendiyse kaydet
+        // Kullanıcının yazar olup olmadığını kontrol et
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        AuthorViewModel? author = null;
+        try
+        {
+            var authorResponse = await client.GetAsync($"/api/authors/user/{userId}");
+            if (authorResponse.IsSuccessStatusCode)
+            {
+                author = await authorResponse.Content.ReadFromJsonAsync<AuthorViewModel>(JsonOptions);
+            }
+        }
+        catch (HttpRequestException)
+        {
+            // 404 veya başka bir hata - yazar değil
+            author = null;
+        }
+
+        if (author == null || !author.IsActive)
+        {
+            TempData["ErrorMessage"] = "Tarif eklemek için önce yazar olmanız gerekiyor.";
+            return RedirectToAction("BecomeAuthor", "Author");
+        }
+
+        // Çoklu fotoğraf yükleme - S3'e yükle
+        var imageUrls = new List<string>();
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+
+        // Eski tek dosya desteği (backward compatibility) - S3'e yükle
         if (imageFile != null && imageFile.Length > 0)
         {
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
             var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
             
             if (!allowedExtensions.Contains(extension))
@@ -161,22 +222,179 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
                 return View(model);
             }
 
-            // Klasörü oluştur
-            var imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "recipes");
-            Directory.CreateDirectory(imagesPath);
-
-            // Benzersiz dosya adı oluştur
-            var fileName = $"{Guid.NewGuid()}{extension}";
-            var filePath = Path.Combine(imagesPath, fileName);
-
-            // Dosyayı kaydet
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            // S3'e yükle
+            try
             {
-                await imageFile.CopyToAsync(stream);
+                using var content = new MultipartFormDataContent();
+                using var fileStream = imageFile.OpenReadStream();
+                content.Add(new StreamContent(fileStream), "file", imageFile.FileName);
+                
+                var uploadResponse = await client.PostAsync("/api/upload/image", content);
+                if (uploadResponse.IsSuccessStatusCode)
+                {
+                    var result = await uploadResponse.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(JsonOptions);
+                    if (result.TryGetProperty("url", out var urlElement))
+                    {
+                        var uploadedUrl = urlElement.GetString();
+                        if (!string.IsNullOrWhiteSpace(uploadedUrl))
+                        {
+                            imageUrls.Add(uploadedUrl);
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("ImageFile", "Fotoğraf yüklendi ancak URL alınamadı.");
+                            return View(model);
+                        }
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("ImageFile", "Fotoğraf yüklendi ancak yanıt formatı hatalı.");
+                        return View(model);
+                    }
+                }
+                else
+                {
+                    var errorContent = await uploadResponse.Content.ReadAsStringAsync();
+                    var statusCode = uploadResponse.StatusCode;
+                    ModelState.AddModelError("ImageFile", $"Fotoğraf yüklenirken hata oluştu (Status: {statusCode}): {errorContent}");
+                    return View(model);
+                }
             }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("ImageFile", $"Fotoğraf yüklenirken hata oluştu: {ex.Message}");
+                return View(model);
+            }
+        }
 
-            // Model'e URL'i ekle
-            model.ImageUrl = $"/images/recipes/{fileName}";
+        // Yeni çoklu dosya desteği - S3'e yükle
+        if (imageFiles != null && imageFiles.Length > 0)
+        {
+            foreach (var file in imageFiles)
+            {
+                if (file.Length == 0) continue;
+
+                var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+                
+                if (!allowedExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError("ImageFiles", $"{file.FileName} sadece JPG, PNG, GIF veya WebP formatında olabilir.");
+                    continue;
+                }
+
+                if (file.Length > 5 * 1024 * 1024) // 5MB
+                {
+                    ModelState.AddModelError("ImageFiles", $"{file.FileName} 5MB'dan küçük olmalıdır.");
+                    continue;
+                }
+
+                // S3'e yükle
+                try
+                {
+                    using var content = new MultipartFormDataContent();
+                    using var fileStream = file.OpenReadStream();
+                    content.Add(new StreamContent(fileStream), "file", file.FileName);
+                    
+                    var uploadResponse = await client.PostAsync("/api/upload/image", content);
+                    if (uploadResponse.IsSuccessStatusCode)
+                    {
+                        var result = await uploadResponse.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(JsonOptions);
+                        if (result.TryGetProperty("url", out var urlElement))
+                        {
+                            var url = urlElement.GetString();
+                            if (!string.IsNullOrWhiteSpace(url) && !imageUrls.Contains(url))
+                            {
+                                imageUrls.Add(url);
+                            }
+                            else if (string.IsNullOrWhiteSpace(url))
+                            {
+                                ModelState.AddModelError("ImageFiles", $"{file.FileName} yüklendi ancak URL alınamadı.");
+                            }
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("ImageFiles", $"{file.FileName} yüklendi ancak yanıt formatı hatalı.");
+                        }
+                    }
+                    else
+                    {
+                        var errorContent = await uploadResponse.Content.ReadAsStringAsync();
+                        var statusCode = uploadResponse.StatusCode;
+                        ModelState.AddModelError("ImageFiles", $"{file.FileName} yüklenirken hata (Status: {statusCode}): {errorContent}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("ImageFiles", $"{file.FileName} yüklenirken hata: {ex.Message}");
+                }
+            }
+        }
+
+        // JSON'dan URL'leri ekle (zaten S3 URL'leri olabilir veya external URL'ler)
+        if (!string.IsNullOrWhiteSpace(imageUrlsJson))
+        {
+            try
+            {
+                var urlsFromJson = System.Text.Json.JsonSerializer.Deserialize<List<string>>(imageUrlsJson);
+                if (urlsFromJson != null)
+                {
+                    foreach (var url in urlsFromJson)
+                    {
+                        if (!string.IsNullOrWhiteSpace(url) && !imageUrls.Contains(url))
+                        {
+                            // Eğer base64 data URL ise, S3'e yükle
+                            if (url.StartsWith("data:image"))
+                            {
+                                try
+                                {
+                                    var base64Data = url.Split(',')[1];
+                                    var imageBytes = Convert.FromBase64String(base64Data);
+                                    var mimeType = url.Split(';')[0].Split(':')[1];
+                                    var extension = mimeType.Split('/')[1];
+                                    
+                                    using var ms = new MemoryStream(imageBytes);
+                                    using var content = new MultipartFormDataContent();
+                                    content.Add(new StreamContent(ms), "file", $"image.{extension}");
+                                    
+                                    var uploadResponse = await client.PostAsync("/api/upload/image", content);
+                                    if (uploadResponse.IsSuccessStatusCode)
+                                    {
+                                        var result = await uploadResponse.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(JsonOptions);
+                                        if (result.TryGetProperty("url", out var urlElement))
+                                        {
+                                            imageUrls.Add(urlElement.GetString() ?? string.Empty);
+                                        }
+                                    }
+                                }
+                                catch
+                                {
+                                    // Base64 yükleme hatası, atla
+                                }
+                            }
+                            else
+                            {
+                                // Zaten bir URL (S3 veya external)
+                                imageUrls.Add(url);
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // JSON parse hatası, devam et
+            }
+        }
+
+        // Ana fotoğrafı belirle
+        var primaryIdx = primaryImageIndex ?? 0;
+        if (primaryIdx < 0 || primaryIdx >= imageUrls.Count)
+            primaryIdx = 0;
+        
+        // Eğer hiç fotoğraf yoksa, eski ImageUrl'i kullan (backward compatibility)
+        if (imageUrls.Count == 0 && !string.IsNullOrWhiteSpace(model.ImageUrl))
+        {
+            imageUrls.Add(model.ImageUrl);
         }
 
         // RecipeViewModel'den CreateRecipeDto formatına mapping yap
@@ -196,6 +414,9 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .ToList();
 
+        // AuthorId'yi ekle (yukarıda zaten kontrol edildi, author var ve aktif)
+        int? authorId = author?.Id;
+
         // Anonymous object kullanarak JSON serialization otomatik olarak PascalCase kullanır (PropertyNamingPolicy = null ayarı sayesinde)
         var createDto = new
         {
@@ -207,11 +428,14 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
             CookingTimeMinutes = model.CookingTimeMinutes,
             Servings = model.Servings,
             Difficulty = model.Difficulty ?? "Orta",
-            ImageUrl = string.IsNullOrWhiteSpace(model.ImageUrl) ? null : model.ImageUrl, // Boş string yerine null gönder
+            ImageUrl = imageUrls.Count > 0 ? imageUrls[primaryIdx] : (string.IsNullOrWhiteSpace(model.ImageUrl) ? null : model.ImageUrl), // Ana fotoğraf
+            ImageUrls = imageUrls.Count > 0 ? imageUrls : null, // Çoklu fotoğraflar
+            PrimaryImageIndex = imageUrls.Count > 0 ? (int?)primaryIdx : null, // Ana fotoğraf index'i
             Tips = string.IsNullOrWhiteSpace(model.Tips) ? null : model.Tips,
             AlternativeIngredients = string.IsNullOrWhiteSpace(model.AlternativeIngredients) ? null : model.AlternativeIngredients,
             NutritionInfo = string.IsNullOrWhiteSpace(model.NutritionInfo) ? null : model.NutritionInfo,
             CategoryId = model.CategoryId, // Backend validator'da nullable, bu yüzden null gönderebiliriz
+            AuthorId = authorId,
             IsFeatured = model.IsFeatured
         };
         
@@ -254,10 +478,14 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
             return View(model);
         }
 
-        // Admin kullanıcı ise Admin panelindeki tarifler listesine, değilse ana sayfaya yönlendir
+        // Yazar ise tariflerim sayfasına, Admin ise Admin panelindeki tarifler listesine, değilse ana sayfaya yönlendir
         if (User.IsInRole("Admin"))
         {
             return RedirectToAction("Recipes", "Admin");
+        }
+        else if (authorId.HasValue)
+        {
+            return RedirectToAction("MyRecipes", "Author", new { authorId = authorId.Value });
         }
         else
         {
@@ -341,7 +569,7 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
             TempData["ErrorMessage"] = "Oturumunuz sona erdi. Lütfen tekrar giriş yapın.";
             return RedirectToAction("Login", "Account");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             TempData["ErrorMessage"] = "Koleksiyonlar yüklenirken bir hata oluştu.";
             return View(new List<CollectionViewModel>());

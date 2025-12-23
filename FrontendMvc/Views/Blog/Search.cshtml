@@ -1,0 +1,131 @@
+@model IEnumerable<FrontendMvc.Models.Blog.BlogPostViewModel>
+
+@{
+    ViewData["Title"] = "Blog Arama";
+    var searchTerm = ViewBag.SearchTerm as string ?? "";
+    var pageNumber = ViewBag.PageNumber as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 12;
+    var totalCount = ViewBag.TotalCount as int? ?? 0;
+    var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+}
+
+<div class="row gap-20">
+    <div class="col-12">
+        <div class="bd bgc-white p-20">
+            <h4 class="mB-20">Arama Sonuçları: "@searchTerm"</h4>
+            <p class="text-muted">@totalCount sonuç bulundu</p>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var blogPost in Model)
+        {
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="bd bgc-white p-20">
+                    <div class="layers">
+                        @if (!string.IsNullOrEmpty(blogPost.ImageUrl))
+                        {
+                            <div class="layer w-100 mB-15">
+                                <a asp-action="Details" asp-route-id="@blogPost.Id">
+                                    <img src="@blogPost.ImageUrl" alt="@blogPost.Title" class="w-100" style="height: 250px; object-fit: cover; border-radius: 8px;">
+                                </a>
+                            </div>
+                        }
+
+                        @if (blogPost.Author != null)
+                        {
+                            <div class="layer w-100 mB-10">
+                                <div class="peers fxw-nw ai-c">
+                                    @if (!string.IsNullOrEmpty(blogPost.Author.ProfileImageUrl))
+                                    {
+                                        <div class="peer mR-10">
+                                            <img src="@blogPost.Author.ProfileImageUrl" alt="@blogPost.Author.DisplayName" 
+                                                 style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                        </div>
+                                    }
+                                    <div class="peer peer-greed">
+                                        <div class="fw-600">@blogPost.Author.DisplayName</div>
+                                    </div>
+                                    <div class="peer">
+                                        <span class="text-muted fsz-sm">
+                                            @blogPost.PublishedAt?.ToString("dd.MM.yyyy") ?? @blogPost.CreatedAt.ToString("dd.MM.yyyy")
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="layer w-100 mB-10">
+                            <h5 class="mB-0">
+                                <a asp-action="Details" asp-route-id="@blogPost.Id" class="text-dark">
+                                    @blogPost.Title
+                                </a>
+                            </h5>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(blogPost.Excerpt))
+                        {
+                            <div class="layer w-100 mB-15">
+                                <p class="text-muted mB-0">@blogPost.Excerpt</p>
+                            </div>
+                        }
+
+                        <div class="layer w-100">
+                            <div class="peers fxw-nw ai-c">
+                                <div class="peer mR-20">
+                                    <i class="ti-heart"></i> @blogPost.LikeCount
+                                </div>
+                                <div class="peer mR-20">
+                                    <i class="ti-comment"></i> @blogPost.CommentCount
+                                </div>
+                                <div class="peer">
+                                    <span class="text-muted">@blogPost.ViewCount Görüntülenme</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (totalPages > 1)
+        {
+            <div class="col-12">
+                <div class="bd bgc-white p-20">
+                    <nav aria-label="Arama sayfalama">
+                        <ul class="pagination justify-content-center mB-0">
+                            @if (pageNumber > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Search", new { q = searchTerm, pageNumber = pageNumber - 1, pageSize = pageSize })">Önceki</a>
+                                </li>
+                            }
+                            @for (int i = Math.Max(1, pageNumber - 2); i <= Math.Min(totalPages, pageNumber + 2); i++)
+                            {
+                                <li class="page-item @(i == pageNumber ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Search", new { q = searchTerm, pageNumber = i, pageSize = pageSize })">@i</a>
+                                </li>
+                            }
+                            @if (pageNumber < totalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Search", new { q = searchTerm, pageNumber = pageNumber + 1, pageSize = pageSize })">Sonraki</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="bd bgc-white p-20">
+                <p class="text-center text-muted">Arama kriterlerinize uygun blog yazısı bulunamadı.</p>
+            </div>
+        </div>
+    }
+</div>
+

@@ -11,6 +11,8 @@ public class UnitOfWork : IUnitOfWork
 
     private IRecipeRepository? _recipes;
     private ICategoryRepository? _categories;
+    private IAuthorRepository? _authors;
+    private IBlogPostRepository? _blogPosts;
     private IRatingRepository? _ratings;
     private ILikeRepository? _likes;
     private ICollectionRepository? _collections;
@@ -21,6 +23,7 @@ public class UnitOfWork : IUnitOfWork
     private IMealPlanItemRepository? _mealPlanItems;
     private IShoppingListRepository? _shoppingLists;
     private IShoppingListItemRepository? _shoppingListItems;
+    private IRecipeImageRepository? _recipeImages;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -40,6 +43,22 @@ public class UnitOfWork : IUnitOfWork
         get
         {
             return _categories ??= new CategoryRepository(_context);
+        }
+    }
+
+    public IAuthorRepository Authors
+    {
+        get
+        {
+            return _authors ??= new AuthorRepository(_context);
+        }
+    }
+
+    public IBlogPostRepository BlogPosts
+    {
+        get
+        {
+            return _blogPosts ??= new BlogPostRepository(_context);
         }
     }
 
@@ -120,6 +139,14 @@ public class UnitOfWork : IUnitOfWork
         get
         {
             return _shoppingListItems ??= new ShoppingListItemRepository(_context);
+        }
+    }
+
+    public IRecipeImageRepository RecipeImages
+    {
+        get
+        {
+            return _recipeImages ??= new RecipeImageRepository(_context);
         }
     }
 

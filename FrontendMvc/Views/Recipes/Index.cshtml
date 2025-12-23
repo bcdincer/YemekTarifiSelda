@@ -170,10 +170,16 @@
             <div class="col-md-4 col-lg-4 mb-3">
                 <a asp-controller="Recipes" asp-action="Details" asp-route-id="@recipe.Id" class="recipe-card-link" style="text-decoration: none; display: block;">
                     <div class="bd bgc-white bdrs-3 ov-h recipe-card" style="transition: all 0.3s ease; cursor: pointer;">
-                        @if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                        @{
+                            // Çoklu fotoğraf desteği: Önce Images listesinden ana fotoğrafı al, yoksa ImageUrl'i kullan
+                            var displayImageUrl = recipe.Images?.FirstOrDefault(img => img.IsPrimary)?.ImageUrl 
+                                                   ?? recipe.Images?.FirstOrDefault()?.ImageUrl 
+                                                   ?? recipe.ImageUrl;
+                        }
+                        @if (!string.IsNullOrEmpty(displayImageUrl))
                         {
                             <div class="recipe-card-image-wrapper" style="position: relative; overflow: hidden;">
-                                <img src="@recipe.ImageUrl" alt="@recipe.Title" class="w-100" style="height: 200px; object-fit: cover; transition: transform 0.3s ease;" loading="lazy" decoding="async">
+                                <img src="@displayImageUrl" alt="@recipe.Title" class="w-100" style="height: 200px; object-fit: cover; transition: transform 0.3s ease;" loading="lazy" decoding="async">
                                 <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: flex-end; padding: 15px;">
                                     <span class="c-white fw-600" style="font-size: 14px;">
                                         <i class="ti-eye mR-5"></i> Detayları Gör

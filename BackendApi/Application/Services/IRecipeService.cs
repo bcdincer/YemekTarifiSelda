@@ -13,11 +13,13 @@ public interface IRecipeService
     Task<RecipeResponseDto?> GetRandomAsync();
     Task<List<RecipeResponseDto>> GetByCategoryAsync(int categoryId);
     Task<PagedResult<RecipeResponseDto>> GetByCategoryPagedAsync(int categoryId, int pageNumber, int pageSize);
+    Task<List<RecipeResponseDto>> GetByAuthorIdAsync(int authorId);
+    Task<PagedResult<RecipeResponseDto>> GetByAuthorIdPagedAsync(int authorId, int pageNumber, int pageSize);
     Task<List<RecipeResponseDto>> SearchAsync(string searchTerm);
     Task<PagedResult<RecipeResponseDto>> SearchPagedAsync(string searchTerm, int pageNumber, int pageSize);
     Task<PagedResult<RecipeResponseDto>> SearchWithFiltersAsync(RecipeFilterDto filter, int pageNumber, int pageSize);
     Task<RecipeResponseDto> CreateAsync(Recipe recipe);
-    Task<bool> UpdateAsync(int id, Recipe updated);
+    Task<bool> UpdateAsync(int id, Recipe updated, CreateRecipeDto? dto = null);
     Task<bool> DeleteAsync(int id);
     Task IncrementViewCountAsync(int id);
 }

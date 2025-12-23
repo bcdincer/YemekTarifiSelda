@@ -1,0 +1,121 @@
+@model IEnumerable<FrontendMvc.Models.Recipes.RecipeViewModel>
+
+@{
+    ViewData["Title"] = "Tariflerim";
+    var pageNumber = ViewBag.PageNumber as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 10;
+    var totalCount = ViewBag.TotalCount as int? ?? 0;
+    var authorId = ViewBag.AuthorId as int?;
+    var isOwnRecipes = ViewBag.IsOwnRecipes as bool? ?? true;
+}
+
+<div class="row gap-20">
+    <div class="col-12">
+        <div class="bd bgc-white p-20">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <div class="peers fxw-nw ai-c">
+                        <div class="peer peer-greed">
+                            <h4 class="lh-1 mB-0">
+                                <i class="ti-book mR-10"></i> Tariflerim
+                            </h4>
+                            <p class="c-grey-600 mB-0 mT-5">Toplam @totalCount tarif</p>
+                        </div>
+                        @if (isOwnRecipes)
+                        {
+                            <div class="peer">
+                                <a asp-controller="Recipes" asp-action="Create" class="btn btn-primary" style="color: white;">
+                                    <i class="ti-plus mR-5"></i> Yeni Tarif Ekle
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <div class="bd bgc-white p-40 text-center">
+                <i class="ti-book" style="font-size: 64px; color: #ccc; margin-bottom: 20px;"></i>
+                <h5 class="mB-10">Henüz tarif eklenmemiş</h5>
+                @if (isOwnRecipes)
+                {
+                    <p class="c-grey-600 mB-20">İlk tarifinizi ekleyerek başlayın!</p>
+                    <a asp-controller="Recipes" asp-action="Create" class="btn btn-primary" style="color: white;">
+                        <i class="ti-plus mR-5"></i> Yeni Tarif Ekle
+                    </a>
+                }
+                else
+                {
+                    <p class="c-grey-600">Bu yazar henüz tarif paylaşmamış.</p>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var recipe in Model)
+        {
+            <div class="col-lg-4 col-md-6">
+                <div class="bd bgc-white p-20 recipe-card">
+                    <a asp-controller="Recipes" asp-action="Details" asp-route-id="@recipe.Id" class="text-decoration-none">
+                        @if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                        {
+                            <img src="@recipe.ImageUrl" alt="@recipe.Title" class="w-100 bdrs-3 mB-15" style="height: 200px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="w-100 bdrs-3 mB-15 bgc-grey-100" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                                <i class="ti-image" style="font-size: 48px; color: #ccc;"></i>
+                            </div>
+                        }
+                        <h5 class="mB-10">@recipe.Title</h5>
+                        <p class="c-grey-600 mB-15" style="min-height: 40px;">@(recipe.Description.Length > 100 ? recipe.Description.Substring(0, 100) + "..." : recipe.Description)</p>
+                        <div class="d-flex gap-10 ai-c">
+                            <span class="c-grey-600">
+                                <i class="ti-time mR-5"></i>@recipe.CookingTimeMinutes dk
+                            </span>
+                            <span class="c-grey-600">
+                                <i class="ti-user mR-5"></i>@recipe.Servings kişilik
+                            </span>
+                            @if (recipe.AverageRating.HasValue)
+                            {
+                                <span class="c-grey-600">
+                                    <i class="ti-star mR-5" style="color: #ffc107;"></i>@recipe.AverageRating.Value.ToString("F1")
+                                </span>
+                            }
+                        </div>
+                    </a>
+                </div>
+            </div>
+        }
+
+        <!-- Pagination -->
+        @if (totalCount > pageSize)
+        {
+            <div class="col-12">
+                <div class="bd bgc-white p-20">
+                    <div class="d-flex justify-content-center gap-10">
+                        @if (pageNumber > 1)
+                        {
+                            <a asp-action="MyRecipes" asp-route-authorId="@authorId" asp-route-pageNumber="@(pageNumber - 1)" class="btn btn-outline-primary">
+                                <i class="ti-angle-left mR-5"></i> Önceki
+                            </a>
+                        }
+                        <span class="d-flex ai-c">Sayfa @pageNumber / @((int)Math.Ceiling((double)totalCount / pageSize))</span>
+                        @if (pageNumber * pageSize < totalCount)
+                        {
+                            <a asp-action="MyRecipes" asp-route-authorId="@authorId" asp-route-pageNumber="@(pageNumber + 1)" class="btn btn-outline-primary">
+                                Sonraki <i class="ti-angle-right mL-5"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+

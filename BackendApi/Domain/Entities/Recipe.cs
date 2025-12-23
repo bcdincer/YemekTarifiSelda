@@ -49,6 +49,12 @@ public class Recipe
     public int? CategoryId { get; set; }
     public Category? Category { get; set; }
     
+    public int? AuthorId { get; set; }
+    public Author? Author { get; set; }
+    
+    // Çoklu fotoğraflar
+    public ICollection<RecipeImage> Images { get; set; } = new List<RecipeImage>();
+    
     // Tarih bilgileri
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }

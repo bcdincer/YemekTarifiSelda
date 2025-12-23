@@ -6,623 +6,9 @@
 	var categories = ViewBag.Categories as List<FrontendMvc.Models.Recipes.CategoryViewModel> ?? new();
 }
 
-<style>
-	/* Ana container için stil */
-	.edit-recipe-container {
-		max-width: 100%;
-	}
-
-	.edit-recipe-container .row {
-		margin-left: -8px;
-		margin-right: -8px;
-	}
-
-	.edit-recipe-container [class*="col-"] {
-		padding-left: 8px;
-		padding-right: 8px;
-	}
-
-	.edit-recipe-container .bd.bgc-white {
-		background: #ffffff;
-		border-radius: 12px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-		transition: box-shadow 0.3s ease;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .bd.bgc-white,
-	[data-theme="dark"] .edit-recipe-container.bd.bgc-white {
-		background: #1e1e2e !important;
-		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-		border-color: #3d3d4f !important;
-	}
-
-	/* Üst bilgi satırı için stil */
-	.quick-info-bar {
-		background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-		border: 1px solid #dee2e6;
-		border-radius: 10px;
-		padding: 20px 24px;
-		margin-bottom: 24px;
-		display: flex;
-		justify-content: space-around;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: 20px;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-		transition: all 0.3s ease;
-	}
-
-	[data-theme="dark"] .quick-info-bar {
-		background: linear-gradient(135deg, #2d2d3f 0%, #1e1e2e 100%);
-		border: 1px solid #3d3d4f;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-	}
-
-	.quick-info-bar:hover {
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-		transform: translateY(-1px);
-	}
-
-	[data-theme="dark"] .quick-info-bar:hover {
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-	}
-
-	.quick-info-bar .quick-info-item {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex: 0 1 auto;
-		min-width: 0;
-	}
-
-	.quick-info-bar .quick-info-item > label {
-		margin-bottom: 0;
-		margin-right: 8px;
-		font-size: 13px;
-		font-weight: 600;
-		color: #495057;
-		white-space: nowrap;
-		cursor: default;
-		display: flex;
-		align-items: center;
-		transition: color 0.2s ease;
-	}
-
-	[data-theme="dark"] .quick-info-bar .quick-info-item > label {
-		color: #e0e0e0;
-	}
-
-	.quick-info-bar .quick-info-item > label i {
-		color: #6c757d;
-		transition: color 0.2s ease;
-	}
-
-	[data-theme="dark"] .quick-info-bar .quick-info-item > label i {
-		color: #a0a0b0;
-	}
-
-	.quick-info-bar .quick-info-item input[type="number"],
-	.quick-info-bar .quick-info-item select {
-		width: auto;
-		display: inline-block;
-		flex-shrink: 0;
-		border: 1px solid #ced4da !important;
-		border-radius: 6px;
-		transition: all 0.2s ease;
-		background: #ffffff !important;
-		color: #495057 !important;
-		-webkit-appearance: none;
-		-moz-appearance: none;
-		appearance: none;
-	}
-
-	[data-theme="dark"] .quick-info-bar .quick-info-item input[type="number"],
-	[data-theme="dark"] .quick-info-bar .quick-info-item select {
-		background: #2d2d3f !important;
-		border-color: #4d4d5f !important;
-		color: #e0e0e0 !important;
-	}
-
-	.quick-info-bar .quick-info-item input[type="number"]:focus,
-	.quick-info-bar .quick-info-item select:focus {
-		border-color: #818cf8 !important;
-		box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1) !important;
-		outline: none;
-	}
-
-	[data-theme="dark"] .quick-info-bar .quick-info-item input[type="number"]:focus,
-	[data-theme="dark"] .quick-info-bar .quick-info-item select:focus {
-		border-color: #6366f1 !important;
-		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
-	}
-
-	/* Select'lerin normal durumda mor border göstermemesi için */
-	.quick-info-bar .quick-info-item select:not(:focus) {
-		border-color: #ced4da !important;
-		box-shadow: none !important;
-	}
-
-	[data-theme="dark"] .quick-info-bar .quick-info-item select:not(:focus) {
-		border-color: #4d4d5f !important;
-		box-shadow: none !important;
-	}
-
-	/* Hazırlık ve Pişirme süreleri için daha küçük input */
-	.quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
-	.quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
-		width: 60px;
-		min-width: 60px;
-		max-width: 60px;
-		text-align: center;
-	}
-
-	.quick-info-bar .quick-info-item select[name="Difficulty"] {
-		min-width: 100px;
-		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-		background-repeat: no-repeat !important;
-		background-position: right 0.5rem center !important;
-		background-size: 12px 10px !important;
-		padding-right: 1.75rem !important;
-		-webkit-appearance: none !important;
-		-moz-appearance: none !important;
-		appearance: none !important;
-		cursor: pointer;
-		border: 1px solid #ced4da !important;
-		background-color: #ffffff !important;
-		color: #495057 !important;
-	}
-
-	[data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"] {
-		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-		border-color: #4d4d5f !important;
-		background-color: #2d2d3f !important;
-		color: #e0e0e0 !important;
-	}
-
-	.quick-info-bar .quick-info-item select[name="Difficulty"]:focus {
-		border-color: #818cf8 !important;
-		box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1) !important;
-		outline: none;
-	}
-
-	[data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"]:focus {
-		border-color: #6366f1 !important;
-		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
-	}
-
-	.quick-info-bar .quick-info-item select[name="Difficulty"]:not(:focus) {
-		border-color: #ced4da !important;
-		box-shadow: none !important;
-	}
-
-	[data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"]:not(:focus) {
-		border-color: #4d4d5f !important;
-		box-shadow: none !important;
-	}
-
-	.quick-info-bar .quick-info-item select[name="Difficulty"] option {
-		background: #ffffff;
-		color: #495057;
-		padding: 8px;
-	}
-
-	[data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"] option {
-		background: #2d2d3f !important;
-		color: #e0e0e0 !important;
-	}
-
-	.quick-info-bar .quick-info-item select[name="Difficulty"]:hover {
-		border-color: #adb5bd;
-	}
-
-	[data-theme="dark"] .quick-info-bar .quick-info-item select[name="Difficulty"]:hover {
-		border-color: #5d5d6f;
-	}
-
-	.quick-info-bar .form-check {
-		display: flex;
-		align-items: center;
-		margin: 0;
-		padding: 0;
-	}
-
-	.quick-info-bar .form-check-input {
-		margin-top: 0;
-		margin-right: 8px;
-		flex-shrink: 0;
-		width: 20px !important;
-		height: 20px !important;
-		border: 2px solid #ced4da !important;
-		border-radius: 4px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		background-color: #ffffff;
-		position: relative;
-	}
-
-	.quick-info-bar .form-check-label {
-		margin-bottom: 0;
-		font-size: 14px;
-		font-weight: 600;
-		color: #495057;
-		display: flex;
-		align-items: center;
-		white-space: nowrap;
-		transition: color 0.2s ease;
-		cursor: pointer;
-	}
-
-	[data-theme="dark"] .quick-info-bar .form-check-label {
-		color: #e0e0e0;
-	}
-
-	.quick-info-bar .form-check-label i {
-		color: #ffc107;
-		transition: color 0.2s ease;
-		font-size: 16px;
-	}
-
-	.quick-info-bar .form-check-input:checked ~ .form-check-label i {
-		color: #ff9800;
-	}
-
-	.quick-info-bar .form-check-input:checked {
-		background-color: #818cf8 !important;
-		border-color: #6366f1 !important;
-		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e") !important;
-		background-size: 14px 14px !important;
-		background-position: center !important;
-		background-repeat: no-repeat !important;
-		box-shadow: 0 2px 4px rgba(129, 140, 248, 0.3);
-	}
-
-	.quick-info-bar .form-check-input:hover {
-		border-color: #818cf8 !important;
-		box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
-	}
-
-	.quick-info-bar .form-check-input:checked:hover {
-		border-color: #6366f1 !important;
-		box-shadow: 0 2px 6px rgba(129, 140, 248, 0.4);
-	}
-
-	[data-theme="dark"] .quick-info-bar .form-check-input {
-		background-color: #2d2d3f !important;
-		border-color: #5d5d6f !important;
-	}
-
-	[data-theme="dark"] .quick-info-bar .form-check-input:checked {
-		background-color: #6366f1 !important;
-		border-color: #4f46e5 !important;
-		box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4);
-	}
-
-	[data-theme="dark"] .quick-info-bar .form-check-input:hover {
-		border-color: #6366f1 !important;
-		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-	}
-
-	[data-theme="dark"] .quick-info-bar .form-check-input:checked:hover {
-		border-color: #4f46e5 !important;
-		box-shadow: 0 2px 8px rgba(99, 102, 241, 0.5);
-	}
-
-	[data-theme="dark"] .quick-info-bar .form-check-input:focus {
-		border-color: #6366f1 !important;
-		box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25) !important;
-		outline: none;
-	}
-
-	.quick-info-bar .form-check-input:focus {
-		border-color: #818cf8 !important;
-		box-shadow: 0 0 0 0.25rem rgba(129, 140, 248, 0.25) !important;
-		outline: none;
-	}
-
-	/* Validation mesajı için */
-	.quick-info-bar .quick-info-item {
-		position: relative;
-	}
-
-	.quick-info-bar .text-danger {
-		position: absolute;
-		top: 100%;
-		left: 0;
-		white-space: nowrap;
-		font-size: 11px;
-		margin-top: 2px;
-	}
-
-	/* Responsive */
-	@@media (max-width: 1200px) {
-		.quick-info-bar {
-			gap: 12px;
-			padding: 15px;
-		}
-
-		.quick-info-bar .quick-info-item > label {
-			font-size: 12px;
-			margin-right: 6px;
-		}
-
-		.quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
-		.quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
-			width: 55px;
-			min-width: 55px;
-			max-width: 55px;
-		}
-	}
-
-	@@media (max-width: 992px) {
-		.quick-info-bar {
-			gap: 10px;
-			padding: 12px 15px;
-		}
-
-		.quick-info-bar .quick-info-item > label {
-			font-size: 11px;
-			margin-right: 5px;
-		}
-
-		.quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
-		.quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
-			width: 50px;
-			min-width: 50px;
-			max-width: 50px;
-			font-size: 12px;
-		}
-	}
-
-	@@media (max-width: 768px) {
-		.quick-info-bar {
-			justify-content: flex-start;
-			gap: 12px;
-			padding: 15px;
-		}
-
-		.quick-info-bar .quick-info-item {
-			flex: 0 1 calc(50% - 6px);
-			min-width: 0;
-			justify-content: flex-start;
-		}
-
-		.quick-info-bar .quick-info-item > label {
-			font-size: 12px;
-		}
-
-		.quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
-		.quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
-			width: 55px;
-			min-width: 55px;
-			max-width: 55px;
-		}
-	}
-
-	@@media (max-width: 480px) {
-		.quick-info-bar {
-			flex-direction: column;
-			align-items: stretch;
-			gap: 12px;
-			padding: 15px;
-		}
-
-		.quick-info-bar .quick-info-item {
-			flex: 1 1 auto;
-			justify-content: space-between;
-			width: 100%;
-		}
-
-		.quick-info-bar .quick-info-item > label {
-			flex-shrink: 0;
-		}
-
-		.quick-info-bar .quick-info-item input[name="PrepTimeMinutes"],
-		.quick-info-bar .quick-info-item input[name="CookingTimeMinutes"] {
-			width: 60px;
-			min-width: 60px;
-			max-width: 60px;
-		}
-	}
-
-	/* Form alanları için iyileştirmeler */
-	.edit-recipe-container .form-control {
-		border: 1px solid #ced4da;
-		border-radius: 8px;
-		transition: all 0.2s ease;
-		padding: 10px 14px;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .form-control {
-		background: #2d2d3f;
-		border-color: #4d4d5f;
-		color: #e0e0e0;
-	}
-
-	.edit-recipe-container .form-control:focus {
-		border-color: #818cf8;
-		box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
-		outline: none;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .form-control:focus {
-		border-color: #6366f1;
-		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-	}
-
-	.edit-recipe-container .form-label {
-		color: #495057;
-		margin-bottom: 8px;
-		font-weight: 600;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .form-label {
-		color: #e0e0e0;
-	}
-
-	/* Select dropdown için */
-	.edit-recipe-container select.form-control {
-		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-		background-repeat: no-repeat !important;
-		background-position: right 0.75rem center !important;
-		background-size: 16px 12px !important;
-		padding-right: 2.5rem !important;
-		-webkit-appearance: none !important;
-		-moz-appearance: none !important;
-		appearance: none !important;
-		cursor: pointer;
-	}
-
-	[data-theme="dark"] .edit-recipe-container select.form-control {
-		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-	}
-
-	/* Select'lerin normal durumda mor border göstermemesi için */
-	.edit-recipe-container select.form-control:not(:focus) {
-		border-color: #ced4da !important;
-		box-shadow: none !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container select.form-control:not(:focus) {
-		border-color: #4d4d5f !important;
-		box-shadow: none !important;
-	}
-
-	/* Quick info bar içindeki select'ler için dropdown arrow */
-	.quick-info-bar .quick-info-item select {
-		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-		background-repeat: no-repeat !important;
-		background-position: right 0.5rem center !important;
-		background-size: 12px 10px !important;
-		padding-right: 1.75rem !important;
-		cursor: pointer;
-	}
-
-	[data-theme="dark"] .quick-info-bar .quick-info-item select {
-		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-	}
-
-	/* Dark mode için genel düzeltmeler */
-	[data-theme="dark"] .edit-recipe-container h4 {
-		color: #e0e0e0 !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .c-grey-600 {
-		color: #a0a0b0 !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .text-danger {
-		color: #ff6b6b !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .form-control::placeholder {
-		color: #6d6d7d !important;
-		opacity: 0.7;
-	}
-
-	[data-theme="dark"] .edit-recipe-container textarea.form-control {
-		background: #2d2d3f !important;
-		border-color: #4d4d5f !important;
-		color: #e0e0e0 !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container textarea.form-control:focus {
-		background: #2d2d3f !important;
-		border-color: #6366f1 !important;
-		color: #e0e0e0 !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container input[type="file"] {
-		background: #2d2d3f !important;
-		border-color: #4d4d5f !important;
-		color: #e0e0e0 !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container input[type="file"]::file-selector-button {
-		background: #3d3d4f !important;
-		border-color: #5d5d6f !important;
-		color: #e0e0e0 !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container input[type="file"]::file-selector-button:hover {
-		background: #4d4d5f !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .bd-top {
-		border-top-color: #3d3d4f !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .btn-primary {
-		background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%) !important;
-		border-color: #6366f1 !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .btn-primary:hover {
-		background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
-		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .btn-secondary {
-		background: #3d3d4f !important;
-		border-color: #4d4d5f !important;
-		color: #e0e0e0 !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .btn-secondary:hover {
-		background: #4d4d5f !important;
-		border-color: #5d5d6f !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .btn-danger {
-		background: #dc3545 !important;
-		border-color: #dc3545 !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container .btn-danger:hover {
-		background: #c82333 !important;
-		border-color: #bd2130 !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container small {
-		color: #a0a0b0 !important;
-	}
-
-	[data-theme="dark"] .edit-recipe-container #imagePreview img {
-		border: 1px solid #4d4d5f !important;
-	}
-
-	/* Select option'lar için dark mode */
-	[data-theme="dark"] .edit-recipe-container select.form-control option {
-		background: #2d2d3f !important;
-		color: #e0e0e0 !important;
-	}
-
-	[data-theme="dark"] .quick-info-bar .quick-info-item select option {
-		background: #2d2d3f !important;
-		color: #e0e0e0 !important;
-	}
-
-	/* Tüm select'ler için genel düzeltmeler */
-	.edit-recipe-container select,
-	.quick-info-bar .quick-info-item select {
-		background-color: inherit !important;
-	}
-
-	/* Select'lerin hover durumu */
-	.edit-recipe-container select:hover,
-	.quick-info-bar .quick-info-item select:hover {
-		border-color: #adb5bd;
-	}
-
-	[data-theme="dark"] .edit-recipe-container select:hover,
-	[data-theme="dark"] .quick-info-bar .quick-info-item select:hover {
-		border-color: #5d5d6f;
-	}
-
-	/* Layers için dark mode */
-	[data-theme="dark"] .edit-recipe-container .layers {
-		color: #e0e0e0;
-	}
-</style>
+@section Styles {
+	<link rel="stylesheet" href="~/css/recipe-form.css" />
+}
 
 <div class="edit-recipe-container">
 	<div class="row">
@@ -638,13 +24,13 @@
 							</div>
 						</div>
 					</div>
-					
+
 					<div class="layer w-100 mB-15">
-						<form asp-action="EditRecipe" method="post" enctype="multipart/form-data">
+						<form asp-action="EditRecipe" asp-controller="Admin" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" id="editRecipeForm">
 							<input type="hidden" asp-for="Id" />
-							
+
 							<!-- Hızlı Bilgi Çubuğu -->
-							<div class="layer w-100 mB-20">
+							<div class="layer w-100 mB-5">
 								<div class="quick-info-bar">
 									<div class="quick-info-item">
 										<div class="form-check">
@@ -655,7 +41,7 @@
 										</div>
 									</div>
 									<div class="quick-info-item">
-										<label asp-for="PrepTimeMinutes" class="mB-5">
+										<label asp-for="PrepTimeMinutes" class="mB-0">
 											<i class="ti-timer mR-5"></i> Hazırlık (dk):
 										</label>
 										<input asp-for="PrepTimeMinutes" class="form-control form-control-sm d-inline-block" type="number" min="0" placeholder="0" />
@@ -701,12 +87,13 @@
 											<label asp-for="Ingredients" class="form-label fw-600">
 												<i class="ti-shopping-cart mR-5"></i> Malzemeler *
 											</label>
-											<textarea asp-for="Ingredients" class="form-control" rows="5" required
-													  placeholder="Her malzemeyi ayrı satıra yazın&#10;Örn:&#10;500g tavuk göğsü&#10;2 su bardağı pilav&#10;1 adet soğan"></textarea>
+											<div style="margin-top:22px;"></div>
+											<div id="ingredientsEditor"></div>
+											<textarea asp-for="Ingredients" id="Ingredients" name="Ingredients" class="d-none" required></textarea>
 											<span asp-validation-for="Ingredients" class="text-danger fsz-sm"></span>
 										</div>
 
-										<div class="layer w-100 mB-15">
+										<div class="layer w-100 mB-20">
 											<label asp-for="Description" class="form-label fw-600">
 												<i class="ti-file-text mR-5"></i> Kısa Açıklama
 											</label>
@@ -721,13 +108,7 @@
 											<textarea asp-for="Tips" class="form-control" rows="3"
 													  placeholder="Püf noktaları"></textarea>
 										</div>
-										<div class="layer w-100 mB-15">
-											<label asp-for="AlternativeIngredients" class="form-label fw-600">
-												<i class="ti-exchange-vertical mR-5"></i> Alternatif Malzemeler
-											</label>
-											<textarea asp-for="AlternativeIngredients" class="form-control" rows="3"
-													  placeholder="Alternatif malzemeler"></textarea>
-										</div>
+
 									</div>
 								</div>
 
@@ -755,67 +136,129 @@
 										</div>
 
 										<div class="layer w-100 mB-15">
-											<label asp-for="Steps" class="form-label fw-600">
-												<i class="ti-list mR-5"></i> Yapılış *
-											</label>
-											<textarea asp-for="Steps" class="form-control" rows="5" required
-													  placeholder="Adım adım yapılışını yazın&#10;Örn:&#10;1. Tavuğu küp küp doğrayın&#10;2. Soğanı ince ince doğrayın&#10;3. Tencereye yağ ekleyin ve kavurun"></textarea>
+											<div class="d-flex justify-content-between align-items-center mB-10">
+												<label class="form-label fw-600 mB-0">
+													<i class="ti-list mR-5"></i> Yapılış *
+												</label>
+												<button type="button" class="dynamic-list-add-btn" onclick="addStepItem()">
+													<i class="ti-plus"></i> Adım Ekle
+												</button>
+											</div>
+											<div id="stepsList" class="dynamic-list"></div>
+											<textarea asp-for="Steps" id="Steps" name="Steps" class="d-none" required></textarea>
 											<span asp-validation-for="Steps" class="text-danger fsz-sm"></span>
 										</div>
 
 										<div class="layer w-100 mB-15">
 											<label class="form-label fw-600 mB-8">
-												<i class="ti-image mR-5"></i> Tarif Görseli
+												<i class="ti-image mR-5"></i> Tarif Görselleri
 											</label>
-											<div class="d-flex gap-10 ai-c" style="flex-wrap: wrap;">
-												<input type="file" name="imageFile" id="imageFile" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="form-control" style="flex: 1; min-width: 200px;" />
-												<span class="c-grey-600" style="white-space: nowrap;">veya</span>
-											<input asp-for="ImageUrl" class="form-control" type="text" 
-												   placeholder="https://example.com/image.jpg" id="imageUrl" style="flex: 1; min-width: 200px;" />
-											</div>
-											<small class="c-grey-600 d-block mT-5">JPG, PNG, GIF veya WebP formatında, maksimum 5MB</small>
+											<small class="c-grey-600 d-block mB-10">Birden çok fotoğraf ekleyebilir veya değiştirebilirsiniz. Birini ana fotoğraf olarak seçebilirsiniz.</small>
 											
-											<!-- Mevcut görsel varsa göster -->
-											@if (!string.IsNullOrEmpty(Model.ImageUrl))
+											<!-- Mevcut görseller -->
+											@if (Model.Images != null && Model.Images.Any())
 											{
-												<div class="mT-10">
+												<div class="mB-15">
+													<label class="fw-600 mB-5">Mevcut Görseller:</label>
+													<div id="existingImagesList">
+														@foreach (var img in Model.Images.OrderBy(i => i.DisplayOrder))
+														{
+															<div class="existing-image-item mB-10 p-10 bd bgc-grey-50" data-image-id="@img.Id" style="display: flex; align-items: center; gap: 15px; border-radius: 8px;">
+																<div style="position: relative; width: 100px; height: 100px; flex-shrink: 0;">
+																	<img src="@img.ImageUrl" alt="Görsel" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
+																	@if (img.IsPrimary)
+																	{
+																		<span class="badge bg-primary" style="position: absolute; top: 5px; left: 5px;">Ana Fotoğraf</span>
+																	}
+																</div>
+																<div style="flex: 1;">
+																	<div class="fw-600 mB-5">Görsel @(img.DisplayOrder + 1)</div>
+																	<div class="d-flex gap-10">
+																		<button type="button" class="btn btn-sm @(img.IsPrimary ? "btn-primary" : "btn-outline-primary")" onclick="setExistingPrimary(@img.Id)">
+																			<i class="ti-star"></i> @(img.IsPrimary ? "Ana Fotoğraf" : "Ana Fotoğraf Yap")
+																		</button>
+																		<button type="button" class="btn btn-sm btn-danger" onclick="removeExistingImage(@img.Id)">
+																			<i class="ti-close"></i> Kaldır
+																		</button>
+																	</div>
+																</div>
+															</div>
+														}
+													</div>
+												</div>
+											}
+											else if (!string.IsNullOrEmpty(Model.ImageUrl))
+											{
+												<div class="mB-15">
 													<label class="fw-600 mB-5">Mevcut Görsel:</label>
-													<div>
-														<img src="@Model.ImageUrl" alt="@Model.Title" class="bdrs-3" style="max-width: 200px; max-height: 200px; object-fit: cover;" />
+													<div class="existing-image-item mB-10 p-10 bd bgc-grey-50" data-image-url="@Model.ImageUrl" style="display: flex; align-items: center; gap: 15px; border-radius: 8px;">
+														<div style="position: relative; width: 100px; height: 100px; flex-shrink: 0;">
+															<img src="@Model.ImageUrl" alt="@Model.Title" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
+															<span class="badge bg-primary" style="position: absolute; top: 5px; left: 5px;">Ana Fotoğraf</span>
+														</div>
+														<div style="flex: 1;">
+															<div class="fw-600 mB-5">Mevcut Görsel</div>
+															<button type="button" class="btn btn-sm btn-danger" onclick="removeExistingImageUrl()">
+																<i class="ti-close"></i> Kaldır
+															</button>
+														</div>
 													</div>
 												</div>
 											}
 											
-											<!-- Görsel önizleme -->
-											<div id="imagePreview" class="mT-10" style="display: none;">
-												<label class="fw-600 mB-5">Yeni Görsel Önizleme:</label>
-												<div>
-													<img id="previewImg" src="" alt="Önizleme" class="bdrs-3" style="max-width: 200px; max-height: 200px; object-fit: cover;" />
-													<button type="button" id="removeImage" class="btn btn-sm btn-danger mT-5">
-														<i class="ti-close"></i> Görseli Kaldır
+											<!-- Yeni görsel ekleme -->
+											<div class="mB-10">
+												<input type="file" name="imageFiles" id="imageFiles" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="form-control" multiple />
+												<small class="c-grey-600 d-block mT-5">JPG, PNG, GIF veya WebP formatında, maksimum 5MB (birden çok seçebilirsiniz)</small>
+											</div>
+											
+											<!-- URL ile ekleme -->
+											<div class="mB-10">
+												<div class="d-flex gap-10 ai-c" style="flex-wrap: wrap;">
+													<input type="text" id="imageUrlInput" class="form-control" placeholder="https://example.com/image.jpg" style="flex: 1; min-width: 200px;" />
+													<button type="button" id="addImageUrl" class="btn btn-sm btn-outline-primary">
+														<i class="ti-plus"></i> URL Ekle
 													</button>
 												</div>
 											</div>
+											
+											<!-- Yeni eklenen görseller listesi -->
+											<div id="newImagesList" class="mT-15">
+												<!-- Yeni görseller buraya eklenecek -->
+											</div>
+											
+											<!-- Hidden inputs -->
+											<input type="hidden" id="imageUrlsJson" name="imageUrlsJson" />
+											<input type="hidden" id="primaryImageIndex" name="primaryImageIndex" value="@(Model.Images?.FirstOrDefault(i => i.IsPrimary)?.DisplayOrder ?? 0)" />
+											<input type="hidden" id="removedImageIds" name="removedImageIds" />
 										</div>
-								</div>
-							</div>
-
-							<div class="row mT-20">
-								<div class="bd-top pT-15">
-									<div class="peers fxw-nw gap-10" style="justify-content: flex-end;">
-										<div class="peer">
-											<button type="submit" class="btn btn-primary" style="color: white;">
-												<i class="ti-save mR-5"></i> Değişiklikleri Kaydet
-											</button>
-										</div>
-										<div class="peer">
-											<a asp-action="Recipes" class="btn btn-secondary" style="color: white;">
-												<i class="ti-close mR-5"></i> İptal
-											</a>
+										<div class="layer w-100 mB-15">
+											<label asp-for="AlternativeIngredients" class="form-label fw-600">
+												<i class="ti-exchange-vertical mR-5"></i> Alternatif Malzemeler
+											</label>
+											<textarea asp-for="AlternativeIngredients" class="form-control" rows="3"
+													  placeholder="Alternatif malzemeler"></textarea>
 										</div>
 									</div>
 								</div>
 							</div>
+
+								<div class="row mT-20">
+									<div class="bd-top pT-15">
+										<div class="peers fxw-nw gap-10" style="justify-content: flex-end;">
+											<div class="peer">
+												<button type="submit" class="btn btn-primary" style="color: white;">
+													<i class="ti-save mR-5"></i> Güncelle
+												</button>
+											</div>
+											<div class="peer">
+												<a asp-controller="Admin" asp-action="Recipes" class="btn btn-secondary" style="color: white;">
+													<i class="ti-close mR-5"></i> İptal
+												</a>
+											</div>
+										</div>
+									</div>
+								</div>
 						</form>
 					</div>
 				</div>
@@ -825,46 +268,376 @@
 
 	@section Scripts {
 		<partial name="_ValidationScriptsPartial" />
+		<script src="~/js/recipe-form.js"></script>
 		<script>
-			const imageFileInput = document.getElementById('imageFile');
-			const imagePreview = document.getElementById('imagePreview');
-			const previewImg = document.getElementById('previewImg');
-			const removeImageBtn = document.getElementById('removeImage');
-			const imageUrlInput = document.getElementById('imageUrl');
+			// Çoklu fotoğraf yönetimi (Edit için)
+			let existingImages = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Images ?? new List<FrontendMvc.Models.Recipes.RecipeImageViewModel>()));
+			let newImages = [];
+			let removedImageIds = [];
+			let primaryImageIndex = @(Model.Images?.FirstOrDefault(i => i.IsPrimary)?.DisplayOrder ?? 0);
 
-			// Dosya seçildiğinde önizleme göster
-			if (imageFileInput) {
-				imageFileInput.addEventListener('change', function(e) {
-					const file = e.target.files[0];
-					if (file) {
+			const imageFilesInput = document.getElementById('imageFiles');
+			const imageUrlInput = document.getElementById('imageUrlInput');
+			const addImageUrlBtn = document.getElementById('addImageUrl');
+			const newImagesList = document.getElementById('newImagesList');
+			const imageUrlsJsonInput = document.getElementById('imageUrlsJson');
+			const primaryImageIndexInput = document.getElementById('primaryImageIndex');
+			const removedImageIdsInput = document.getElementById('removedImageIds');
+
+			// Dosya seçildiğinde
+			if (imageFilesInput) {
+				imageFilesInput.addEventListener('change', function(e) {
+					const files = Array.from(e.target.files);
+					files.forEach(file => {
+						if (file.size > 5 * 1024 * 1024) {
+							alert(`${file.name} dosyası 5MB'dan büyük!`);
+							return;
+						}
 						const reader = new FileReader();
 						reader.onload = function(e) {
-							previewImg.src = e.target.result;
-							imagePreview.style.display = 'block';
-							if (imageUrlInput) imageUrlInput.value = ''; // URL input'unu temizle
+							const imageData = {
+								url: e.target.result,
+								file: file,
+								isFile: true,
+								isPrimary: existingImages.length === 0 && newImages.length === 0
+							};
+							newImages.push(imageData);
+							if (existingImages.length === 0 && newImages.length === 1) {
+								primaryImageIndex = 0;
+								primaryImageIndexInput.value = '0';
+							}
+							renderNewImagesList();
 						};
 						reader.readAsDataURL(file);
-					}
+					});
 				});
 			}
 
-			// Görseli kaldır
-			if (removeImageBtn) {
-				removeImageBtn.addEventListener('click', function() {
-					if (imageFileInput) imageFileInput.value = '';
-					imagePreview.style.display = 'none';
-					previewImg.src = '';
+			// URL ile ekleme
+			if (addImageUrlBtn && imageUrlInput) {
+				addImageUrlBtn.addEventListener('click', function() {
+					const url = imageUrlInput.value.trim();
+					if (!url) {
+						alert('Lütfen geçerli bir URL giriniz!');
+						return;
+					}
+					const imageData = {
+						url: url,
+						isFile: false,
+						isPrimary: existingImages.length === 0 && newImages.length === 0
+					};
+					newImages.push(imageData);
+					if (existingImages.length === 0 && newImages.length === 1) {
+						primaryImageIndex = 0;
+						primaryImageIndexInput.value = '0';
+					}
+					imageUrlInput.value = '';
+					renderNewImagesList();
 				});
 			}
 
-			// URL input'u değiştiğinde dosya input'unu temizle
-			if (imageUrlInput) {
-				imageUrlInput.addEventListener('input', function() {
-					if (this.value && imageFileInput) {
-						imageFileInput.value = '';
-						if (imagePreview) imagePreview.style.display = 'none';
+			// Yeni görselleri render et
+			function renderNewImagesList() {
+				if (!newImagesList) return;
+				
+				newImagesList.innerHTML = '';
+				
+				if (newImages.length === 0) return;
+				
+				newImages.forEach((img, index) => {
+					const imageItem = document.createElement('div');
+					imageItem.className = 'image-item mB-10 p-10 bd bgc-grey-50';
+					imageItem.style.cssText = 'display: flex; align-items: center; gap: 15px; border-radius: 8px;';
+					
+					const globalIndex = existingImages.length + index;
+					imageItem.innerHTML = `
+						<div style="position: relative; width: 100px; height: 100px; flex-shrink: 0;">
+							<img src="${img.url}" alt="Yeni Görsel ${index + 1}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
+							${img.isPrimary ? '<span class="badge bg-primary" style="position: absolute; top: 5px; left: 5px;">Ana Fotoğraf</span>' : ''}
+						</div>
+						<div style="flex: 1;">
+							<div class="fw-600 mB-5">Yeni Görsel ${index + 1}</div>
+							<div class="fsz-sm text-muted mB-10">${img.isFile ? 'Yüklenecek dosya' : 'URL'}</div>
+							<div class="d-flex gap-10">
+								<button type="button" class="btn btn-sm ${img.isPrimary ? 'btn-primary' : 'btn-outline-primary'}" onclick="setNewPrimaryImage(${index})">
+									<i class="ti-star"></i> ${img.isPrimary ? 'Ana Fotoğraf' : 'Ana Fotoğraf Yap'}
+								</button>
+								<button type="button" class="btn btn-sm btn-danger" onclick="removeNewImage(${index})">
+									<i class="ti-close"></i> Kaldır
+								</button>
+							</div>
+						</div>
+					`;
+					
+					newImagesList.appendChild(imageItem);
+				});
+				
+				updateHiddenInputs();
+			}
+
+			// Mevcut görseli ana fotoğraf yap
+			window.setExistingPrimary = function(imageId) {
+				const image = existingImages.find(img => img.id === imageId);
+				if (!image) return;
+				
+				// Tüm mevcut görselleri güncelle
+				existingImages.forEach(img => {
+					img.isPrimary = img.id === imageId;
+				});
+				
+				// Yeni görselleri güncelle
+				newImages.forEach(img => {
+					img.isPrimary = false;
+				});
+				
+				primaryImageIndex = existingImages.findIndex(img => img.id === imageId);
+				primaryImageIndexInput.value = primaryImageIndex.toString();
+				
+				// UI'ı güncelle
+				document.querySelectorAll('.existing-image-item').forEach(item => {
+					const btn = item.querySelector('button');
+					if (btn) {
+						const isPrimary = item.dataset.imageId == imageId;
+						btn.className = `btn btn-sm ${isPrimary ? 'btn-primary' : 'btn-outline-primary'}`;
+						btn.innerHTML = `<i class="ti-star"></i> ${isPrimary ? 'Ana Fotoğraf' : 'Ana Fotoğraf Yap'}`;
 					}
 				});
+				
+				renderNewImagesList();
+			};
+
+			// Mevcut görseli kaldır
+			window.removeExistingImage = function(imageId) {
+				if (confirm('Bu görseli kaldırmak istediğinize emin misiniz?')) {
+					removedImageIds.push(imageId);
+					existingImages = existingImages.filter(img => img.id !== imageId);
+					
+					// Ana fotoğraf güncelle
+					if (existingImages.length > 0 && !existingImages.some(img => img.isPrimary)) {
+						existingImages[0].isPrimary = true;
+						primaryImageIndex = 0;
+					}
+					
+					removedImageIdsInput.value = JSON.stringify(removedImageIds);
+					
+					// UI'dan kaldır
+					const item = document.querySelector(`[data-image-id="${imageId}"]`);
+					if (item) item.remove();
+				}
+			};
+
+			// Mevcut URL görselini kaldır
+			window.removeExistingImageUrl = function() {
+				if (confirm('Bu görseli kaldırmak istediğinize emin misiniz?')) {
+					const item = document.querySelector('[data-image-url]');
+					if (item) item.remove();
+					// ImageUrl'i temizle (backend'de null olacak)
+				}
+			};
+
+			// Yeni görseli ana fotoğraf yap
+			window.setNewPrimaryImage = function(index) {
+				// Tüm görselleri güncelle
+				existingImages.forEach(img => img.isPrimary = false);
+				newImages.forEach((img, i) => {
+					img.isPrimary = i === index;
+				});
+				
+				primaryImageIndex = existingImages.length + index;
+				primaryImageIndexInput.value = primaryImageIndex.toString();
+				
+				renderNewImagesList();
+			};
+
+			// Yeni görseli kaldır
+			window.removeNewImage = function(index) {
+				if (confirm('Bu görseli kaldırmak istediğinize emin misiniz?')) {
+					newImages.splice(index, 1);
+					if (newImages.length > 0 && !newImages.some(img => img.isPrimary)) {
+						newImages[0].isPrimary = true;
+						primaryImageIndex = existingImages.length;
+					}
+					renderNewImagesList();
+				}
+			};
+
+			// Hidden input'ları güncelle
+			function updateHiddenInputs() {
+				if (imageUrlsJsonInput) {
+					const allUrls = [...existingImages.map(img => img.imageUrl), ...newImages.map(img => img.url)];
+					imageUrlsJsonInput.value = JSON.stringify(allUrls);
+				}
+			}
+
+			// Form submit edilmeden önce
+			const form = document.getElementById('editRecipeForm') || document.querySelector('form');
+			if (form) {
+				// Form action'ını kontrol et ve doğru action'ı set et
+				const recipeId = @Model.Id;
+				const correctAction = `/Admin/EditRecipe/${recipeId}`;
+				if (!form.action || form.action.includes('/Admin/Edit') && !form.action.includes('EditRecipe')) {
+					form.action = correctAction;
+				}
+				console.log('Form action set to:', form.action);
+				
+				const submitHandler = async function(e) {
+					console.log('EditRecipe form submit event tetiklendi');
+					console.log('Form action:', form.action);
+					
+					// Form validation kontrolü
+					if (!form.checkValidity()) {
+						console.error('Form validation hatası var');
+						form.reportValidity();
+						return;
+					}
+					
+					// ÖNEMLİ: Form submit edilmeden önce Ingredients ve Steps textarea'larını güncelle
+					// Quill editöründen içeriği al
+					if (typeof ingredientsQuill !== 'undefined' && ingredientsQuill) {
+						const ingredientsTextarea = document.getElementById('Ingredients');
+						if (ingredientsTextarea) {
+							const htmlData = ingredientsQuill.root.innerHTML;
+							if (typeof convertHtmlToPlainText === 'function') {
+								const plain = convertHtmlToPlainText(htmlData);
+								ingredientsTextarea.value = plain;
+								console.log('Ingredients güncellendi:', plain.substring(0, 50) + '...');
+							} else {
+								// Fallback: HTML'den text çıkar
+								const tempDiv = document.createElement('div');
+								tempDiv.innerHTML = htmlData;
+								ingredientsTextarea.value = tempDiv.textContent || tempDiv.innerText || '';
+								console.log('Ingredients güncellendi (fallback)');
+							}
+						} else {
+							console.error('Ingredients textarea bulunamadı!');
+						}
+					} else {
+						console.warn('ingredientsQuill tanımlı değil');
+					}
+					
+					// Steps textarea'sını güncelle
+					if (typeof updateStepsTextarea === 'function') {
+						updateStepsTextarea();
+						const stepsTextarea = document.getElementById('Steps');
+						if (stepsTextarea) {
+							console.log('Steps güncellendi:', stepsTextarea.value.substring(0, 50) + '...');
+						}
+					} else {
+						// Fallback: Manuel olarak güncelle
+						const stepsList = document.getElementById('stepsList');
+						const stepsTextarea = document.getElementById('Steps');
+						if (stepsList && stepsTextarea) {
+							const items = stepsList.querySelectorAll('.item-input');
+							const values = Array.from(items).map(input => input.value.trim()).filter(v => v);
+							stepsTextarea.value = values.join('\n');
+							console.log('Steps güncellendi (fallback):', stepsTextarea.value.substring(0, 50) + '...');
+						} else {
+							console.error('Steps textarea veya list bulunamadı!');
+						}
+					}
+					
+					// Hidden input'ları güncelle
+					updateHiddenInputs();
+					
+					// Yeni görselleri S3'e yükle (eğer varsa)
+					const filesToUpload = newImages.filter(img => img.isFile && img.file);
+					
+					if (filesToUpload.length > 0) {
+						console.log('Yeni görseller S3\'e yükleniyor...', filesToUpload.length, 'dosya');
+						e.preventDefault(); // Önce S3'e yükleyelim
+						
+						try {
+							const uploadPromises = filesToUpload.map(async (imgData) => {
+								try {
+									const formData = new FormData();
+									formData.append('file', imgData.file);
+									
+									// Token'ı al
+									let token = '';
+									if (typeof getAuthToken === 'function') {
+										token = getAuthToken();
+									} else if (typeof localStorage !== 'undefined') {
+										token = localStorage.getItem('authToken') || '';
+									}
+									
+									const headers = {};
+									if (token) {
+										headers['Authorization'] = `Bearer ${token}`;
+									}
+									
+									// Backend API URL'ini al
+									const apiBaseUrl = window.API_BASE_URL || 'https://localhost:7016';
+									const uploadUrl = `${apiBaseUrl}/api/upload/image`;
+									
+									const response = await fetch(uploadUrl, {
+										method: 'POST',
+										headers: headers,
+										body: formData
+									});
+									
+									if (response.ok) {
+										const result = await response.json();
+										if (result.url) {
+											// Base64 URL'yi S3 URL'i ile değiştir
+											const oldIndex = newImages.findIndex(img => img === imgData);
+											if (oldIndex !== -1) {
+												newImages[oldIndex].url = result.url;
+												newImages[oldIndex].isFile = false; // Artık URL
+											}
+											return result.url;
+										}
+									} else {
+										const error = await response.text();
+										console.error('S3 upload failed:', error);
+										throw new Error(`Upload failed: ${error}`);
+									}
+								} catch (error) {
+									console.error('Error uploading to S3:', error);
+									throw error;
+								}
+							});
+							
+							await Promise.all(uploadPromises);
+							console.log('Tüm görseller S3\'e yüklendi');
+							
+							// Hidden input'ları tekrar güncelle (S3 URL'leri ile)
+							updateHiddenInputs();
+							
+							// imageFiles input'unu temizle
+							if (imageFilesInput) {
+								imageFilesInput.value = '';
+							}
+							
+							// Form submit et
+							console.log('Form submit ediliyor (görseller yüklendikten sonra)...');
+							setTimeout(() => {
+								form.removeEventListener('submit', submitHandler);
+								// Form action'ını tekrar kontrol et
+								const recipeId = @Model.Id;
+								const correctAction = `/Admin/EditRecipe/${recipeId}`;
+								if (!form.action || (form.action.includes('/Admin/Edit') && !form.action.includes('EditRecipe'))) {
+									form.action = correctAction;
+								}
+								console.log('Final form action:', form.action);
+								form.submit();
+							}, 500);
+						} catch (error) {
+							alert('Görseller yüklenirken hata oluştu: ' + error.message);
+							console.error('Upload error:', error);
+						}
+					} else {
+						// Yüklenecek dosya yok, direkt submit et
+						console.log('Yeni görsel yok, form direkt submit ediliyor...');
+						// Form action'ını kontrol et
+						const recipeId = @Model.Id;
+						const correctAction = `/Admin/EditRecipe/${recipeId}`;
+						if (!form.action || (form.action.includes('/Admin/Edit') && !form.action.includes('EditRecipe'))) {
+							form.action = correctAction;
+						}
+						console.log('Final form action:', form.action);
+					}
+				};
+				form.addEventListener('submit', submitHandler);
 			}
 		</script>
 	}

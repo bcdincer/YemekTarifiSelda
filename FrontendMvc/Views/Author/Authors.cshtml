@@ -1,0 +1,127 @@
+@model IEnumerable<FrontendMvc.Models.Recipes.AuthorViewModel>
+
+@{
+    ViewData["Title"] = "Yazarlar";
+    var pageNumber = ViewBag.PageNumber as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 20;
+    var totalCount = ViewBag.TotalCount as int? ?? 0;
+}
+
+<div class="row gap-20">
+    <div class="col-12">
+        <div class="bd bgc-white p-20">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <div class="peers fxw-nw ai-c">
+                        <div class="peer peer-greed">
+                            <h4 class="lh-1 mB-0">
+                                <i class="ti-user mR-10"></i> Yazarlar
+                            </h4>
+                            <p class="c-grey-600 mB-0 mT-5">Toplam @totalCount yazar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <div class="bd bgc-white p-40 text-center">
+                <i class="ti-user" style="font-size: 64px; color: #ccc; margin-bottom: 20px;"></i>
+                <h5 class="mB-10">Henüz yazar bulunmuyor</h5>
+                <p class="c-grey-600">Henüz hiçbir kullanıcı yazar olmamış.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var author in Model)
+        {
+            <div class="col-lg-4 col-md-6">
+                <div class="bd bgc-white p-20 author-card">
+                    <div class="d-flex gap-15 ai-c mB-15">
+                        @if (!string.IsNullOrEmpty(author.ProfileImageUrl))
+                        {
+                            <img src="@author.ProfileImageUrl" alt="@author.DisplayName" class="bdrs-50" style="width: 80px; height: 80px; object-fit: cover; flex-shrink: 0;" />
+                        }
+                        else
+                        {
+                            <div class="bdrs-50 bgc-grey-100" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <i class="ti-user" style="font-size: 36px; color: #ccc;"></i>
+                            </div>
+                        }
+                        <div class="flex-1">
+                            <h5 class="mB-5">
+                                <a asp-action="AuthorRecipes" asp-route-id="@author.Id" class="text-decoration-none">
+                                    @author.DisplayName
+                                </a>
+                            </h5>
+                            @if (!string.IsNullOrEmpty(author.Bio))
+                            {
+                                <p class="c-grey-600 fsz-sm mB-0" style="min-height: 40px;">
+                                    @(author.Bio.Length > 100 ? author.Bio.Substring(0, 100) + "..." : author.Bio)
+                                </p>
+                            }
+                        </div>
+                    </div>
+                    <div class="d-flex gap-15 ai-c">
+                        <span class="c-grey-600">
+                            <i class="ti-book mR-5"></i>@author.RecipeCount tarif
+                        </span>
+                        <span class="c-grey-600">
+                            <i class="ti-calendar mR-5"></i>@author.CreatedAt.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("tr-TR"))
+                        </span>
+                    </div>
+                    <div class="mT-15">
+                        <a asp-action="AuthorRecipes" asp-route-id="@author.Id" class="btn btn-primary btn-sm" style="color: white;">
+                            <i class="ti-book mR-5"></i> Tariflerini Gör
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Pagination -->
+        @if (totalCount > pageSize)
+        {
+            <div class="col-12">
+                <div class="bd bgc-white p-20">
+                    <div class="d-flex justify-content-center gap-10">
+                        @if (pageNumber > 1)
+                        {
+                            <a asp-action="Authors" asp-route-pageNumber="@(pageNumber - 1)" class="btn btn-outline-primary">
+                                <i class="ti-angle-left mR-5"></i> Önceki
+                            </a>
+                        }
+                        <span class="d-flex ai-c">Sayfa @pageNumber / @((int)Math.Ceiling((double)totalCount / pageSize))</span>
+                        @if (pageNumber * pageSize < totalCount)
+                        {
+                            <a asp-action="Authors" asp-route-pageNumber="@(pageNumber + 1)" class="btn btn-outline-primary">
+                                Sonraki <i class="ti-angle-right mL-5"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .author-card {
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .author-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="dark"] .author-card:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+</style>
+
