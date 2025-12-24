@@ -57,7 +57,7 @@
 										<label asp-for="Servings" class="mB-0">
 											<i class="ti-user mR-5"></i> Kaç Kişilik:
 										</label>
-										<input asp-for="Servings" class="form-control form-control-sm d-inline-block" type="number" min="1" placeholder="4" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center;" />
+										<input asp-for="Servings" class="form-control form-control-sm d-inline-block servings-input" type="number" min="1" placeholder="4" />
 									</div>
 									<div class="quick-info-item">
 										<label asp-for="Difficulty" class="mB-0">
@@ -87,7 +87,7 @@
 											<label asp-for="Ingredients" class="form-label fw-600">
 												<i class="ti-shopping-cart mR-5"></i> Malzemeler *
 											</label>
-											<div style="margin-top:22px;"></div>
+											<div class="mT-22"></div>
 											<div id="ingredientsEditor"></div>
 											<textarea asp-for="Ingredients" id="Ingredients" name="Ingredients" class="d-none" required></textarea>
 											<span asp-validation-for="Ingredients" class="text-danger fsz-sm"></span>
@@ -161,17 +161,17 @@
 												<div class="mB-15">
 													<label class="fw-600 mB-5">Mevcut Görseller:</label>
 													<div id="existingImagesList">
-														@foreach (var img in Model.Images.OrderBy(i => i.DisplayOrder))
+														@foreach (var img in Model.Images.OrderByDescending(i => i.IsPrimary).ThenBy(i => i.DisplayOrder))
 														{
-															<div class="existing-image-item mB-10 p-10 bd bgc-grey-50" data-image-id="@img.Id" style="display: flex; align-items: center; gap: 15px; border-radius: 8px;">
-																<div style="position: relative; width: 100px; height: 100px; flex-shrink: 0;">
-																	<img src="@img.ImageUrl" alt="Görsel" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
+															<div class="existing-image-item mB-10 p-10 bd bgc-grey-50" data-image-id="@img.Id">
+																<div class="image-container">
+																	<img src="@img.ImageUrl" alt="Görsel" />
 																	@if (img.IsPrimary)
 																	{
-																		<span class="badge bg-primary" style="position: absolute; top: 5px; left: 5px;">Ana Fotoğraf</span>
+																		<span class="badge bg-primary image-badge">Ana Fotoğraf</span>
 																	}
 																</div>
-																<div style="flex: 1;">
+																<div class="image-content">
 																	<div class="fw-600 mB-5">Görsel @(img.DisplayOrder + 1)</div>
 																	<div class="d-flex gap-10">
 																		<button type="button" class="btn btn-sm @(img.IsPrimary ? "btn-primary" : "btn-outline-primary")" onclick="setExistingPrimary(@img.Id)">
@@ -191,12 +191,12 @@
 											{
 												<div class="mB-15">
 													<label class="fw-600 mB-5">Mevcut Görsel:</label>
-													<div class="existing-image-item mB-10 p-10 bd bgc-grey-50" data-image-url="@Model.ImageUrl" style="display: flex; align-items: center; gap: 15px; border-radius: 8px;">
-														<div style="position: relative; width: 100px; height: 100px; flex-shrink: 0;">
-															<img src="@Model.ImageUrl" alt="@Model.Title" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
-															<span class="badge bg-primary" style="position: absolute; top: 5px; left: 5px;">Ana Fotoğraf</span>
+													<div class="existing-image-item mB-10 p-10 bd bgc-grey-50" data-image-url="@Model.ImageUrl">
+														<div class="image-container">
+															<img src="@Model.ImageUrl" alt="@Model.Title" />
+															<span class="badge bg-primary image-badge">Ana Fotoğraf</span>
 														</div>
-														<div style="flex: 1;">
+														<div class="image-content">
 															<div class="fw-600 mB-5">Mevcut Görsel</div>
 															<button type="button" class="btn btn-sm btn-danger" onclick="removeExistingImageUrl()">
 																<i class="ti-close"></i> Kaldır
@@ -209,17 +209,6 @@
 											<!-- Yeni görsel ekleme -->
 											<div class="mB-10">
 												<input type="file" name="imageFiles" id="imageFiles" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="form-control" multiple />
-												<small class="c-grey-600 d-block mT-5">JPG, PNG, GIF veya WebP formatında, maksimum 5MB (birden çok seçebilirsiniz)</small>
-											</div>
-											
-											<!-- URL ile ekleme -->
-											<div class="mB-10">
-												<div class="d-flex gap-10 ai-c" style="flex-wrap: wrap;">
-													<input type="text" id="imageUrlInput" class="form-control" placeholder="https://example.com/image.jpg" style="flex: 1; min-width: 200px;" />
-													<button type="button" id="addImageUrl" class="btn btn-sm btn-outline-primary">
-														<i class="ti-plus"></i> URL Ekle
-													</button>
-												</div>
 											</div>
 											
 											<!-- Yeni eklenen görseller listesi -->
@@ -245,17 +234,13 @@
 
 								<div class="row mT-20">
 									<div class="bd-top pT-15">
-										<div class="peers fxw-nw gap-10" style="justify-content: flex-end;">
-											<div class="peer">
-												<button type="submit" class="btn btn-primary" style="color: white;">
-													<i class="ti-save mR-5"></i> Güncelle
-												</button>
-											</div>
-											<div class="peer">
-												<a asp-controller="Admin" asp-action="Recipes" class="btn btn-secondary" style="color: white;">
-													<i class="ti-close mR-5"></i> İptal
-												</a>
-											</div>
+										<div class="form-actions">
+											<button type="submit" class="btn btn-primary">
+												<i class="ti-save mR-5"></i> Güncelle
+											</button>
+											<a asp-controller="Admin" asp-action="Recipes" class="btn btn-secondary">
+												<i class="ti-close mR-5"></i> İptal
+											</a>
 										</div>
 									</div>
 								</div>
@@ -268,376 +253,9 @@
 
 	@section Scripts {
 		<partial name="_ValidationScriptsPartial" />
-		<script src="~/js/recipe-form.js"></script>
 		<script>
-			// Çoklu fotoğraf yönetimi (Edit için)
-			let existingImages = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Images ?? new List<FrontendMvc.Models.Recipes.RecipeImageViewModel>()));
-			let newImages = [];
-			let removedImageIds = [];
-			let primaryImageIndex = @(Model.Images?.FirstOrDefault(i => i.IsPrimary)?.DisplayOrder ?? 0);
-
-			const imageFilesInput = document.getElementById('imageFiles');
-			const imageUrlInput = document.getElementById('imageUrlInput');
-			const addImageUrlBtn = document.getElementById('addImageUrl');
-			const newImagesList = document.getElementById('newImagesList');
-			const imageUrlsJsonInput = document.getElementById('imageUrlsJson');
-			const primaryImageIndexInput = document.getElementById('primaryImageIndex');
-			const removedImageIdsInput = document.getElementById('removedImageIds');
-
-			// Dosya seçildiğinde
-			if (imageFilesInput) {
-				imageFilesInput.addEventListener('change', function(e) {
-					const files = Array.from(e.target.files);
-					files.forEach(file => {
-						if (file.size > 5 * 1024 * 1024) {
-							alert(`${file.name} dosyası 5MB'dan büyük!`);
-							return;
-						}
-						const reader = new FileReader();
-						reader.onload = function(e) {
-							const imageData = {
-								url: e.target.result,
-								file: file,
-								isFile: true,
-								isPrimary: existingImages.length === 0 && newImages.length === 0
-							};
-							newImages.push(imageData);
-							if (existingImages.length === 0 && newImages.length === 1) {
-								primaryImageIndex = 0;
-								primaryImageIndexInput.value = '0';
-							}
-							renderNewImagesList();
-						};
-						reader.readAsDataURL(file);
-					});
-				});
-			}
-
-			// URL ile ekleme
-			if (addImageUrlBtn && imageUrlInput) {
-				addImageUrlBtn.addEventListener('click', function() {
-					const url = imageUrlInput.value.trim();
-					if (!url) {
-						alert('Lütfen geçerli bir URL giriniz!');
-						return;
-					}
-					const imageData = {
-						url: url,
-						isFile: false,
-						isPrimary: existingImages.length === 0 && newImages.length === 0
-					};
-					newImages.push(imageData);
-					if (existingImages.length === 0 && newImages.length === 1) {
-						primaryImageIndex = 0;
-						primaryImageIndexInput.value = '0';
-					}
-					imageUrlInput.value = '';
-					renderNewImagesList();
-				});
-			}
-
-			// Yeni görselleri render et
-			function renderNewImagesList() {
-				if (!newImagesList) return;
-				
-				newImagesList.innerHTML = '';
-				
-				if (newImages.length === 0) return;
-				
-				newImages.forEach((img, index) => {
-					const imageItem = document.createElement('div');
-					imageItem.className = 'image-item mB-10 p-10 bd bgc-grey-50';
-					imageItem.style.cssText = 'display: flex; align-items: center; gap: 15px; border-radius: 8px;';
-					
-					const globalIndex = existingImages.length + index;
-					imageItem.innerHTML = `
-						<div style="position: relative; width: 100px; height: 100px; flex-shrink: 0;">
-							<img src="${img.url}" alt="Yeni Görsel ${index + 1}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
-							${img.isPrimary ? '<span class="badge bg-primary" style="position: absolute; top: 5px; left: 5px;">Ana Fotoğraf</span>' : ''}
-						</div>
-						<div style="flex: 1;">
-							<div class="fw-600 mB-5">Yeni Görsel ${index + 1}</div>
-							<div class="fsz-sm text-muted mB-10">${img.isFile ? 'Yüklenecek dosya' : 'URL'}</div>
-							<div class="d-flex gap-10">
-								<button type="button" class="btn btn-sm ${img.isPrimary ? 'btn-primary' : 'btn-outline-primary'}" onclick="setNewPrimaryImage(${index})">
-									<i class="ti-star"></i> ${img.isPrimary ? 'Ana Fotoğraf' : 'Ana Fotoğraf Yap'}
-								</button>
-								<button type="button" class="btn btn-sm btn-danger" onclick="removeNewImage(${index})">
-									<i class="ti-close"></i> Kaldır
-								</button>
-							</div>
-						</div>
-					`;
-					
-					newImagesList.appendChild(imageItem);
-				});
-				
-				updateHiddenInputs();
-			}
-
-			// Mevcut görseli ana fotoğraf yap
-			window.setExistingPrimary = function(imageId) {
-				const image = existingImages.find(img => img.id === imageId);
-				if (!image) return;
-				
-				// Tüm mevcut görselleri güncelle
-				existingImages.forEach(img => {
-					img.isPrimary = img.id === imageId;
-				});
-				
-				// Yeni görselleri güncelle
-				newImages.forEach(img => {
-					img.isPrimary = false;
-				});
-				
-				primaryImageIndex = existingImages.findIndex(img => img.id === imageId);
-				primaryImageIndexInput.value = primaryImageIndex.toString();
-				
-				// UI'ı güncelle
-				document.querySelectorAll('.existing-image-item').forEach(item => {
-					const btn = item.querySelector('button');
-					if (btn) {
-						const isPrimary = item.dataset.imageId == imageId;
-						btn.className = `btn btn-sm ${isPrimary ? 'btn-primary' : 'btn-outline-primary'}`;
-						btn.innerHTML = `<i class="ti-star"></i> ${isPrimary ? 'Ana Fotoğraf' : 'Ana Fotoğraf Yap'}`;
-					}
-				});
-				
-				renderNewImagesList();
-			};
-
-			// Mevcut görseli kaldır
-			window.removeExistingImage = function(imageId) {
-				if (confirm('Bu görseli kaldırmak istediğinize emin misiniz?')) {
-					removedImageIds.push(imageId);
-					existingImages = existingImages.filter(img => img.id !== imageId);
-					
-					// Ana fotoğraf güncelle
-					if (existingImages.length > 0 && !existingImages.some(img => img.isPrimary)) {
-						existingImages[0].isPrimary = true;
-						primaryImageIndex = 0;
-					}
-					
-					removedImageIdsInput.value = JSON.stringify(removedImageIds);
-					
-					// UI'dan kaldır
-					const item = document.querySelector(`[data-image-id="${imageId}"]`);
-					if (item) item.remove();
-				}
-			};
-
-			// Mevcut URL görselini kaldır
-			window.removeExistingImageUrl = function() {
-				if (confirm('Bu görseli kaldırmak istediğinize emin misiniz?')) {
-					const item = document.querySelector('[data-image-url]');
-					if (item) item.remove();
-					// ImageUrl'i temizle (backend'de null olacak)
-				}
-			};
-
-			// Yeni görseli ana fotoğraf yap
-			window.setNewPrimaryImage = function(index) {
-				// Tüm görselleri güncelle
-				existingImages.forEach(img => img.isPrimary = false);
-				newImages.forEach((img, i) => {
-					img.isPrimary = i === index;
-				});
-				
-				primaryImageIndex = existingImages.length + index;
-				primaryImageIndexInput.value = primaryImageIndex.toString();
-				
-				renderNewImagesList();
-			};
-
-			// Yeni görseli kaldır
-			window.removeNewImage = function(index) {
-				if (confirm('Bu görseli kaldırmak istediğinize emin misiniz?')) {
-					newImages.splice(index, 1);
-					if (newImages.length > 0 && !newImages.some(img => img.isPrimary)) {
-						newImages[0].isPrimary = true;
-						primaryImageIndex = existingImages.length;
-					}
-					renderNewImagesList();
-				}
-			};
-
-			// Hidden input'ları güncelle
-			function updateHiddenInputs() {
-				if (imageUrlsJsonInput) {
-					const allUrls = [...existingImages.map(img => img.imageUrl), ...newImages.map(img => img.url)];
-					imageUrlsJsonInput.value = JSON.stringify(allUrls);
-				}
-			}
-
-			// Form submit edilmeden önce
-			const form = document.getElementById('editRecipeForm') || document.querySelector('form');
-			if (form) {
-				// Form action'ını kontrol et ve doğru action'ı set et
-				const recipeId = @Model.Id;
-				const correctAction = `/Admin/EditRecipe/${recipeId}`;
-				if (!form.action || form.action.includes('/Admin/Edit') && !form.action.includes('EditRecipe')) {
-					form.action = correctAction;
-				}
-				console.log('Form action set to:', form.action);
-				
-				const submitHandler = async function(e) {
-					console.log('EditRecipe form submit event tetiklendi');
-					console.log('Form action:', form.action);
-					
-					// Form validation kontrolü
-					if (!form.checkValidity()) {
-						console.error('Form validation hatası var');
-						form.reportValidity();
-						return;
-					}
-					
-					// ÖNEMLİ: Form submit edilmeden önce Ingredients ve Steps textarea'larını güncelle
-					// Quill editöründen içeriği al
-					if (typeof ingredientsQuill !== 'undefined' && ingredientsQuill) {
-						const ingredientsTextarea = document.getElementById('Ingredients');
-						if (ingredientsTextarea) {
-							const htmlData = ingredientsQuill.root.innerHTML;
-							if (typeof convertHtmlToPlainText === 'function') {
-								const plain = convertHtmlToPlainText(htmlData);
-								ingredientsTextarea.value = plain;
-								console.log('Ingredients güncellendi:', plain.substring(0, 50) + '...');
-							} else {
-								// Fallback: HTML'den text çıkar
-								const tempDiv = document.createElement('div');
-								tempDiv.innerHTML = htmlData;
-								ingredientsTextarea.value = tempDiv.textContent || tempDiv.innerText || '';
-								console.log('Ingredients güncellendi (fallback)');
-							}
-						} else {
-							console.error('Ingredients textarea bulunamadı!');
-						}
-					} else {
-						console.warn('ingredientsQuill tanımlı değil');
-					}
-					
-					// Steps textarea'sını güncelle
-					if (typeof updateStepsTextarea === 'function') {
-						updateStepsTextarea();
-						const stepsTextarea = document.getElementById('Steps');
-						if (stepsTextarea) {
-							console.log('Steps güncellendi:', stepsTextarea.value.substring(0, 50) + '...');
-						}
-					} else {
-						// Fallback: Manuel olarak güncelle
-						const stepsList = document.getElementById('stepsList');
-						const stepsTextarea = document.getElementById('Steps');
-						if (stepsList && stepsTextarea) {
-							const items = stepsList.querySelectorAll('.item-input');
-							const values = Array.from(items).map(input => input.value.trim()).filter(v => v);
-							stepsTextarea.value = values.join('\n');
-							console.log('Steps güncellendi (fallback):', stepsTextarea.value.substring(0, 50) + '...');
-						} else {
-							console.error('Steps textarea veya list bulunamadı!');
-						}
-					}
-					
-					// Hidden input'ları güncelle
-					updateHiddenInputs();
-					
-					// Yeni görselleri S3'e yükle (eğer varsa)
-					const filesToUpload = newImages.filter(img => img.isFile && img.file);
-					
-					if (filesToUpload.length > 0) {
-						console.log('Yeni görseller S3\'e yükleniyor...', filesToUpload.length, 'dosya');
-						e.preventDefault(); // Önce S3'e yükleyelim
-						
-						try {
-							const uploadPromises = filesToUpload.map(async (imgData) => {
-								try {
-									const formData = new FormData();
-									formData.append('file', imgData.file);
-									
-									// Token'ı al
-									let token = '';
-									if (typeof getAuthToken === 'function') {
-										token = getAuthToken();
-									} else if (typeof localStorage !== 'undefined') {
-										token = localStorage.getItem('authToken') || '';
-									}
-									
-									const headers = {};
-									if (token) {
-										headers['Authorization'] = `Bearer ${token}`;
-									}
-									
-									// Backend API URL'ini al
-									const apiBaseUrl = window.API_BASE_URL || 'https://localhost:7016';
-									const uploadUrl = `${apiBaseUrl}/api/upload/image`;
-									
-									const response = await fetch(uploadUrl, {
-										method: 'POST',
-										headers: headers,
-										body: formData
-									});
-									
-									if (response.ok) {
-										const result = await response.json();
-										if (result.url) {
-											// Base64 URL'yi S3 URL'i ile değiştir
-											const oldIndex = newImages.findIndex(img => img === imgData);
-											if (oldIndex !== -1) {
-												newImages[oldIndex].url = result.url;
-												newImages[oldIndex].isFile = false; // Artık URL
-											}
-											return result.url;
-										}
-									} else {
-										const error = await response.text();
-										console.error('S3 upload failed:', error);
-										throw new Error(`Upload failed: ${error}`);
-									}
-								} catch (error) {
-									console.error('Error uploading to S3:', error);
-									throw error;
-								}
-							});
-							
-							await Promise.all(uploadPromises);
-							console.log('Tüm görseller S3\'e yüklendi');
-							
-							// Hidden input'ları tekrar güncelle (S3 URL'leri ile)
-							updateHiddenInputs();
-							
-							// imageFiles input'unu temizle
-							if (imageFilesInput) {
-								imageFilesInput.value = '';
-							}
-							
-							// Form submit et
-							console.log('Form submit ediliyor (görseller yüklendikten sonra)...');
-							setTimeout(() => {
-								form.removeEventListener('submit', submitHandler);
-								// Form action'ını tekrar kontrol et
-								const recipeId = @Model.Id;
-								const correctAction = `/Admin/EditRecipe/${recipeId}`;
-								if (!form.action || (form.action.includes('/Admin/Edit') && !form.action.includes('EditRecipe'))) {
-									form.action = correctAction;
-								}
-								console.log('Final form action:', form.action);
-								form.submit();
-							}, 500);
-						} catch (error) {
-							alert('Görseller yüklenirken hata oluştu: ' + error.message);
-							console.error('Upload error:', error);
-						}
-					} else {
-						// Yüklenecek dosya yok, direkt submit et
-						console.log('Yeni görsel yok, form direkt submit ediliyor...');
-						// Form action'ını kontrol et
-						const recipeId = @Model.Id;
-						const correctAction = `/Admin/EditRecipe/${recipeId}`;
-						if (!form.action || (form.action.includes('/Admin/Edit') && !form.action.includes('EditRecipe'))) {
-							form.action = correctAction;
-						}
-						console.log('Final form action:', form.action);
-					}
-				};
-				form.addEventListener('submit', submitHandler);
-			}
+			// Mevcut görselleri window'a set et (recipe-form.js için)
+			window.existingImagesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Images ?? new List<FrontendMvc.Models.Recipes.RecipeImageViewModel>()));
 		</script>
+		<script src="~/js/recipe-form.js"></script>
 	}

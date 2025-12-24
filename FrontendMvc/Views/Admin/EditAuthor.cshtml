@@ -1,0 +1,93 @@
+@model FrontendMvc.Models.Recipes.AuthorViewModel
+
+@{
+    ViewData["Title"] = "Yazar Düzenle";
+}
+
+<div class="row gap-20">
+    <div class="col-12">
+        <div class="bd bgc-white p-20">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <div class="peers fxw-nw ai-c">
+                        <div class="peer peer-greed">
+                            <h4 class="lh-1 mB-0">
+                                <i class="ti-pencil mR-10"></i> Yazar Düzenle
+                            </h4>
+                        </div>
+                        <div class="peer">
+                            <a asp-action="Authors" class="btn btn-outline-secondary">
+                                <i class="ti-arrow-left mR-5"></i> Geri Dön
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <form asp-action="EditAuthor" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="UserId" />
+                    <input type="hidden" asp-for="CreatedAt" />
+                    <input type="hidden" asp-for="RecipeCount" />
+
+                    <div class="layer w-100 mB-15">
+                        <label asp-for="DisplayName" class="form-label fw-600">
+                            <i class="ti-user mR-5"></i> Görünen Ad *
+                        </label>
+                        <input asp-for="DisplayName" class="form-control" required />
+                        <span asp-validation-for="DisplayName" class="text-danger fsz-sm"></span>
+                    </div>
+
+                    <div class="layer w-100 mB-15">
+                        <label asp-for="Bio" class="form-label fw-600">
+                            <i class="ti-file-text mR-5"></i> Biyografi
+                        </label>
+                        <textarea asp-for="Bio" class="form-control" rows="4" placeholder="Yazar hakkında kısa bilgi..."></textarea>
+                        <span asp-validation-for="Bio" class="text-danger fsz-sm"></span>
+                    </div>
+
+                    <div class="layer w-100 mB-15">
+                        <label asp-for="ProfileImageUrl" class="form-label fw-600">
+                            <i class="ti-image mR-5"></i> Profil Fotoğrafı URL
+                        </label>
+                        <input asp-for="ProfileImageUrl" class="form-control" type="url" placeholder="https://example.com/image.jpg" />
+                        <span asp-validation-for="ProfileImageUrl" class="text-danger fsz-sm"></span>
+                        @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
+                        {
+                            <div class="mT-10">
+                                <img src="@Model.ProfileImageUrl" alt="Profil Fotoğrafı" 
+                                     style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;" />
+                            </div>
+                        }
+                    </div>
+
+                    <div class="layer w-100 mB-20">
+                        <div class="form-check">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" id="IsActive" />
+                            <label class="form-check-label" for="IsActive">
+                                <i class="ti-check mR-5"></i> Aktif
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">Pasif yazarlar tarif ekleyemez ve tarifleri görünmez.</small>
+                    </div>
+
+                    <div class="layer w-100">
+                        <div class="d-flex gap-10">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ti-save mR-5"></i> Kaydet
+                            </button>
+                            <a asp-action="Authors" class="btn btn-outline-secondary">
+                                <i class="ti-close mR-5"></i> İptal
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

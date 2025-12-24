@@ -60,7 +60,7 @@
         @foreach (var recipe in Model)
         {
             <div class="col-lg-4 col-md-6">
-                <div class="bd bgc-white p-20 recipe-card">
+                <div class="bd bgc-white p-20 recipe-card" style="position: relative;">
                     <a asp-controller="Recipes" asp-action="Details" asp-route-id="@recipe.Id" class="text-decoration-none">
                         @if (!string.IsNullOrEmpty(recipe.ImageUrl))
                         {
@@ -89,6 +89,14 @@
                             }
                         </div>
                     </a>
+                    @if (isOwnRecipes)
+                    {
+                        <div class="d-flex gap-5 mT-15" style="justify-content: flex-end;">
+                            <a asp-controller="Recipes" asp-action="Edit" asp-route-id="@recipe.Id" class="btn btn-sm btn-primary">
+                                <i class="ti-pencil mR-5"></i> Düzenle
+                            </a>
+                        </div>
+                    }
                 </div>
             </div>
         }

@@ -376,103 +376,188 @@
                     @foreach (var recipe in Model)
                     {
                         <div class="col-md-6 col-lg-3 mb-3">
-                            <a asp-controller="Recipes" asp-action="Details" asp-route-id="@recipe.Id" class="recipe-card-link" style="text-decoration: none; display: block; height: 100%;">
-                                <div class="bd bgc-white bdrs-3 ov-h recipe-card" style="transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; height: 100%;">
-                                    @if (!string.IsNullOrEmpty(recipe.ImageUrl))
-                                    {
-                                        <div class="recipe-card-image-wrapper" style="position: relative; overflow: hidden;">
-                                            <img src="@recipe.ImageUrl" alt="@recipe.Title" class="w-100" style="height: 200px; object-fit: cover; transition: transform 0.3s ease;" loading="lazy" decoding="async">
-                                            <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: flex-end; padding: 15px;">
-                                                <span class="c-white fw-600" style="font-size: 14px;">
-                                                    <i class="ti-eye mR-5"></i> Detayları Gör
-                                                </span>
-                                            </div>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="w-100 bgc-grey-200" style="height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
-                                            <i class="ti-image fsz-xxl c-grey-400"></i>
-                                            <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: center; justify-content: center;">
-                                                <span class="c-white fw-600">
-                                                    <i class="ti-eye mR-5"></i> Detayları Gör
-                                                </span>
-                                            </div>
-                                        </div>
-                                    }
-                                    <div class="p-20" style="flex: 1; display: flex; flex-direction: column;">
-                                        <h6 class="mB-10 c-grey-800" style="transition: color 0.3s ease; min-height: 48px; line-height: 1.4;">
-                                            @recipe.Title
-                                        </h6>
-                                        <p class="fsz-sm c-grey-600 mB-10" style="min-height: 40px; line-height: 1.4;">
-                                            @(recipe.Description.Length > 100 ? recipe.Description.Substring(0, 100) + "..." : recipe.Description)
-                                        </p>
-                                        <div class="peers fxw-nw ai-c fsz-sm c-grey-600 mB-10" style="min-height: 24px; flex-shrink: 0;">
-                                            <div class="peer mR-15">
-                                                <i class="ti-time"></i> @recipe.CookingTimeMinutes dk
-                                            </div>
-                                            <div class="peer mR-15">
-                                                <i class="ti-user"></i> @recipe.Servings kişilik
-                                            </div>
-                                            @if (recipe.Category != null)
+                            <div class="recipe-card-container" data-recipe-id="@recipe.Id">
+                                <a asp-controller="Recipes" asp-action="Details" asp-route-id="@recipe.Id" class="recipe-card-link" style="text-decoration: none; display: block; height: 100%;">
+                                    <div class="bd bgc-white bdrs-3 ov-h recipe-card" style="transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; height: 100%; position: relative;">
+                                        @{
+                                            var displayImageUrl = recipe.Images?.FirstOrDefault(img => img.IsPrimary)?.ImageUrl 
+                                                                   ?? recipe.Images?.FirstOrDefault()?.ImageUrl 
+                                                                   ?? recipe.ImageUrl;
+                                            var isNew = (DateTime.UtcNow - recipe.CreatedAt).TotalDays < 7;
+                                            var isPopular = recipe.ViewCount > 100 || recipe.LikeCount > 10;
+                                        }
+                                        
+                                        <!-- Badge'ler -->
+                                        <div class="recipe-badges" style="position: absolute; top: 10px; left: 10px; z-index: 10; display: flex; flex-direction: column; gap: 5px;">
+                                            @if (recipe.IsFeatured)
                                             {
-                                                <div class="peer">
-                                                    <i class="@recipe.Category.Icon"></i> @recipe.Category.Name
-                                                </div>
+                                                <span class="badge bg-warning" style="font-size: 11px; padding: 4px 8px;">
+                                                    <i class="ti-star"></i> Öne Çıkan
+                                                </span>
+                                            }
+                                            @if (isNew)
+                                            {
+                                                <span class="badge bg-success" style="font-size: 11px; padding: 4px 8px;">
+                                                    <i class="ti-new"></i> Yeni
+                                                </span>
+                                            }
+                                            @if (isPopular)
+                                            {
+                                                <span class="badge bg-danger" style="font-size: 11px; padding: 4px 8px;">
+                                                    <i class="ti-fire"></i> Popüler
+                                                </span>
                                             }
                                         </div>
-                                        <div class="peers fxw-nw ai-c mT-10 gap-10" style="min-height: 32px; flex-shrink: 0; margin-top: auto; align-items: center;">
-                                            <div class="peer" style="min-width: 120px;">
-                                                @if (recipe.AverageRating.HasValue)
-                                                {
-                                                    <div class="peers fxw-nw ai-c">
-                                                        <div class="peer" style="display: inline-flex; align-items: center; gap: 2px;">
-                                                            @{
-                                                                double visualRating = recipe.AverageRating.Value * 2; // 1-5 -> 2-10
-                                                            }
-                                                            @for (int i = 0; i < 5; i++)
+                                        
+                                        @if (!string.IsNullOrEmpty(displayImageUrl))
+                                        {
+                                            <div class="recipe-card-image-wrapper" style="position: relative; overflow: hidden;">
+                                                <img src="@displayImageUrl" alt="@recipe.Title" class="w-100" style="height: 200px; object-fit: cover; transition: transform 0.3s ease;" loading="lazy" decoding="async">
+                                                <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: flex-end; padding: 15px;">
+                                                    <div class="w-100">
+                                                        <span class="c-white fw-600 d-block mB-5" style="font-size: 14px;">
+                                                            <i class="ti-eye mR-5"></i> Detayları Gör
+                                                        </span>
+                                                        <!-- Hızlı İstatistikler -->
+                                                        <div class="peers fxw-nw ai-c gap-10 mT-5" style="font-size: 12px;">
+                                                            <span class="c-white"><i class="ti-eye mR-3"></i>@recipe.ViewCount</span>
+                                                            @if (recipe.LikeCount > 0)
                                                             {
-                                                                int starValue = (i + 1) * 2; // 2, 4, 6, 8, 10
-                                                                int starStart = i * 2; // 0, 2, 4, 6, 8
-                                                                
-                                                                if (visualRating >= starValue)
-                                                                {
-                                                                    <i class="ti-star c-yellow-500" style="font-size: 14px;"></i>
-                                                                }
-                                                                else if (visualRating > starStart && visualRating < starValue)
-                                                                {
-                                                                    double fractionalPart = (visualRating - starStart) / (starValue - starStart);
-                                                                    double fillPercentage = fractionalPart * 100;
-                                                                    <div style="position: relative; display: inline-block; width: 14px; height: 14px; line-height: 1;">
-                                                                        <i class="ti-star c-grey-300" style="font-size: 14px; position: absolute; left: 0; top: 0; z-index: 1;"></i>
-                                                                        <div style="position: absolute; left: 0; top: 0; width: @(fillPercentage.ToString("F1", System.Globalization.CultureInfo.InvariantCulture))%; height: 14px; overflow: hidden; z-index: 2;">
-                                                                            <i class="ti-star c-yellow-500" style="font-size: 14px; position: absolute; left: 0; top: 0; width: 14px; height: 14px; display: block;"></i>
-                                                                        </div>
-                                                                    </div>
-                                                                }
-                                                                else
-                                                                {
-                                                                    <i class="ti-star c-grey-300" style="font-size: 14px;"></i>
-                                                                }
+                                                                <span class="c-white"><i class="ti-heart mR-3"></i>@recipe.LikeCount</span>
+                                                            }
+                                                            @if (recipe.AverageRating.HasValue)
+                                                            {
+                                                                <span class="c-white"><i class="ti-star mR-3"></i>@recipe.AverageRating.Value.ToString("F1")</span>
                                                             }
                                                         </div>
-                                                        <div class="peer mL-5 fsz-sm c-grey-600">
-                                                            <span class="fw-600">@recipe.AverageRating.Value.ToString("F1")</span> (@recipe.RatingCount)
-                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="w-100 bgc-grey-200" style="height: 200px; display: flex; align-items: center; justify-content: center; position: relative;">
+                                                <i class="ti-image fsz-xxl c-grey-400"></i>
+                                                <div class="recipe-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: center; justify-content: center;">
+                                                    <span class="c-white fw-600">
+                                                        <i class="ti-eye mR-5"></i> Detayları Gör
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        }
+                                        <div class="p-20" style="flex: 1; display: flex; flex-direction: column;">
+                                            <h6 class="mB-10 c-grey-800" style="transition: color 0.3s ease; min-height: 48px; line-height: 1.4;">
+                                                @recipe.Title
+                                            </h6>
+                                            <p class="fsz-sm c-grey-600 mB-10" style="min-height: 40px; line-height: 1.4;">
+                                                @(recipe.Description.Length > 100 ? recipe.Description.Substring(0, 100) + "..." : recipe.Description)
+                                            </p>
+                                            
+                                            <!-- Yazar Bilgisi -->
+                                            @if (recipe.Author != null)
+                                            {
+                                                <div class="d-flex ai-c gap-5 mB-10" style="font-size: 12px;">
+                                                    @if (!string.IsNullOrEmpty(recipe.Author.ProfileImageUrl))
+                                                    {
+                                                        <img src="@recipe.Author.ProfileImageUrl" alt="@recipe.Author.DisplayName" 
+                                                             class="bdrs-50" style="width: 20px; height: 20px; object-fit: cover;" />
+                                                    }
+                                                    <span class="c-grey-600">
+                                                        <i class="ti-pencil mR-3"></i>@recipe.Author.DisplayName
+                                                    </span>
+                                                </div>
+                                            }
+                                            
+                                            <div class="peers fxw-nw ai-c fsz-sm c-grey-600 mB-10" style="min-height: 24px; flex-shrink: 0;">
+                                                <div class="peer mR-15">
+                                                    <i class="ti-time"></i> @recipe.CookingTimeMinutes dk
+                                                </div>
+                                                <div class="peer mR-15">
+                                                    <i class="ti-user"></i> @recipe.Servings kişilik
+                                                </div>
+                                                @if (recipe.Category != null)
+                                                {
+                                                    <div class="peer">
+                                                        <span class="category-badge" data-category-id="@recipe.Category.Id" style="font-size: 10px; padding: 2px 6px;">
+                                                            <i class="@recipe.Category.Icon"></i> @recipe.Category.Name
+                                                        </span>
                                                     </div>
                                                 }
                                             </div>
-                                            <div class="peer" style="min-width: 50px;">
+                                            <div class="peers fxw-nw ai-c mT-10 gap-10" style="min-height: 32px; flex-shrink: 0; margin-top: auto; align-items: center;">
+                                                <div class="peer" style="min-width: 120px;">
+                                                    @if (recipe.AverageRating.HasValue)
+                                                    {
+                                                        <div class="peers fxw-nw ai-c">
+                                                            <div class="peer" style="display: inline-flex; align-items: center; gap: 2px;">
+                                                                @{
+                                                                    double visualRating = recipe.AverageRating.Value * 2; // 1-5 -> 2-10
+                                                                }
+                                                                @for (int i = 0; i < 5; i++)
+                                                                {
+                                                                    int starValue = (i + 1) * 2; // 2, 4, 6, 8, 10
+                                                                    int starStart = i * 2; // 0, 2, 4, 6, 8
+                                                                    
+                                                                    if (visualRating >= starValue)
+                                                                    {
+                                                                        <i class="ti-star c-yellow-500" style="font-size: 12px;"></i>
+                                                                    }
+                                                                    else if (visualRating > starStart && visualRating < starValue)
+                                                                    {
+                                                                        double fractionalPart = (visualRating - starStart) / (starValue - starStart);
+                                                                        double fillPercentage = fractionalPart * 100;
+                                                                        <div style="position: relative; display: inline-block; width: 12px; height: 12px; line-height: 1;">
+                                                                            <i class="ti-star c-grey-300" style="font-size: 12px; position: absolute; left: 0; top: 0; z-index: 1;"></i>
+                                                                            <div style="position: absolute; left: 0; top: 0; width: @(fillPercentage.ToString("F1", System.Globalization.CultureInfo.InvariantCulture))%; height: 12px; overflow: hidden; z-index: 2;">
+                                                                                <i class="ti-star c-yellow-500" style="font-size: 12px; position: absolute; left: 0; top: 0; width: 12px; height: 12px; display: block;"></i>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <i class="ti-star c-grey-300" style="font-size: 12px;"></i>
+                                                                    }
+                                                                }
+                                                            </div>
+                                                            <div class="peer mL-5 fsz-sm c-grey-600">
+                                                                <span class="fw-600">@recipe.AverageRating.Value.ToString("F1")</span>
+                                                                @if (recipe.RatingCount > 0)
+                                                                {
+                                                                    <span class="c-grey-500">(@recipe.RatingCount)</span>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
                                                 @if (recipe.LikeCount > 0)
                                                 {
-                                                    <i class="ti-heart c-red-500"></i>
-                                                    <span class="fsz-sm c-grey-600 mL-3">@recipe.LikeCount</span>
+                                                    <div class="peer">
+                                                        <i class="ti-heart c-red-500"></i>
+                                                        <span class="fsz-sm c-grey-600 mL-3">@recipe.LikeCount</span>
+                                                    </div>
                                                 }
                                             </div>
                                         </div>
+                                        
+                                        <!-- Hızlı Aksiyonlar (Hover'da görünür) -->
+                                        <div class="recipe-quick-actions" style="position: absolute; top: 10px; right: 10px; z-index: 10; opacity: 0; transition: opacity 0.3s ease;">
+                                            @if (User.Identity?.IsAuthenticated == true)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-light recipe-quick-like" data-recipe-id="@recipe.Id" 
+                                                        style="width: 36px; height: 36px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"
+                                                        onclick="event.preventDefault(); event.stopPropagation(); toggleLikeQuick(@recipe.Id, this);">
+                                                    <i class="ti-heart" style="font-size: 16px;"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-light recipe-quick-save" data-recipe-id="@recipe.Id"
+                                                        style="width: 36px; height: 36px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"
+                                                        onclick="event.preventDefault(); event.stopPropagation(); toggleSaveQuick(@recipe.Id, this);">
+                                                    <i class="ti-bookmark" style="font-size: 16px;"></i>
+                                                </button>
+                                            }
+                                        </div>
                                     </div>
-                                </div>
-                            </a>
+                                </a>
+                            </div>
                         </div>
                     }
                 </div>
@@ -793,30 +878,90 @@ else
 }
 
 <style>
+    /* Recipe Card Container */
+    .recipe-card-container {
+        position: relative;
+    }
+    
     /* Recipe Card Hover Effects */
     .recipe-card-link {
         text-decoration: none !important;
     }
     
     .recipe-card {
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .recipe-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important;
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
     }
     
     .recipe-card:hover .recipe-card-image-wrapper img {
-        transform: scale(1.05);
+        transform: scale(1.1);
     }
     
     .recipe-card:hover .recipe-card-overlay {
         opacity: 1 !important;
     }
     
+    .recipe-card:hover .recipe-quick-actions {
+        opacity: 1 !important;
+    }
+    
     .recipe-card:hover h6 {
         color: #007bff !important;
+    }
+    
+    /* Badge Animations */
+    .recipe-badges .badge {
+        animation: fadeInUp 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Category Badge Colors */
+    .category-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        font-weight: 500;
+        display: inline-block;
+    }
+    
+    .category-badge[data-category-id="1"] { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .category-badge[data-category-id="2"] { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .category-badge[data-category-id="3"] { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .category-badge[data-category-id="4"] { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .category-badge[data-category-id="5"] { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+    .category-badge[data-category-id="6"] { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+    
+    /* Quick Actions */
+    .recipe-quick-actions button {
+        transition: all 0.2s ease;
+    }
+    
+    .recipe-quick-actions button:hover {
+        transform: scale(1.1);
+        background-color: #fff !important;
+    }
+    
+    .recipe-quick-actions .recipe-quick-like.active i {
+        color: #dc3545;
+    }
+    
+    .recipe-quick-actions .recipe-quick-save.active i {
+        color: #ffc107;
     }
     
     /* Sort Buttons Styling */
@@ -989,6 +1134,103 @@ else
 </style>
 
 @section Scripts {
+    <script>
+        // Quick Like Function
+        async function toggleLikeQuick(recipeId, button) {
+            const icon = button.querySelector('i');
+            const isActive = button.classList.contains('active');
+            
+            try {
+                const token = localStorage.getItem('authToken') || getCookie('authToken');
+                const response = await fetch(`/api/recipes/${recipeId}/like`, {
+                    method: isActive ? 'DELETE' : 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    if (isActive) {
+                        button.classList.remove('active');
+                        icon.style.color = '';
+                    } else {
+                        button.classList.add('active');
+                        icon.style.color = '#dc3545';
+                    }
+                }
+            } catch (error) {
+                console.error('Like error:', error);
+            }
+        }
+        
+        // Quick Save Function
+        async function toggleSaveQuick(recipeId, button) {
+            const icon = button.querySelector('i');
+            const isActive = button.classList.contains('active');
+            
+            try {
+                const token = localStorage.getItem('authToken') || getCookie('authToken');
+                const response = await fetch(`/api/collections/recipes/${recipeId}`, {
+                    method: isActive ? 'DELETE' : 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    if (isActive) {
+                        button.classList.remove('active');
+                        icon.style.color = '';
+                    } else {
+                        button.classList.add('active');
+                        icon.style.color = '#ffc107';
+                    }
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+            }
+        }
+        
+        // Get Cookie Helper
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+        
+        // Load user's liked/saved recipes on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <text>
+                try {
+                    const token = localStorage.getItem('authToken') || getCookie('authToken');
+                    if (!token) return;
+                    
+                    const likedResponse = await fetch('/api/recipes/liked', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (likedResponse.ok) {
+                        const likedRecipes = await likedResponse.json();
+                        likedRecipes.forEach(recipeId => {
+                            const likeBtn = document.querySelector(`.recipe-quick-like[data-recipe-id="${recipeId}"]`);
+                            if (likeBtn) {
+                                likeBtn.classList.add('active');
+                                likeBtn.querySelector('i').style.color = '#dc3545';
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading user preferences:', error);
+                }
+                </text>
+            }
+        });
+    </script>
+    
     <script>
         // Submit form on Enter key
         const searchInput = document.getElementById('searchInput');

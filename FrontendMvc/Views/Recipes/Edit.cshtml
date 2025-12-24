@@ -1,7 +1,8 @@
 @model FrontendMvc.Models.Recipes.RecipeViewModel
 
 @{
-    ViewData["Title"] = "Yeni Tarif Ekle";
+    ViewData["Title"] = "Tarif Düzenle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
     var categories = ViewBag.Categories as List<FrontendMvc.Models.Recipes.CategoryViewModel> ?? new();
 }
 
@@ -9,23 +10,31 @@
     <link rel="stylesheet" href="~/css/recipe-form.css" />
 }
 
-<div class="recipe-create-container">
+<div class="edit-recipe-container">
     <div class="row">
         <div class="col-12">
-            <div class="bd bgc-white p-20 recipe-create-container">
+            <div class="bd bgc-white p-20 edit-recipe-container">
                 <div class="layers">
                     <div class="layer w-100 mB-15">
-                        <div class="peers fxw-nw ai-c">
+                        <div class="peers fxw-nw ai-c"> 
                             <div class="peer peer-greed">
                                 <h4 class="lh-1 mB-0">
-                                    <i class="ti-plus mR-10"></i> Yeni Tarif Ekle
+                                    <i class="ti-pencil mR-10"></i> Tarif Düzenle
                                 </h4>
+                            </div>
+                            <div class="peer">
+                                <a asp-controller="Author" asp-action="MyRecipes" class="btn btn-outline-secondary">
+                                    <i class="ti-arrow-left mR-5"></i> Geri Dön
+                                </a>
                             </div>
                         </div>
                     </div>
 
                     <div class="layer w-100 mB-15">
-                        <form asp-action="Create" method="post" enctype="multipart/form-data" id="createRecipeForm">
+                        <form asp-action="Edit" asp-controller="Recipes" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" id="editRecipeForm">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="Id" />
+
                             <!-- Hızlı Bilgi Çubuğu -->
                             <div class="layer w-100 mB-5">
                                 <div class="quick-info-bar">
@@ -54,16 +63,16 @@
                                         <label asp-for="Servings" class="mB-0">
                                             <i class="ti-user mR-5"></i> Kaç Kişilik:
                                         </label>
-                                        <input asp-for="Servings" class="form-control form-control-sm d-inline-block" type="number" min="1" placeholder="4" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center;" />
+                                        <input asp-for="Servings" class="form-control form-control-sm d-inline-block servings-input" type="number" min="1" placeholder="4" />
                                     </div>
                                     <div class="quick-info-item">
                                         <label asp-for="Difficulty" class="mB-0">
                                             <i class="ti-settings mR-5"></i> Zorluk:
                                         </label>
                                         <select asp-for="Difficulty" class="form-control form-control-sm d-inline-block">
-                                            <option value="Kolay">🟢 Kolay</option>
-                                            <option value="Orta" selected>🟡 Orta</option>
-                                            <option value="Zor">🔴 Zor</option>
+                                            <option value="Kolay" selected="@(Model.Difficulty == "Kolay")">🟢 Kolay</option>
+                                            <option value="Orta" selected="@(Model.Difficulty == "Orta")">🟡 Orta</option>
+                                            <option value="Zor" selected="@(Model.Difficulty == "Zor")">🔴 Zor</option>
                                         </select>
                                     </div>
                                 </div>
@@ -84,7 +93,7 @@
                                             <label asp-for="Ingredients" class="form-label fw-600">
                                                 <i class="ti-shopping-cart mR-5"></i> Malzemeler *
                                             </label>
-                                            <div style="margin-top:22px;"></div>
+                                            <div class="mT-22"></div>
                                             <div id="ingredientsEditor"></div>
                                             <textarea asp-for="Ingredients" id="Ingredients" name="Ingredients" class="d-none" required></textarea>
                                             <span asp-validation-for="Ingredients" class="text-danger fsz-sm"></span>
@@ -120,7 +129,14 @@
                                                 <option value="">Kategori Seçin</option>
                                                 @foreach (var category in categories)
                                                 {
-                                                    <option value="@category.Id">@category.Name</option>
+                                                    @if (Model.CategoryId == category.Id)
+                                                    {
+                                                        <option value="@category.Id" selected>@category.Name</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@category.Id">@category.Name</option>
+                                                    }
                                                 }
                                             </select>
                                         </div>
@@ -143,22 +159,62 @@
                                             <label class="form-label fw-600 mB-8">
                                                 <i class="ti-image mR-5"></i> Tarif Görselleri
                                             </label>
-                                            <small class="c-grey-600 d-block mB-10">Birden çok fotoğraf ekleyebilirsiniz. Birini ana fotoğraf olarak seçebilirsiniz.</small>
+                                            <small class="c-grey-600 d-block mB-10">Birden çok fotoğraf ekleyebilir veya değiştirebilirsiniz. Birini ana fotoğraf olarak seçebilirsiniz.</small>
+                                            
+                                            <!-- Mevcut görseller -->
+                                            @if (Model.Images != null && Model.Images.Any())
+                                            {
+                                                <div class="mB-15">
+                                                    <label class="fw-600 mB-5">Mevcut Görseller:</label>
+                                                    <div id="existingImagesList">
+                                                        @foreach (var img in Model.Images.OrderByDescending(i => i.IsPrimary).ThenBy(i => i.DisplayOrder))
+                                                        {
+                                                            <div class="existing-image-item mB-10 p-10 bd bgc-grey-50" data-image-id="@img.Id">
+                                                                <div class="image-container">
+                                                                    <img src="@img.ImageUrl" alt="Görsel" />
+                                                                    @if (img.IsPrimary)
+                                                                    {
+                                                                        <span class="badge bg-primary image-badge">Ana Fotoğraf</span>
+                                                                    }
+                                                                </div>
+                                                                <div class="image-content">
+                                                                    <div class="fw-600 mB-5">Görsel @(img.DisplayOrder + 1)</div>
+                                                                    <div class="d-flex gap-10">
+                                                                        <button type="button" class="btn btn-sm @(img.IsPrimary ? "btn-primary" : "btn-outline-primary")" onclick="setExistingPrimary(@img.Id)">
+                                                                            <i class="ti-star"></i> @(img.IsPrimary ? "Ana Fotoğraf" : "Ana Fotoğraf Yap")
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeExistingImage(@img.Id)">
+                                                                            <i class="ti-close"></i> Kaldır
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                            else if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                            {
+                                                <div class="mB-15">
+                                                    <label class="fw-600 mB-5">Mevcut Görsel:</label>
+                                                    <div class="existing-image-item mB-10 p-10 bd bgc-grey-50" data-image-url="@Model.ImageUrl">
+                                                        <div class="image-container">
+                                                            <img src="@Model.ImageUrl" alt="@Model.Title" />
+                                                            <span class="badge bg-primary image-badge">Ana Fotoğraf</span>
+                                                        </div>
+                                                        <div class="image-content">
+                                                            <div class="fw-600 mB-5">Mevcut Görsel</div>
+                                                            <button type="button" class="btn btn-sm btn-danger" onclick="removeExistingImageUrl()">
+                                                                <i class="ti-close"></i> Kaldır
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
                                             
                                             <!-- Yeni görsel ekleme -->
                                             <div class="mB-10">
                                                 <input type="file" name="imageFiles" id="imageFiles" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="form-control" multiple />
-                                                <small class="c-grey-600 d-block mT-5">JPG, PNG, GIF veya WebP formatında, maksimum 5MB (birden çok seçebilirsiniz)</small>
-                                            </div>
-                                            
-                                            <!-- URL ile ekleme -->
-                                            <div class="mB-10">
-                                                <div class="d-flex gap-10 ai-c" style="flex-wrap: wrap;">
-                                                    <input type="text" id="imageUrlInput" class="form-control" placeholder="https://example.com/image.jpg" style="flex: 1; min-width: 200px;" />
-                                                    <button type="button" id="addImageUrl" class="btn btn-sm btn-outline-primary">
-                                                        <i class="ti-plus"></i> URL Ekle
-                                                    </button>
-                                                </div>
                                             </div>
                                             
                                             <!-- Yeni eklenen görseller listesi -->
@@ -168,7 +224,7 @@
                                             
                                             <!-- Hidden inputs -->
                                             <input type="hidden" id="imageUrlsJson" name="imageUrlsJson" />
-                                            <input type="hidden" id="primaryImageIndex" name="primaryImageIndex" value="0" />
+                                            <input type="hidden" id="primaryImageIndex" name="primaryImageIndex" value="@(Model.Images?.FirstOrDefault(i => i.IsPrimary)?.DisplayOrder ?? 0)" />
                                             <input type="hidden" id="removedImageIds" name="removedImageIds" />
                                         </div>
                                         <div class="layer w-100 mB-15">
@@ -182,35 +238,31 @@
                                 </div>
                             </div>
 
-                                <div class="row mT-20">
-                                    <div class="bd-top pT-15">
-                                        <div class="peers fxw-nw gap-10" style="justify-content: flex-end;">
-                                            <div class="peer">
-                                                <button type="submit" class="btn btn-primary" style="color: white;">
-                                                    <i class="ti-save mR-5"></i> Kaydet
-                                                </button>
-                                            </div>
-                                            <div class="peer">
-                                                <a asp-controller="Recipes" asp-action="Index" class="btn btn-secondary" style="color: white;">
-                                                    <i class="ti-close mR-5"></i> İptal
-                                                </a>
-                                            </div>
-                                        </div>
+                            <div class="row mT-20">
+                                <div class="bd-top pT-15">
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="ti-save mR-5"></i> Güncelle
+                                        </button>
+                                        <a asp-controller="Author" asp-action="MyRecipes" class="btn btn-secondary">
+                                            <i class="ti-close mR-5"></i> İptal
+                                        </a>
                                     </div>
                                 </div>
+                            </div>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    @section Scripts {
-        <partial name="_ValidationScriptsPartial" />
-        <script>
-            // Mevcut görselleri window'a set et (recipe-form.js için) - Create sayfasında boş
-            window.existingImagesData = [];
-        </script>
-        <script src="~/js/recipe-form.js"></script>
-    }
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Mevcut görselleri window'a set et (recipe-form.js için)
+        window.existingImagesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Images ?? new List<FrontendMvc.Models.Recipes.RecipeImageViewModel>()));
+    </script>
+    <script src="~/js/recipe-form.js"></script>
+}

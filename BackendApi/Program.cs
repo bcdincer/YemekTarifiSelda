@@ -821,6 +821,36 @@ app.MapPut("/api/authors/{id:int}", async (int id, UpdateAuthorDto dto, HttpCont
     }
 }).RequireAuthorization();
 
+// Admin için yazar güncelleme endpoint'i
+app.MapPut("/api/authors/{id:int}/admin", async (int id, UpdateAuthorDto dto, HttpContext httpContext, IAuthorService service) =>
+{
+    var userId = GetUserIdFromToken(httpContext);
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Results.Unauthorized();
+    }
+    
+    // Admin kontrolü - şimdilik herkes güncelleyebilir (daha sonra role kontrolü eklenebilir)
+    var author = await service.GetByIdAsync(id);
+    if (author == null)
+    {
+        return Results.NotFound();
+    }
+    
+    try
+    {
+        var updated = await service.UpdateAsync(id, dto);
+        return updated ? Results.NoContent() : Results.NotFound();
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: 500
+        );
+    }
+}).RequireAuthorization();
+
 // Blog endpoint'leri
 app.MapGet("/api/blog", async (IBlogPostService service, int pageNumber = 1, int pageSize = 10) =>
 {

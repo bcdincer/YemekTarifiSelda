@@ -262,7 +262,7 @@ public class AdminController : Controller
                             // Failed to delete - log but continue
                         }
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         // S3'ten silme hatası olsa bile devam et
                         // Log error but don't throw
@@ -609,6 +609,106 @@ public class AdminController : Controller
         }
 
         return RedirectToAction(nameof(Images));
+    }
+
+    // Yazar Yönetimi
+    public async Task<IActionResult> Authors(int pageNumber = 1, int pageSize = 20)
+    {
+        var client = CreateApiClient();
+        var pagedResult = await client.GetFromJsonAsync<PagedResult<AuthorViewModel>>(
+            $"/api/authors?pageNumber={pageNumber}&pageSize={pageSize}", JsonOptions);
+
+        ViewBag.PageNumber = pageNumber;
+        ViewBag.PageSize = pageSize;
+        ViewBag.TotalCount = pagedResult?.TotalCount ?? 0;
+
+        return View(pagedResult?.Items ?? new List<AuthorViewModel>());
+    }
+
+    // Yazar Düzenle - GET
+    [HttpGet]
+    public async Task<IActionResult> EditAuthor(int id)
+    {
+        var client = CreateApiClient();
+        var author = await client.GetFromJsonAsync<AuthorViewModel>($"/api/authors/{id}", JsonOptions);
+
+        if (author == null)
+        {
+            return NotFound();
+        }
+
+        return View(author);
+    }
+
+    // Yazar Düzenle - POST
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditAuthor(int id, AuthorViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var client = CreateApiClient();
+        
+        var updateDto = new
+        {
+            DisplayName = model.DisplayName ?? string.Empty,
+            Bio = string.IsNullOrWhiteSpace(model.Bio) ? null : model.Bio,
+            ProfileImageUrl = string.IsNullOrWhiteSpace(model.ProfileImageUrl) ? null : model.ProfileImageUrl,
+            IsActive = model.IsActive
+        };
+
+        var response = await client.PutAsJsonAsync($"/api/authors/{id}/admin", updateDto);
+
+        if (response.IsSuccessStatusCode)
+        {
+            TempData["SuccessMessage"] = "Yazar başarıyla güncellendi.";
+            return RedirectToAction(nameof(Authors));
+        }
+
+        var errorContent = await response.Content.ReadAsStringAsync();
+        ModelState.AddModelError(string.Empty, $"Yazar güncellenirken bir hata oluştu: {errorContent}");
+        
+        return View(model);
+    }
+
+    // Yazar Sil
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAuthor(int id)
+    {
+        var client = CreateApiClient();
+        // Backend'de delete endpoint'i yok, şimdilik sadece IsActive = false yapabiliriz
+        var author = await client.GetFromJsonAsync<AuthorViewModel>($"/api/authors/{id}", JsonOptions);
+        
+        if (author == null)
+        {
+            TempData["ErrorMessage"] = "Yazar bulunamadı.";
+            return RedirectToAction(nameof(Authors));
+        }
+
+        var updateDto = new
+        {
+            DisplayName = author.DisplayName,
+            Bio = author.Bio,
+            ProfileImageUrl = author.ProfileImageUrl,
+            IsActive = false
+        };
+
+        var response = await client.PutAsJsonAsync($"/api/authors/{id}/admin", updateDto);
+
+        if (response.IsSuccessStatusCode)
+        {
+            TempData["SuccessMessage"] = "Yazar pasif hale getirildi.";
+        }
+        else
+        {
+            TempData["ErrorMessage"] = "Yazar güncellenirken bir hata oluştu.";
+        }
+
+        return RedirectToAction(nameof(Authors));
     }
 
     private HttpClient CreateApiClient()

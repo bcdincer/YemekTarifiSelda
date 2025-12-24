@@ -908,6 +908,50 @@
                         <!-- Infinite Scroll Trigger -->
                         <div id="infiniteScrollTrigger" style="height: 20px;"></div>
                     </div>
+                    
+                    <!-- Benzer Tarifler ve İlgili İçerikler -->
+                    <div class="layer w-100 mT-40">
+                        <div class="row gap-20">
+                            <!-- Benzer Tarifler -->
+                            <div class="col-12">
+                                <h5 class="mB-20">
+                                    <i class="ti-layout-grid2 c-purple-500"></i> Benzer Tarifler
+                                </h5>
+                                <div id="similarRecipes" class="row gap-20">
+                                    <!-- Benzer tarifler buraya yüklenecek -->
+                                    <div class="col-12 text-center p-20">
+                                        <i class="ti-reload" style="font-size: 24px; color: #ccc; animation: spin 1s linear infinite;"></i>
+                                        <p class="c-grey-600 mT-10">Yükleniyor...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Aynı Yazarın Tarifleri -->
+                            @if (Model.AuthorId.HasValue)
+                            {
+                                <div class="col-12 mT-30">
+                                    <h5 class="mB-20">
+                                        <i class="ti-pencil c-blue-500"></i> 
+                                        @if (Model.Author != null)
+                                        {
+                                            <span>@Model.Author.DisplayName'in Diğer Tarifleri</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Aynı Yazarın Diğer Tarifleri</span>
+                                        }
+                                    </h5>
+                                    <div id="authorRecipes" class="row gap-20">
+                                        <!-- Yazarın diğer tarifleri buraya yüklenecek -->
+                                        <div class="col-12 text-center p-20">
+                                            <i class="ti-reload" style="font-size: 24px; color: #ccc; animation: spin 1s linear infinite;"></i>
+                                            <p class="c-grey-600 mT-10">Yükleniyor...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3345,6 +3389,108 @@
                 
                 loadComments(true); // Yorumları yükle (herkes görebilir)
                 setupInfiniteScroll(); // Infinite scroll'u başlat
+                
+                // Benzer tarifleri ve yazarın diğer tariflerini yükle
+                loadSimilarRecipes();
+                @if (Model.AuthorId.HasValue)
+                {
+                    <text>loadAuthorRecipes(@Model.AuthorId.Value);</text>
+                }
             });
+            
+            // Benzer tarifleri yükle
+            async function loadSimilarRecipes() {
+                try {
+                    const response = await fetch(`/api/recipes/category/@(Model.CategoryId ?? 0)?pageNumber=1&pageSize=4`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const similarRecipes = data.items?.filter(r => r.id !== @Model.Id).slice(0, 4) || [];
+                        renderSimilarRecipes(similarRecipes);
+                    }
+                } catch (error) {
+                    console.error('Error loading similar recipes:', error);
+                    document.getElementById('similarRecipes').innerHTML = '<div class="col-12 text-center p-20"><p class="c-grey-600">Benzer tarifler yüklenemedi.</p></div>';
+                }
+            }
+            
+            // Yazarın diğer tariflerini yükle
+            async function loadAuthorRecipes(authorId) {
+                try {
+                    const response = await fetch(`/api/authors/${authorId}/recipes?pageNumber=1&pageSize=4`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const authorRecipes = data.items?.filter(r => r.id !== @Model.Id).slice(0, 4) || [];
+                        renderAuthorRecipes(authorRecipes);
+                    }
+                } catch (error) {
+                    console.error('Error loading author recipes:', error);
+                    document.getElementById('authorRecipes').innerHTML = '<div class="col-12 text-center p-20"><p class="c-grey-600">Yazarın diğer tarifleri yüklenemedi.</p></div>';
+                }
+            }
+            
+            // Benzer tarifleri render et
+            function renderSimilarRecipes(recipes) {
+                const container = document.getElementById('similarRecipes');
+                if (!recipes || recipes.length === 0) {
+                    container.innerHTML = '<div class="col-12 text-center p-20"><p class="c-grey-600">Benzer tarif bulunamadı.</p></div>';
+                    return;
+                }
+                
+                container.innerHTML = recipes.map(recipe => `
+                    <div class="col-md-6 col-lg-3">
+                        <a href="/Recipes/Details/${recipe.id}" class="recipe-card-link" style="text-decoration: none; display: block;">
+                            <div class="bd bgc-white bdrs-3 ov-h recipe-card" style="transition: all 0.3s ease; cursor: pointer; height: 100%;">
+                                <div class="recipe-card-image-wrapper" style="position: relative; overflow: hidden; height: 150px;">
+                                    <img src="${recipe.imageUrl || '/images/placeholder.jpg'}" alt="${recipe.title}" 
+                                         style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
+                                </div>
+                                <div class="p-15">
+                                    <h6 class="mB-5" style="font-size: 14px; line-height: 1.4; min-height: 40px;">${recipe.title}</h6>
+                                    <div class="peers fxw-nw ai-c fsz-sm c-grey-600">
+                                        <div class="peer mR-10"><i class="ti-time"></i> ${recipe.cookingTimeMinutes} dk</div>
+                                        ${recipe.averageRating ? `<div class="peer"><i class="ti-star c-yellow-500"></i> ${recipe.averageRating.toFixed(1)}</div>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                `).join('');
+            }
+            
+            // Yazarın tariflerini render et
+            function renderAuthorRecipes(recipes) {
+                const container = document.getElementById('authorRecipes');
+                if (!recipes || recipes.length === 0) {
+                    container.innerHTML = '<div class="col-12 text-center p-20"><p class="c-grey-600">Yazarın başka tarifi bulunamadı.</p></div>';
+                    return;
+                }
+                
+                container.innerHTML = recipes.map(recipe => `
+                    <div class="col-md-6 col-lg-3">
+                        <a href="/Recipes/Details/${recipe.id}" class="recipe-card-link" style="text-decoration: none; display: block;">
+                            <div class="bd bgc-white bdrs-3 ov-h recipe-card" style="transition: all 0.3s ease; cursor: pointer; height: 100%;">
+                                <div class="recipe-card-image-wrapper" style="position: relative; overflow: hidden; height: 150px;">
+                                    <img src="${recipe.imageUrl || '/images/placeholder.jpg'}" alt="${recipe.title}" 
+                                         style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
+                                </div>
+                                <div class="p-15">
+                                    <h6 class="mB-5" style="font-size: 14px; line-height: 1.4; min-height: 40px;">${recipe.title}</h6>
+                                    <div class="peers fxw-nw ai-c fsz-sm c-grey-600">
+                                        <div class="peer mR-10"><i class="ti-time"></i> ${recipe.cookingTimeMinutes} dk</div>
+                                        ${recipe.averageRating ? `<div class="peer"><i class="ti-star c-yellow-500"></i> ${recipe.averageRating.toFixed(1)}</div>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                `).join('');
+            }
     </script>
+    
+    <style>
+        @@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
 }

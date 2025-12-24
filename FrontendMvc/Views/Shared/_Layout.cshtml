@@ -386,8 +386,30 @@
                             {
                                 @if (User.IsInRole("Admin"))
                                 {
-                                    <li>
-                                        <a asp-controller="Admin" asp-action="Dashboard">YÖNETİM</a>
+                                    <li class="dropdown-nav-item">
+                                        <a href="javascript:void(0);" class="dropdown-nav-link">
+                                            YÖNETİM <i class="ti-angle-down" style="margin-left: 5px; font-size: 12px;"></i>
+                                        </a>
+                                        <div class="dropdown-nav-menu" id="management-dropdown">
+                                            <a asp-controller="Admin" asp-action="Recipes" class="dropdown-nav-item-link">
+                                                <i class="ti-book mR-10"></i> Tarif Yönetimi
+                                            </a>
+                                            <a asp-controller="Categories" asp-action="Index" class="dropdown-nav-item-link">
+                                                <i class="ti-folder mR-10"></i> Kategori Yönetimi
+                                            </a>
+                                            <a asp-controller="Admin" asp-action="Users" class="dropdown-nav-item-link">
+                                                <i class="ti-user mR-10"></i> Kullanıcı Yönetimi
+                                            </a>
+                                            <a asp-controller="Admin" asp-action="Roles" class="dropdown-nav-item-link">
+                                                <i class="ti-settings mR-10"></i> Rol Yönetimi
+                                            </a>
+                                            <a asp-controller="Admin" asp-action="Images" class="dropdown-nav-item-link">
+                                                <i class="ti-image mR-10"></i> Görsel Yönetimi
+                                            </a>
+                                            <a asp-controller="Admin" asp-action="Authors" class="dropdown-nav-item-link">
+                                                <i class="ti-user mR-10"></i> Yazar Yönetimi
+                                            </a>
+                                        </div>
                                     </li>
                                 }
                             }

@@ -1,0 +1,152 @@
+@model IEnumerable<FrontendMvc.Models.Recipes.AuthorViewModel>
+
+@{
+    ViewData["Title"] = "Yazar Yönetimi";
+    var pageNumber = ViewBag.PageNumber as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 20;
+    var totalCount = ViewBag.TotalCount as int? ?? 0;
+    var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+}
+
+<div class="row gap-20">
+    <div class="col-12">
+        <div class="bd bgc-white p-20">
+            <div class="layers">
+                <div class="layer w-100 mB-20">
+                    <div class="peers fxw-nw ai-c">
+                        <div class="peer peer-greed">
+                            <h4 class="lh-1 mB-0">
+                                <i class="ti-user mR-10"></i> Yazar Yönetimi
+                            </h4>
+                            <p class="c-grey-600 mB-0 mT-5">Toplam @totalCount yazar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <div class="bd bgc-white p-40 text-center">
+                <i class="ti-user" style="font-size: 64px; color: #ccc; margin-bottom: 20px;"></i>
+                <h5 class="mB-10">Henüz yazar bulunmuyor</h5>
+                <p class="c-grey-600">Henüz hiçbir kullanıcı yazar olmamış.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="bd bgc-white p-20">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Görünen Ad</th>
+                                <th>Biyografi</th>
+                                <th>Tarif Sayısı</th>
+                                <th>Durum</th>
+                                <th>Oluşturulma</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var author in Model)
+                            {
+                                <tr>
+                                    <td>@author.Id</td>
+                                    <td>
+                                        <div class="d-flex ai-c gap-10">
+                                            @if (!string.IsNullOrEmpty(author.ProfileImageUrl))
+                                            {
+                                                <img src="@author.ProfileImageUrl" alt="@author.DisplayName" 
+                                                     class="bdrs-50" style="width: 40px; height: 40px; object-fit: cover;" />
+                                            }
+                                            <span class="fw-600">@author.DisplayName</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(author.Bio))
+                                        {
+                                            <span class="fsz-sm">@(author.Bio.Length > 50 ? author.Bio.Substring(0, 50) + "..." : author.Bio)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="c-grey-500 fsz-sm">-</span>
+                                        }
+                                    </td>
+                                    <td>@author.RecipeCount</td>
+                                    <td>
+                                        @if (author.IsActive)
+                                        {
+                                            <span class="badge bg-success">Aktif</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Pasif</span>
+                                        }
+                                    </td>
+                                    <td class="fsz-sm">@author.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                                    <td>
+                                        <div class="d-flex gap-5">
+                                            <a asp-action="EditAuthor" asp-route-id="@author.Id" 
+                                               class="btn btn-sm btn-primary" title="Düzenle">
+                                                <i class="ti-pencil"></i>
+                                            </a>
+                                            @if (author.IsActive)
+                                            {
+                                                <form asp-action="DeleteAuthor" asp-route-id="@author.Id" method="post" 
+                                                      style="display: inline;" 
+                                                      onsubmit="return confirm('Bu yazarı pasif hale getirmek istediğinize emin misiniz?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Pasif Yap">
+                                                        <i class="ti-close"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Sayfalama -->
+                @if (totalPages > 1)
+                {
+                    <div class="d-flex jc-c mT-20">
+                        <nav>
+                            <ul class="pagination">
+                                @if (pageNumber > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Authors" asp-route-pageNumber="@(pageNumber - 1)" asp-route-pageSize="@pageSize">Önceki</a>
+                                    </li>
+                                }
+                                
+                                @for (int i = Math.Max(1, pageNumber - 2); i <= Math.Min(totalPages, pageNumber + 2); i++)
+                                {
+                                    <li class="page-item @(i == pageNumber ? "active" : "")">
+                                        <a class="page-link" asp-action="Authors" asp-route-pageNumber="@i" asp-route-pageSize="@pageSize">@i</a>
+                                    </li>
+                                }
+                                
+                                @if (pageNumber < totalPages)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Authors" asp-route-pageNumber="@(pageNumber + 1)" asp-route-pageSize="@pageSize">Sonraki</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+

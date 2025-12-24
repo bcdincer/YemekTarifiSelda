@@ -129,6 +129,9 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
             return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("Create", "Recipes") });
         }
 
+        // Admin kontrolü - Admin'ler başkalarının tariflerini düzenleyebilir ama tarif eklemek için yine de yazar olmalılar
+        bool isAdmin = User.IsInRole("Admin");
+
         // Kullanıcının yazar olup olmadığını kontrol et
         var client = CreateApiClient();
         AuthorViewModel? author = null;
@@ -146,6 +149,7 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
             author = null;
         }
 
+        // Hem Admin hem de normal kullanıcılar için yazar olmak zorunlu (Admin'ler de yazar olarak tarif eklemeli)
         if (author == null || !author.IsActive)
         {
             TempData["InfoMessage"] = "Tarif eklemek için önce yazar olmanız gerekiyor.";
@@ -155,6 +159,8 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
         var categories = await client.GetFromJsonAsync<List<CategoryViewModel>>("/api/categories") 
                          ?? new List<CategoryViewModel>();
         ViewBag.Categories = categories;
+        ViewBag.IsAdmin = isAdmin;
+        ViewBag.AuthorId = author?.Id; // Admin değilse author.Id'yi kullan, Admin ise null (kendi author'ını oluşturmalı)
         return View(new RecipeViewModel { Difficulty = "Orta", Servings = 4 });
     }
 
@@ -180,6 +186,9 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
             return RedirectToAction("Login", "Account");
         }
 
+        // Admin kontrolü - Admin'ler başkalarının tariflerini düzenleyebilir ama tarif eklemek için yine de yazar olmalılar
+        bool isAdmin = User.IsInRole("Admin");
+
         AuthorViewModel? author = null;
         try
         {
@@ -195,9 +204,10 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
             author = null;
         }
 
+        // Hem Admin hem de normal kullanıcılar için yazar olmak zorunlu (Admin'ler de yazar olarak tarif eklemeli)
         if (author == null || !author.IsActive)
         {
-            TempData["ErrorMessage"] = "Tarif eklemek için önce yazar olmanız gerekiyor.";
+            TempData["InfoMessage"] = "Tarif eklemek için önce yazar olmanız gerekiyor.";
             return RedirectToAction("BecomeAuthor", "Author");
         }
 
@@ -414,8 +424,14 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .ToList();
 
-        // AuthorId'yi ekle (yukarıda zaten kontrol edildi, author var ve aktif)
+        // AuthorId'yi ekle
+        // Hem Admin hem de normal kullanıcılar için author zorunlu (Admin'ler de yazar olarak tarif eklemeli)
         int? authorId = author?.Id;
+        if (!authorId.HasValue)
+        {
+            TempData["InfoMessage"] = "Tarif eklemek için önce yazar olmanız gerekiyor.";
+            return RedirectToAction("BecomeAuthor", "Author");
+        }
 
         // Anonymous object kullanarak JSON serialization otomatik olarak PascalCase kullanır (PropertyNamingPolicy = null ayarı sayesinde)
         var createDto = new
@@ -605,6 +621,327 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
         }
         
         return View(collection);
+    }
+
+    // Tarif Düzenle - GET
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        var client = CreateApiClient();
+        var recipe = await client.GetFromJsonAsync<RecipeViewModel>($"/api/recipes/{id}", JsonOptions);
+
+        if (recipe == null)
+        {
+            return NotFound();
+        }
+
+        // Admin kontrolü - Admin'ler başkalarının tariflerini de düzenleyebilir
+        bool isAdmin = User.IsInRole("Admin");
+
+        // Kullanıcının yazar olup olmadığını ve bu tarifin sahibi olup olmadığını kontrol et
+        AuthorViewModel? author = null;
+        try
+        {
+            var authorResponse = await client.GetAsync($"/api/authors/user/{userId}");
+            if (authorResponse.IsSuccessStatusCode)
+            {
+                author = await authorResponse.Content.ReadFromJsonAsync<AuthorViewModel>(JsonOptions);
+            }
+        }
+        catch (HttpRequestException)
+        {
+            author = null;
+        }
+
+        // Admin değilse, yazar kontrolü yap
+        if (!isAdmin)
+        {
+            if (author == null || !author.IsActive)
+            {
+                TempData["ErrorMessage"] = "Tarif düzenlemek için yazar olmanız gerekiyor.";
+                return RedirectToAction("BecomeAuthor", "Author");
+            }
+
+            // Tarifin bu yazara ait olup olmadığını kontrol et
+            if (recipe.AuthorId != author.Id)
+            {
+                TempData["ErrorMessage"] = "Sadece kendi tariflerinizi düzenleyebilirsiniz.";
+                return RedirectToAction("MyRecipes", "Author", new { authorId = author.Id });
+            }
+        }
+
+        var categories = await client.GetFromJsonAsync<List<CategoryViewModel>>("/api/categories") 
+                         ?? new List<CategoryViewModel>();
+        ViewBag.Categories = categories;
+
+        return View(recipe);
+    }
+
+    // Tarif Düzenle - POST
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, RecipeViewModel model, IFormFile? imageFile, IFormFile[]? imageFiles, string? imageUrlsJson, string? removedImageIds, int? primaryImageIndex)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        var client = CreateApiClient();
+        var categories = await client.GetFromJsonAsync<List<CategoryViewModel>>("/api/categories") 
+                         ?? new List<CategoryViewModel>();
+        ViewBag.Categories = categories;
+
+        // Mevcut tarifi al
+        var existingRecipe = await client.GetFromJsonAsync<RecipeViewModel>($"/api/recipes/{id}", JsonOptions);
+        if (existingRecipe == null)
+        {
+            return NotFound();
+        }
+
+        // Admin kontrolü - Admin'ler başkalarının tariflerini de düzenleyebilir
+        bool isAdmin = User.IsInRole("Admin");
+
+        // Kullanıcının yazar olup olmadığını ve bu tarifin sahibi olup olmadığını kontrol et
+        AuthorViewModel? author = null;
+        try
+        {
+            var authorResponse = await client.GetAsync($"/api/authors/user/{userId}");
+            if (authorResponse.IsSuccessStatusCode)
+            {
+                author = await authorResponse.Content.ReadFromJsonAsync<AuthorViewModel>(JsonOptions);
+            }
+        }
+        catch (HttpRequestException)
+        {
+            author = null;
+        }
+
+        // Admin değilse, yazar kontrolü yap
+        if (!isAdmin)
+        {
+            if (author == null || !author.IsActive)
+            {
+                TempData["ErrorMessage"] = "Tarif düzenlemek için yazar olmanız gerekiyor.";
+                return RedirectToAction("BecomeAuthor", "Author");
+            }
+
+            // Tarifin bu yazara ait olup olmadığını kontrol et
+            if (existingRecipe.AuthorId != author.Id)
+            {
+                TempData["ErrorMessage"] = "Sadece kendi tariflerinizi düzenleyebilirsiniz.";
+                return RedirectToAction("MyRecipes", "Author", new { authorId = author.Id });
+            }
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        // AdminController'daki EditRecipe mantığını kullan
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+        var imageUrls = new List<string>();
+
+        // Eski tek dosya desteği (backward compatibility) - S3'e yükle
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+            
+            if (!allowedExtensions.Contains(extension))
+            {
+                ModelState.AddModelError("ImageFile", "Sadece JPG, PNG, GIF veya WebP formatında görseller yüklenebilir.");
+                return View(model);
+            }
+
+            if (imageFile.Length > 5 * 1024 * 1024) // 5MB
+            {
+                ModelState.AddModelError("ImageFile", "Görsel boyutu 5MB'dan küçük olmalıdır.");
+                return View(model);
+            }
+
+            // S3'e yükle
+            try
+            {
+                using var content = new MultipartFormDataContent();
+                using var fileStream = imageFile.OpenReadStream();
+                content.Add(new StreamContent(fileStream), "file", imageFile.FileName);
+                
+                var uploadResponse = await client.PostAsync("/api/upload/image", content);
+                if (uploadResponse.IsSuccessStatusCode)
+                {
+                    var result = await uploadResponse.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(JsonOptions);
+                    if (result.TryGetProperty("url", out var urlElement))
+                    {
+                        var uploadedUrl = urlElement.GetString();
+                        if (!string.IsNullOrWhiteSpace(uploadedUrl))
+                        {
+                            imageUrls.Add(uploadedUrl);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("ImageFile", $"Fotoğraf yüklenirken hata oluştu: {ex.Message}");
+                return View(model);
+            }
+        }
+
+        // Çoklu dosya desteği - S3'e yükle
+        if (imageFiles != null && imageFiles.Length > 0)
+        {
+            foreach (var file in imageFiles)
+            {
+                if (file.Length == 0) continue;
+
+                var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+                
+                if (!allowedExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError("ImageFiles", $"{file.FileName} sadece JPG, PNG, GIF veya WebP formatında olabilir.");
+                    continue;
+                }
+
+                if (file.Length > 5 * 1024 * 1024) // 5MB
+                {
+                    ModelState.AddModelError("ImageFiles", $"{file.FileName} 5MB'dan küçük olmalıdır.");
+                    continue;
+                }
+
+                // S3'e yükle
+                try
+                {
+                    using var content = new MultipartFormDataContent();
+                    using var fileStream = file.OpenReadStream();
+                    content.Add(new StreamContent(fileStream), "file", file.FileName);
+                    
+                    var uploadResponse = await client.PostAsync("/api/upload/image", content);
+                    if (uploadResponse.IsSuccessStatusCode)
+                    {
+                        var result = await uploadResponse.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(JsonOptions);
+                        if (result.TryGetProperty("url", out var urlElement))
+                        {
+                            var url = urlElement.GetString();
+                            if (!string.IsNullOrWhiteSpace(url) && !imageUrls.Contains(url))
+                            {
+                                imageUrls.Add(url);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("ImageFiles", $"Fotoğraf yüklenirken hata oluştu: {ex.Message}");
+                    continue;
+                }
+            }
+        }
+
+        // Mevcut görselleri koru (imageUrlsJson'dan)
+        if (!string.IsNullOrWhiteSpace(imageUrlsJson))
+        {
+            try
+            {
+                var urlsFromJson = System.Text.Json.JsonSerializer.Deserialize<List<string>>(imageUrlsJson);
+                if (urlsFromJson != null)
+                {
+                    foreach (var url in urlsFromJson)
+                    {
+                        if (!string.IsNullOrWhiteSpace(url) && !imageUrls.Contains(url))
+                        {
+                            imageUrls.Add(url);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // JSON parse error, continue
+            }
+        }
+
+        // Malzemeleri ve adımları string'den listeye çevir
+        var ingredientsList = string.IsNullOrWhiteSpace(model.Ingredients)
+            ? new List<string>()
+            : model.Ingredients.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(i => i.Trim())
+                .Where(i => !string.IsNullOrWhiteSpace(i))
+                .ToList();
+
+        var stepsList = string.IsNullOrWhiteSpace(model.Steps)
+            ? new List<string>()
+            : model.Steps.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .ToList();
+
+        var primaryIdx = primaryImageIndex ?? 0;
+        if (primaryIdx < 0 || primaryIdx >= imageUrls.Count)
+            primaryIdx = imageUrls.Count > 0 ? 0 : -1;
+
+        // RecipeViewModel'den CreateRecipeDto formatına mapping yap
+        // ÖNEMLİ: AuthorId'yi mevcut tariften al (güncellemede değiştirilmemeli)
+        var updateDto = new
+        {
+            Title = model.Title ?? string.Empty,
+            Description = model.Description ?? string.Empty,
+            Ingredients = ingredientsList,
+            Steps = stepsList,
+            PrepTimeMinutes = model.PrepTimeMinutes,
+            CookingTimeMinutes = model.CookingTimeMinutes,
+            Servings = model.Servings,
+            Difficulty = model.Difficulty ?? "Orta",
+            ImageUrl = imageUrls.Count > 0 && primaryIdx >= 0 ? imageUrls[primaryIdx] : (string.IsNullOrWhiteSpace(model.ImageUrl) ? existingRecipe.ImageUrl : model.ImageUrl),
+            ImageUrls = imageUrls.Count > 0 ? imageUrls : null,
+            PrimaryImageIndex = imageUrls.Count > 0 && primaryIdx >= 0 ? (int?)primaryIdx : null,
+            Tips = string.IsNullOrWhiteSpace(model.Tips) ? null : model.Tips,
+            AlternativeIngredients = string.IsNullOrWhiteSpace(model.AlternativeIngredients) ? null : model.AlternativeIngredients,
+            NutritionInfo = string.IsNullOrWhiteSpace(model.NutritionInfo) ? null : model.NutritionInfo,
+            CategoryId = model.CategoryId,
+            AuthorId = existingRecipe.AuthorId, // Mevcut AuthorId'yi koru
+            IsFeatured = model.IsFeatured
+        };
+
+        // Backend'e PUT isteği gönder
+        HttpResponseMessage updateResponse;
+        try
+        {
+            updateResponse = await client.PutAsJsonAsync($"/api/recipes/{id}", updateDto);
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError(string.Empty, $"Tarif güncellenirken bir hata oluştu: {ex.Message}");
+            return View(model);
+        }
+        
+        if ((int)updateResponse.StatusCode >= 400)
+        {
+            var errorContent = await updateResponse.Content.ReadAsStringAsync();
+            ModelState.AddModelError(string.Empty, $"Tarif güncellenirken bir hata oluştu: {errorContent}");
+            return View(model);
+        }
+
+        TempData["SuccessMessage"] = "Tarif başarıyla güncellendi.";
+        
+        // Admin ise tarifler listesine, değilse kendi tariflerine yönlendir
+        if (isAdmin)
+        {
+            return RedirectToAction("Recipes", "Admin");
+        }
+        else
+        {
+            return RedirectToAction("MyRecipes", "Author", new { authorId = author!.Id });
+        }
     }
 
     private HttpClient CreateApiClient()
