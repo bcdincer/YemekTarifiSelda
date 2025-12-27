@@ -236,6 +236,8 @@ const convertPlainTextToHtml = (plainText) => {
 
 // Quill için Malzemeler editörü
 let ingredientsQuill;
+// Quill için Yapılış editörü
+let stepsQuill;
 
 // Quill editörünü başlat
 function initQuillEditor(isEditMode = false) {
@@ -252,7 +254,8 @@ function initQuillEditor(isEditMode = false) {
             ['clean']
         ];
 
-        const placeholder = isEditMode 
+        // Ingredients Editor
+        const ingredientsPlaceholder = isEditMode 
             ? 'Her malzemeyi ayrı satıra yazın\nÖrn:\n500g tavuk göğsü\n2 su bardağı pilav\n1 adet soğan'
             : 'Örn:\n\nHamuru için;\n• 125 g tereyağı\n• 1,5 su bardağı su\n• 1 su bardağı + 1 yemek kaşığı un\n\nKreması için;\n• 4 su bardağı süt\n• 1 su bardağı şeker';
 
@@ -261,45 +264,113 @@ function initQuillEditor(isEditMode = false) {
                 toolbar: toolbarOptions,
                 history: { delay: 1000, maxStack: 50 }
             },
-            placeholder: placeholder,
+            placeholder: ingredientsPlaceholder,
             theme: 'snow'
         });
 
-        // Yükseklik/scroll ayarları
-        const qlContainer = document.querySelector('#ingredientsEditor .ql-container');
-        const qlEditor = document.querySelector('#ingredientsEditor .ql-editor');
-        if (qlContainer) {
-            qlContainer.style.minHeight = '400px';
-            qlContainer.style.height = '400px';
-            qlContainer.style.maxHeight = '800px';
-            qlContainer.style.overflowY = 'auto';
+        // Ingredients yükseklik/scroll ayarları
+        const ingredientsQlContainer = document.querySelector('#ingredientsEditor .ql-container');
+        const ingredientsQlEditor = document.querySelector('#ingredientsEditor .ql-editor');
+        if (ingredientsQlContainer) {
+            ingredientsQlContainer.style.minHeight = '400px';
+            ingredientsQlContainer.style.height = '400px';
+            ingredientsQlContainer.style.maxHeight = '800px';
+            ingredientsQlContainer.style.overflowY = 'auto';
         }
-        if (qlEditor) {
-            qlEditor.style.minHeight = '360px';
-            qlEditor.style.height = '360px';
-            qlEditor.setAttribute('spellcheck', 'false');
+        if (ingredientsQlEditor) {
+            ingredientsQlEditor.style.minHeight = '360px';
+            ingredientsQlEditor.style.height = '360px';
+            ingredientsQlEditor.setAttribute('spellcheck', 'false');
         }
 
-        // Dark mode uygulama
+        // Steps Editor
+        const stepsEditorElement = document.getElementById('stepsEditor');
+        if (!stepsEditorElement) {
+            console.error('stepsEditor elementi bulunamadı!');
+        } else {
+            console.log('stepsEditor elementi bulundu, Quill başlatılıyor...');
+            const stepsPlaceholder = isEditMode
+                ? 'Her adımı ayrı satıra yazın\nÖrn:\n1. Tavuğu küp küp doğrayın\n2. Soğanı ince ince kıyın\n3. Tencereye yağ ekleyip kavurun'
+                : 'Örn:\n\n1. Tavuğu küp küp doğrayın\n2. Soğanı ince ince kıyın\n3. Tencereye yağ ekleyip kavurun\n4. Pilavı ekleyip karıştırın';
+
+            try {
+                stepsQuill = new Quill('#stepsEditor', {
+                    modules: {
+                        toolbar: toolbarOptions,
+                        history: { delay: 1000, maxStack: 50 }
+                    },
+                    placeholder: stepsPlaceholder,
+                    theme: 'snow'
+                });
+                console.log('Steps Quill editörü başarıyla başlatıldı');
+            } catch (err) {
+                console.error('Steps Quill editörü başlatılırken hata:', err);
+            }
+        }
+
+        // Steps yükseklik/scroll ayarları
+        if (stepsQuill) {
+            const stepsQlContainer = document.querySelector('#stepsEditor .ql-container');
+            const stepsQlEditor = document.querySelector('#stepsEditor .ql-editor');
+            if (stepsQlContainer) {
+                stepsQlContainer.style.minHeight = '400px';
+                stepsQlContainer.style.height = '400px';
+                stepsQlContainer.style.maxHeight = '800px';
+                stepsQlContainer.style.overflowY = 'auto';
+            }
+            if (stepsQlEditor) {
+                stepsQlEditor.style.minHeight = '360px';
+                stepsQlEditor.style.height = '360px';
+                stepsQlEditor.setAttribute('spellcheck', 'false');
+            }
+        }
+
+        // Dark mode uygulama (hem Ingredients hem Steps için)
         const applyDarkModeStyles = () => {
             const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
-            if (qlEditor) {
+            
+            // Ingredients dark mode
+            if (ingredientsQlEditor) {
                 if (isDarkMode) {
-                    qlEditor.style.backgroundColor = '#2d2d3f';
-                    qlEditor.style.color = '#e0e0e0';
+                    ingredientsQlEditor.style.backgroundColor = '#2d2d3f';
+                    ingredientsQlEditor.style.color = '#e0e0e0';
                 } else {
-                    qlEditor.style.backgroundColor = '';
-                    qlEditor.style.color = '';
+                    ingredientsQlEditor.style.backgroundColor = '';
+                    ingredientsQlEditor.style.color = '';
                 }
             }
-            const qlToolbar = document.querySelector('#ingredientsEditor .ql-toolbar');
-            if (qlToolbar) {
+            const ingredientsQlToolbar = document.querySelector('#ingredientsEditor .ql-toolbar');
+            if (ingredientsQlToolbar) {
                 if (isDarkMode) {
-                    qlToolbar.style.backgroundColor = '#1e1e2e';
-                    qlToolbar.style.borderColor = '#3d3d4f';
+                    ingredientsQlToolbar.style.backgroundColor = '#1e1e2e';
+                    ingredientsQlToolbar.style.borderColor = '#3d3d4f';
                 } else {
-                    qlToolbar.style.backgroundColor = '';
-                    qlToolbar.style.borderColor = '';
+                    ingredientsQlToolbar.style.backgroundColor = '';
+                    ingredientsQlToolbar.style.borderColor = '';
+                }
+            }
+            
+            // Steps dark mode
+            if (stepsQuill) {
+                const stepsQlEditor = document.querySelector('#stepsEditor .ql-editor');
+                if (stepsQlEditor) {
+                    if (isDarkMode) {
+                        stepsQlEditor.style.backgroundColor = '#2d2d3f';
+                        stepsQlEditor.style.color = '#e0e0e0';
+                    } else {
+                        stepsQlEditor.style.backgroundColor = '';
+                        stepsQlEditor.style.color = '';
+                    }
+                }
+                const stepsQlToolbar = document.querySelector('#stepsEditor .ql-toolbar');
+                if (stepsQlToolbar) {
+                    if (isDarkMode) {
+                        stepsQlToolbar.style.backgroundColor = '#1e1e2e';
+                        stepsQlToolbar.style.borderColor = '#3d3d4f';
+                    } else {
+                        stepsQlToolbar.style.backgroundColor = '';
+                        stepsQlToolbar.style.borderColor = '';
+                    }
                 }
             }
         };
@@ -308,7 +379,7 @@ function initQuillEditor(isEditMode = false) {
         const themeObserver = new MutationObserver(() => applyDarkModeStyles());
         themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-        // Mevcut içeriği yükle
+        // Mevcut içeriği yükle - Ingredients
         const hiddenIngredients = document.getElementById('Ingredients');
         if (hiddenIngredients && hiddenIngredients.value) {
             if (isEditMode) {
@@ -321,14 +392,45 @@ function initQuillEditor(isEditMode = false) {
             }
         }
 
-        // İçerik değiştiğinde textarea'yı güncelle
-        ingredientsQuill.on('text-change', () => {
-            if (hiddenIngredients) {
-                const htmlData = ingredientsQuill.root.innerHTML;
-                const plain = convertHtmlToPlainText(htmlData);
-                hiddenIngredients.value = plain;
+        // Mevcut içeriği yükle - Steps
+        if (stepsQuill) {
+            const hiddenSteps = document.getElementById('Steps');
+            if (hiddenSteps && hiddenSteps.value) {
+                console.log('Steps içeriği yükleniyor:', hiddenSteps.value.substring(0, 50) + '...');
+                if (isEditMode) {
+                    // Edit modunda: Plain text'i HTML'e çevir
+                    const htmlContent = convertPlainTextToHtml(hiddenSteps.value);
+                    stepsQuill.root.innerHTML = htmlContent;
+                } else {
+                    // Create modunda: Direkt HTML olarak yükle (eğer varsa)
+                    stepsQuill.root.innerHTML = hiddenSteps.value;
+                }
             }
-        });
+        }
+
+        // İçerik değiştiğinde textarea'yı güncelle - Ingredients
+        if (ingredientsQuill) {
+            ingredientsQuill.on('text-change', () => {
+                const hiddenIngredients = document.getElementById('Ingredients');
+                if (hiddenIngredients) {
+                    const htmlData = ingredientsQuill.root.innerHTML;
+                    const plain = convertHtmlToPlainText(htmlData);
+                    hiddenIngredients.value = plain;
+                }
+            });
+        }
+
+        // İçerik değiştiğinde textarea'yı güncelle - Steps
+        if (stepsQuill) {
+            stepsQuill.on('text-change', () => {
+                const hiddenSteps = document.getElementById('Steps');
+                if (hiddenSteps) {
+                    const htmlData = stepsQuill.root.innerHTML;
+                    const plain = convertHtmlToPlainText(htmlData);
+                    hiddenSteps.value = plain;
+                }
+            });
+        }
 
         // Form submit sırasında da textarea'yı güncelle (güvenlik için)
         const form = document.querySelector('form');
@@ -339,7 +441,11 @@ function initQuillEditor(isEditMode = false) {
                     const plain = convertHtmlToPlainText(htmlData);
                     hiddenIngredients.value = plain;
                 }
-                updateStepsTextarea();
+                if (stepsQuill && hiddenSteps) {
+                    const htmlData = stepsQuill.root.innerHTML;
+                    const plain = convertHtmlToPlainText(htmlData);
+                    hiddenSteps.value = plain;
+                }
             });
         }
     } catch (err) {
@@ -781,7 +887,7 @@ function initEditRecipeImageManagement() {
         }
         
         // ÖNEMLİ: Form submit edilmeden önce Ingredients ve Steps textarea'larını güncelle
-        // Quill editöründen içeriği al
+        // Quill editöründen içeriği al - Ingredients
         if (typeof ingredientsQuill !== 'undefined' && ingredientsQuill) {
             const ingredientsTextarea = document.getElementById('Ingredients');
             if (ingredientsTextarea) {
@@ -804,25 +910,27 @@ function initEditRecipeImageManagement() {
             console.warn('ingredientsQuill tanımlı değil');
         }
         
-        // Steps textarea'sını güncelle
-        if (typeof updateStepsTextarea === 'function') {
-            updateStepsTextarea();
+        // Quill editöründen içeriği al - Steps
+        if (typeof stepsQuill !== 'undefined' && stepsQuill) {
             const stepsTextarea = document.getElementById('Steps');
             if (stepsTextarea) {
-                console.log('Steps güncellendi:', stepsTextarea.value.substring(0, 50) + '...');
+                const htmlData = stepsQuill.root.innerHTML;
+                if (typeof convertHtmlToPlainText === 'function') {
+                    const plain = convertHtmlToPlainText(htmlData);
+                    stepsTextarea.value = plain;
+                    console.log('Steps güncellendi:', plain.substring(0, 50) + '...');
+                } else {
+                    // Fallback: HTML'den text çıkar
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = htmlData;
+                    stepsTextarea.value = tempDiv.textContent || tempDiv.innerText || '';
+                    console.log('Steps güncellendi (fallback)');
+                }
+            } else {
+                console.error('Steps textarea bulunamadı!');
             }
         } else {
-            // Fallback: Manuel olarak güncelle
-            const stepsList = document.getElementById('stepsList');
-            const stepsTextarea = document.getElementById('Steps');
-            if (stepsList && stepsTextarea) {
-                const items = stepsList.querySelectorAll('.item-input');
-                const values = Array.from(items).map(input => input.value.trim()).filter(v => v);
-                stepsTextarea.value = values.join('\n');
-                console.log('Steps güncellendi (fallback):', stepsTextarea.value.substring(0, 50) + '...');
-            } else {
-                console.error('Steps textarea veya list bulunamadı!');
-            }
+            console.warn('stepsQuill tanımlı değil');
         }
         
         // Hidden input'ları güncelle
@@ -934,17 +1042,42 @@ function initEditRecipeImageManagement() {
 
 // Sayfa yüklendiğinde başlat
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded - recipe-form.js başlatılıyor...');
+    
+    // Quill kütüphanesinin yüklendiğini kontrol et
+    if (typeof Quill === 'undefined') {
+        console.error('Quill kütüphanesi yüklenmemiş! Sayfayı yenileyin.');
+        // Quill yüklenene kadar bekle
+        let checkQuill = setInterval(() => {
+            if (typeof Quill !== 'undefined') {
+                clearInterval(checkQuill);
+                console.log('Quill kütüphanesi yüklendi, editörler başlatılıyor...');
+                initializeEditors();
+            }
+        }, 100);
+        
+        // 5 saniye sonra timeout
+        setTimeout(() => {
+            clearInterval(checkQuill);
+            if (typeof Quill === 'undefined') {
+                console.error('Quill kütüphanesi 5 saniye içinde yüklenemedi!');
+            }
+        }, 5000);
+    } else {
+        initializeEditors();
+    }
+});
+
+function initializeEditors() {
     // Edit sayfası mı kontrol et
     const isEditMode = document.querySelector('input[name="Id"]') !== null;
+    console.log('Edit modu:', isEditMode);
     
     // Quill editörünü başlat
     initQuillEditor(isEditMode);
     
-    // Adımları yükle
-    loadExistingSteps();
-    
     // EditRecipe ve Create sayfaları için görsel yönetimini başlat
     // Create sayfasında da çoklu görsel yükleme yapılabilmeli
     initEditRecipeImageManagement();
-});
+}
 

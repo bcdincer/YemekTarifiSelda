@@ -626,7 +626,7 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
     // Tarif Düzenle - GET
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> Edit(int id)
+    public async Task<IActionResult> Edit(int id, string? returnUrl = null)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
@@ -680,6 +680,7 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
         var categories = await client.GetFromJsonAsync<List<CategoryViewModel>>("/api/categories") 
                          ?? new List<CategoryViewModel>();
         ViewBag.Categories = categories;
+        ViewBag.ReturnUrl = returnUrl;
 
         return View(recipe);
     }
@@ -688,7 +689,7 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
     [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, RecipeViewModel model, IFormFile? imageFile, IFormFile[]? imageFiles, string? imageUrlsJson, string? removedImageIds, int? primaryImageIndex)
+    public async Task<IActionResult> Edit(int id, RecipeViewModel model, IFormFile? imageFile, IFormFile[]? imageFiles, string? imageUrlsJson, string? removedImageIds, int? primaryImageIndex, string? returnUrl = null)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
@@ -932,6 +933,12 @@ public class RecipesController(IHttpClientFactory httpClientFactory, IConfigurat
         }
 
         TempData["SuccessMessage"] = "Tarif başarıyla güncellendi.";
+        
+        // returnUrl varsa oraya yönlendir
+        if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
         
         // Admin ise tarifler listesine, değilse kendi tariflerine yönlendir
         if (isAdmin)

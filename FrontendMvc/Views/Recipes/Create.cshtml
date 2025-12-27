@@ -126,15 +126,11 @@
                                         </div>
 
                                         <div class="layer w-100 mB-15">
-                                            <div class="d-flex justify-content-between align-items-center mB-10">
-                                                <label class="form-label fw-600 mB-0">
-                                                    <i class="ti-list mR-5"></i> Yapılış *
-                                                </label>
-                                                <button type="button" class="dynamic-list-add-btn" onclick="addStepItem()">
-                                                    <i class="ti-plus"></i> Adım Ekle
-                                                </button>
-                                            </div>
-                                            <div id="stepsList" class="dynamic-list"></div>
+                                            <label asp-for="Steps" class="form-label fw-600">
+                                                <i class="ti-list mR-5"></i> Yapılış *
+                                            </label>
+                                            <div style="margin-top:22px;"></div>
+                                            <div id="stepsEditor"></div>
                                             <textarea asp-for="Steps" id="Steps" name="Steps" class="d-none" required></textarea>
                                             <span asp-validation-for="Steps" class="text-danger fsz-sm"></span>
                                         </div>

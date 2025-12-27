@@ -42,7 +42,14 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
     {
+        // returnUrl'i query string'den veya form'dan al
+        if (string.IsNullOrEmpty(returnUrl))
+        {
+            returnUrl = Request.Query["returnUrl"].ToString();
+        }
+        
         ViewData["ReturnUrl"] = returnUrl;
+        _logger.LogInformation("Login attempt with returnUrl: {ReturnUrl}", returnUrl);
         
         if (!ModelState.IsValid)
         {
@@ -115,7 +122,31 @@ public class AccountController : Controller
                 }
             }
             
-            return RedirectToLocal(returnUrl ?? "/Admin/Dashboard");
+            // Hoşgeldiniz mesajı
+            if (user != null)
+            {
+                var userName = user.UserName ?? user.Email?.Split('@')[0] ?? "Kullanıcı";
+                TempData["SuccessMessage"] = $"Hoş geldiniz, {userName}!";
+            }
+            
+            // returnUrl'i decode et (URL encoding'den kaynaklanan sorunları önlemek için)
+            string? decodedReturnUrl = null;
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                try
+                {
+                    decodedReturnUrl = Uri.UnescapeDataString(returnUrl);
+                    _logger.LogInformation("Decoded returnUrl: {DecodedReturnUrl}", decodedReturnUrl);
+                }
+                catch
+                {
+                    decodedReturnUrl = returnUrl;
+                }
+            }
+            
+            // returnUrl varsa ona yönlendir, yoksa ana sayfaya yönlendir
+            _logger.LogInformation("Redirecting to: {ReturnUrl}", decodedReturnUrl ?? "Home/Index");
+            return RedirectToLocal(decodedReturnUrl);
         }
         
         if (result.IsLockedOut)

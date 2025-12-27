@@ -25,6 +25,7 @@
             }
             
             <form asp-action="Login" method="post">
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
                 <div asp-validation-summary="ModelOnly" class="text-danger mB-20"></div>
                 
                 <div class="form-group mB-20">

@@ -92,7 +92,7 @@
                                                     <a asp-controller="Recipes" asp-action="Details" asp-route-id="@recipe.Id" class="btn btn-sm btn-info" style="color: white;">
                                                         <i class="ti-eye"></i>
                                                     </a>
-                                                    <a asp-action="EditRecipe" asp-route-id="@recipe.Id" class="btn btn-sm btn-primary" style="color: white;">
+                                                    <a asp-action="EditRecipe" asp-route-id="@recipe.Id" asp-route-returnUrl="@Url.Action("Recipes", "Admin")" class="btn btn-sm btn-primary" style="color: white;">
                                                         <i class="ti-pencil"></i>
                                                     </a>
                                                     <form asp-action="DeleteRecipe" asp-route-id="@recipe.Id" method="post" class="d-inline" onsubmit="return confirm('Bu tarifi silmek istediğinize emin misiniz?');">

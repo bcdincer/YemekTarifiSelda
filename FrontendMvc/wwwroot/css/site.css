@@ -304,3 +304,1248 @@ a.btn.btn-outline-primary:hover {
   background-color: var(--c-bkg-body) !important;
   color: var(--c-primary) !important;
 }
+
+/* ============================================
+   Recipe Details Page Styles
+   ============================================ */
+
+/* Details sayfası için sadece gerekli optimizasyonlar */
+#mainContent {
+  max-width: 100%;
+}
+
+/* Dark mode için tarif detay sayfası özel stilleri */
+[data-theme="dark"] {
+  /* Tüm bgc-grey-50 alanları için dark mode override */
+  .bd.bgc-grey-50,
+  button.bd.bgc-grey-50 {
+    background-color: var(--c-bkg-body) !important;
+    border-color: var(--c-border) !important;
+  }
+  
+  /* Inline style'lı bgc-grey-50 alanları için dark mode override - inline style'ı override et */
+  .bd.bgc-grey-50[style*="background"],
+  button.bd.bgc-grey-50[style*="background"],
+  button.bd.bgc-grey-50[style*="background: #f5f5f5"] {
+    background-color: var(--c-bkg-body) !important;
+    border-color: var(--c-border) !important;
+  }
+  
+  .bd.bgc-grey-50[style*="background"]:hover,
+  button.bd.bgc-grey-50[style*="background"]:hover {
+    background-color: var(--c-bkg-card) !important;
+  }
+  
+  /* Malzemeler ve Yapılış bölümleri */
+  .bd.bgc-grey-50.p-20,
+  .bd.bgc-grey-50.p-15 {
+    background-color: var(--c-bkg-body) !important;
+    border-color: var(--c-border) !important;
+    color: var(--c-text-base) !important;
+  }
+  
+  /* Malzemeler listesindeki border rengi */
+  #ingredientsList li {
+    border-bottom-color: var(--c-border) !important;
+  }
+}
+
+/* Numaralandırılmış malzemeler ve adımlar - Genel stiller (hem light hem dark mode için) */
+.numbered-ingredient,
+.numbered-step {
+  position: relative;
+  padding-left: 40px !important;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.numbered-ingredient:last-child,
+.numbered-step:last-child {
+  border-bottom: none !important;
+  margin-bottom: 0;
+}
+
+.numbered-ingredient::before,
+.numbered-step::before {
+  content: counter(item-counter);
+  counter-increment: item-counter;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+}
+
+/* Dark mode için özel stiller */
+[data-theme="dark"] .numbered-ingredient::before,
+[data-theme="dark"] .numbered-step::before {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+}
+
+[data-theme="dark"] .numbered-step {
+  border-bottom-color: var(--c-border) !important;
+}
+
+/* Breadcrumb dark mode stilleri */
+[data-theme="dark"] .breadcrumb {
+  color: var(--c-text-base) !important;
+}
+
+[data-theme="dark"] .breadcrumb-item a {
+  color: var(--c-text-link) !important;
+}
+
+[data-theme="dark"] .breadcrumb-item a:hover {
+  color: var(--c-text-link-hover, #818cf8) !important;
+}
+
+[data-theme="dark"] .breadcrumb-item.active {
+  color: var(--c-text-muted, #9ca3af) !important;
+}
+
+[data-theme="dark"] .breadcrumb-item + .breadcrumb-item::before {
+  color: var(--c-text-muted, #9ca3af) !important;
+  content: "/" !important;
+}
+
+.numbered-steps-container {
+  counter-reset: item-counter;
+}
+
+.numbered-ingredients-container {
+  counter-reset: item-counter;
+}
+
+/* Malzemeler ve Yapılış yan yana düzeni */
+.recipe-section .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.recipe-section .col-lg-6,
+.recipe-section .col-md-6 {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Malzemeler ve Yapılış container'ları - eşit yükseklik için */
+.numbered-ingredients-container,
+.numbered-steps-container {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+  height: auto;
+}
+
+.recipe-section .bd.bgc-grey-50 {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+  height: auto;
+}
+
+/* İçerik alanlarının tam yüksekliği kullanması için */
+#ingredientsViewer,
+#stepsViewer {
+  flex: 1;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+#ingredientsViewer .ql-container,
+#stepsViewer .ql-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+
+#ingredientsViewer .ql-editor,
+#stepsViewer .ql-editor {
+  flex: 1;
+  min-height: 380px;
+}
+
+#ingredientsList,
+#stepsList {
+  flex: 1;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Yapılış adımları container'ı */
+.numbered-steps-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mobilde alt alta */
+@media (max-width: 768px) {
+  .recipe-section .col-md-6 {
+    margin-bottom: 20px;
+  }
+  
+  .recipe-section .col-md-6:last-child {
+    margin-bottom: 0;
+  }
+  
+  /* QR code container */
+  #qrcode {
+    background-color: var(--c-bkg-card) !important;
+    border-color: var(--c-border) !important;
+  }
+  
+  /* Püf Noktaları ve Alternatif Malzemeler bölümleri */
+  .bd.bgc-yellow-50,
+  .bd.bgc-orange-50 {
+    background-color: var(--c-bkg-body) !important;
+    border-color: var(--c-border) !important;
+    color: var(--c-text-base) !important;
+  }
+  
+  /* İstatistikler bölümü */
+  [style*="background-color: #fafafa"] {
+    background-color: var(--c-bkg-body) !important;
+    border-color: var(--c-border) !important;
+  }
+}
+
+/* Sadece bu sayfadaki row'u optimize et */
+.recipe-details-container .row {
+  margin-left: -8px;
+  margin-right: -8px;
+}
+
+.recipe-details-container [class*="col-"] {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* Print Styles - Sadece print için geçerli */
+@media print {
+  .sidebar, .header, .no-print, button, .btn, #likeButton, .star-rating {
+    display: none !important;
+  }
+
+  .recipe-details-container {
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  .bd {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Normal görünüm için - Print dışında kesinlikle görünür olmalı */
+@media screen {
+  .star-rating {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  #likeButtonStat {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  #likeIconStat {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  #likeCount {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  #ratingStats {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Collection Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal.show {
+  display: block;
+}
+
+.modal-dialog {
+  position: relative;
+  width: auto;
+  max-width: 500px;
+  margin: 50px auto;
+}
+
+.modal-content {
+  position: relative;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modal-header .close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+}
+
+.modal-header .close:hover {
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+/* Share Modal Styles */
+.share-options-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: #333;
+  text-decoration: none;
+}
+
+.share-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.share-btn-whatsapp {
+  border-color: #25D366;
+  color: #25D366;
+}
+
+.share-btn-whatsapp:hover {
+  background: #25D366;
+  color: white;
+}
+
+.share-btn-telegram {
+  border-color: #0088cc;
+  color: #0088cc;
+}
+
+.share-btn-telegram:hover {
+  background: #0088cc;
+  color: white;
+}
+
+.share-btn-facebook {
+  border-color: #1877F2;
+  color: #1877F2;
+}
+
+.share-btn-facebook:hover {
+  background: #1877F2;
+  color: white;
+}
+
+.share-btn-twitter {
+  border-color: #1DA1F2;
+  color: #1DA1F2;
+}
+
+.share-btn-twitter:hover {
+  background: #1DA1F2;
+  color: white;
+}
+
+.share-btn-copy {
+  border-color: #6c757d;
+  color: #6c757d;
+}
+
+.share-btn-copy:hover {
+  background: #6c757d;
+  color: white;
+}
+
+#qrcode {
+  display: inline-block;
+}
+
+#qrcode canvas, #qrcode img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 576px) {
+  .share-options-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Yıldız ve Beğeni için Agresif CSS Kuralları */
+.star-rating,
+div.star-rating,
+.peer .star-rating,
+.peers .star-rating,
+[class*="star-rating"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  flex-wrap: nowrap !important;
+  min-width: 130px !important;
+  overflow: visible !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 9999 !important;
+  height: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+.star-rating .star-icon {
+  transition: all 0.2s ease !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  display: inline-block !important;
+  color: #ddd !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  flex-shrink: 0 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.star-rating .star-icon:hover,
+.star-rating .star-icon.active {
+  color: #ffc107 !important;
+}
+
+.star-rating .star-icon.rated {
+  color: #ffc107 !important;
+}
+
+.star-rating .star-icon:hover {
+  transform: scale(1.15) !important;
+}
+
+/* Like Button - Kesinlikle görünür olmalı */
+/* Beğeni Butonu için Agresif CSS Kuralları */
+#likeButtonStat,
+button#likeButtonStat,
+.peer #likeButtonStat,
+.peers #likeButtonStat,
+[id="likeButtonStat"] {
+  cursor: pointer !important;
+  text-decoration: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 9999 !important;
+  height: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Print dışında her zaman görünür */
+@media not print {
+  #likeButtonStat,
+  button#likeButtonStat {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Parent container'ları da kontrol et */
+.peer,
+.peers,
+[class*="peer"] {
+  overflow: visible !important;
+}
+
+/* Özellikle bu container'lar için */
+.layer.w-100.mB-30,
+div[class*="layer"][class*="w-100"][class*="mB-30"] {
+  overflow: visible !important;
+  display: block !important;
+}
+
+#likeIconStat {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#likeCount {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#ratingStats {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Yorum Sistemi Stilleri */
+.comments-container {
+  max-height: none;
+}
+
+.comment-item {
+  transition: all 0.2s ease;
+}
+
+.comment-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.like-comment-btn,
+.reply-comment-btn {
+  text-decoration: none !important;
+  border: none !important;
+  background: none !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #6c757d;
+}
+
+.like-comment-btn:hover,
+.reply-comment-btn:hover {
+  background-color: #f5f5f5;
+  color: #258cfb;
+  transform: translateY(-1px);
+}
+
+.like-comment-btn:hover i,
+.reply-comment-btn:hover i {
+  transform: scale(1.1);
+}
+
+.like-comment-btn i,
+.reply-comment-btn i {
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.like-comment-btn.liked i {
+  animation: heartBeat 0.3s ease;
+}
+
+.like-comment-btn.liked {
+  color: #dc3545;
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.dropdown-menu {
+  min-width: 150px;
+}
+
+.comment-content textarea {
+  resize: vertical;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Hesapla Butonu Stilleri */
+#calculateBtn {
+  transition: all 0.3s ease;
+  font-weight: 500;
+  min-width: 100px;
+}
+
+#calculateBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+#calculateBtn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+#calculateBtn i[style*="animation"] {
+  display: inline-block;
+}
+
+#likeButtonStat:hover,
+#likeButtonStat:focus,
+#likeButtonStat:active {
+  text-decoration: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+#likeIconStat {
+  color: #999;
+  font-weight: normal;
+  transition: all 0.2s ease;
+  text-decoration: none !important;
+  -webkit-text-stroke: 1px #999;
+  -webkit-text-fill-color: transparent;
+}
+
+#likeIconStat.liked {
+  color: #dc3545 !important;
+  font-weight: 900 !important;
+  -webkit-text-stroke: 0px !important;
+  -webkit-text-fill-color: #dc3545 !important;
+  text-decoration: none !important;
+}
+
+#likeButtonStat:hover #likeIconStat:not(.liked) {
+  color: #dc3545;
+  transform: scale(1.1);
+  -webkit-text-stroke: 1px #dc3545;
+}
+
+/* Yüksek Kaliteli Fotoğraf Görüntüleme Stilleri */
+.recipe-main-image-container {
+  position: relative;
+  width: 100%;
+  background: #f5f5f5;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s ease;
+  /* Görsel kalitesini koruma */
+  image-rendering: auto;
+  -webkit-image-rendering: optimizeQuality;
+  -moz-image-rendering: optimizeQuality;
+  /* GPU hızlandırma */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform;
+}
+
+.recipe-main-image-container:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.recipe-main-image-container:hover .image-overlay {
+  opacity: 1;
+}
+
+.recipe-main-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  object-position: center;
+  cursor: pointer;
+  display: block;
+  background: #fafafa;
+  transition: transform 0.3s ease;
+  /* Yüksek kalite görüntüleme - Fotoğraflar için optimize edilmiş */
+  image-rendering: auto;
+  image-rendering: -webkit-optimize-contrast;
+  -ms-interpolation-mode: bicubic;
+  /* GPU hızlandırma - Kaliteyi korur */
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  -o-transform: translateZ(0);
+  /* Görsel kalitesini koruma */
+  image-orientation: from-image;
+  /* Anti-aliasing - Yumuşak geçişler için */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Görsel sıkıştırmasını önle */
+  -webkit-image-rendering: optimizeQuality;
+  -moz-image-rendering: optimizeQuality;
+  -o-image-rendering: optimizeQuality;
+}
+
+.recipe-main-image:hover {
+  transform: scale(1.01) translateZ(0);
+}
+
+/* Responsive - Mobilde fotoğraf ve açıklama alt alta */
+@media (max-width: 991px) {
+  .recipe-main-image {
+    height: 400px;
+  }
+}
+
+/* Görsel yükleme optimizasyonu */
+.recipe-main-image[loading="eager"] {
+  content-visibility: auto;
+}
+
+/* Container'a da kalite ayarları */
+.recipe-main-image-container {
+  image-rendering: auto;
+  -webkit-image-rendering: optimizeQuality;
+  -moz-image-rendering: optimizeQuality;
+}
+
+.recipe-thumbnail {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.recipe-thumbnail:hover .thumbnail-overlay {
+  opacity: 1;
+}
+
+/* Lightbox Modal Stilleri */
+.image-lightbox {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.95);
+  overflow: auto;
+  animation: fadeIn 0.3s ease;
+}
+
+.image-lightbox.show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-lightbox-content {
+  position: relative;
+  max-width: 95%;
+  max-height: 95%;
+  margin: auto;
+  animation: zoomIn 0.3s ease;
+}
+
+.image-lightbox-content img {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: 95vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  /* Yüksek kalite görüntüleme - Fotoğraflar için optimize edilmiş */
+  image-rendering: auto;
+  image-rendering: -webkit-optimize-contrast;
+  -ms-interpolation-mode: bicubic;
+  /* GPU hızlandırma - Kaliteyi korur */
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  -o-transform: translateZ(0);
+  /* Görsel kalitesini koruma */
+  image-orientation: from-image;
+  /* Anti-aliasing - Yumuşak geçişler için */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Görsel sıkıştırmasını önle */
+  -webkit-image-rendering: optimizeQuality;
+  -moz-image-rendering: optimizeQuality;
+  -o-image-rendering: optimizeQuality;
+}
+
+.image-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  color: #fff;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10001;
+  background: rgba(0,0,0,0.5);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.image-lightbox-close:hover {
+  background: rgba(0,0,0,0.8);
+  transform: scale(1.1);
+}
+
+.image-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff;
+  font-size: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10001;
+  background: rgba(0,0,0,0.5);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.image-lightbox-nav:hover {
+  background: rgba(0,0,0,0.8);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.image-lightbox-prev {
+  left: 20px;
+}
+
+.image-lightbox-next {
+  right: 20px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Responsive - Mobil için */
+@media (max-width: 768px) {
+  .recipe-main-image {
+    height: 400px;
+  }
+  
+  .recipe-thumbnail {
+  }
+
+/* Recipe Details - Action Buttons */
+.recipe-action-btn {
+  width: 70px;
+  height: 70px;
+  min-width: 70px;
+  max-width: 70px;
+  min-height: 70px;
+  max-height: 70px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 4px;
+  border: 1px solid #e0e0e0;
+  background: #f5f5f5;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.recipe-action-btn:hover {
+  background: #e8e8e8;
+}
+
+.recipe-action-btn-icon {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.recipe-action-btn-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.recipe-info-box {
+  width: 70px;
+  height: 70px;
+  min-width: 70px;
+  max-width: 70px;
+  min-height: 70px;
+  max-height: 70px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 4px;
+}
+
+.recipe-info-box-icon {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.recipe-info-box-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+
+.recipe-info-box-value {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+@media print {
+  .recipe-action-btn,
+    width: 100px !important;
+    height: 100px !important;
+  }
+  
+  .image-lightbox-close {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 30px;
+  }
+  
+  .image-lightbox-nav {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+  }
+  
+  .image-lightbox-prev {
+    left: 10px;
+  }
+  
+  .image-lightbox-next {
+    right: 10px;
+  }
+}
+
+/* Küçük ekranlarda beğeni bölümü tek satıra sığmalı */
+@media (max-width: 767.98px) {
+  /* İstatistikler ve Etkileşim bölümü - Ana container */
+  .recipe-details-container .p-15[style*="background-color: #fafafa"] {
+    padding: 8px 10px !important;
+  }
+  
+  /* Mobile stats container - tek satır */
+  .mobile-stats-container {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  .mobile-stats-inner {
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+  }
+  
+  /* Her bir stat item */
+  .mobile-stat-item {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+  
+  /* Icon boyutlarını küçült */
+  .mobile-stat-icon {
+    font-size: 12px !important;
+    line-height: 1 !important;
+  }
+  
+  /* Text boyutlarını küçült */
+  .mobile-stat-text {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* Yıldız puanlama bölümünü küçült */
+  .mobile-star-rating {
+    min-width: 70px !important;
+    gap: 1px !important;
+  }
+  
+  .mobile-star-icon {
+    font-size: 12px !important;
+    width: 12px !important;
+    height: 12px !important;
+    line-height: 1 !important;
+  }
+  
+  /* Rating stats text'ini küçült */
+  .mobile-rating-text {
+    font-size: 9px !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+  }
+  
+  .mobile-rating-text span {
+    font-size: 9px !important;
+  }
+  
+  /* mL-5 margin'ini azalt */
+  .mobile-stat-item .mL-5 {
+    margin-left: 2px !important;
+  }
+  
+  /* Padding'i azalt */
+  .mobile-stats-container.pY-5 {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+  
+  /* Tarih kısmını küçült */
+  .mobile-stat-item .ti-calendar {
+    font-size: 11px !important;
+  }
+  
+  /* Beğeni butonu ve icon */
+  #likeIconStatMobile {
+    font-size: 12px !important;
+  }
+  
+  /* Görüntülenme sayısı icon */
+  .mobile-stat-item .ti-eye {
+    font-size: 12px !important;
+  }
+  
+  /* Rating text'i daha kompakt yap */
+  #ratingStatsMobile {
+    font-size: 9px !important;
+  }
+  
+  #ratingStatsMobile span {
+    font-size: 8px !important;
+  }
+  
+  /* Mobilde fotoğraf ve yazılar alt alta */
+  .recipe-details-container .row[style*="align-items: flex-start"] {
+    flex-direction: column !important;
+  }
+  
+  .recipe-details-container .col-lg-9[style*="flex: 0 0 70%"],
+  .recipe-details-container .col-lg-3[style*="flex: 0 0 30%"] {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Mobilde sıralama: Fotoğraf önce, sonra yazılar */
+  .recipe-details-container [data-mobile-order="1"] {
+    order: 1 !important;
+  }
+  
+  .recipe-details-container [data-mobile-order="2"] {
+    order: 2 !important;
+  }
+  
+  /* Mobilde açıklama ve püf noktaları yüksekliği */
+  .recipe-details-container .d-flex.flex-column[style*="height: 400px"],
+  .recipe-details-container .mobile-text-container {
+    height: auto !important;
+    min-height: auto !important;
+    gap: 15px !important;
+  }
+  
+  /* Mobilde fotoğraf yüksekliği */
+  .recipe-details-container .recipe-main-image-container {
+    margin-bottom: 20px !important;
+  }
+  
+  .recipe-details-container .recipe-main-image {
+    height: 250px !important;
+    object-fit: cover !important;
+  }
+  
+  /* Başlık ve butonlar mobilde */
+  .recipe-details-container #titleButtonsContainer {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  
+  .recipe-details-container #buttonsContainer {
+    margin-top: 15px !important;
+    width: 100% !important;
+  }
+  
+  .recipe-details-container #recipeTitle {
+    font-size: 1.5rem !important;
+    line-height: 1.3 !important;
+  }
+  
+  /* Action butonları mobilde daha küçük */
+  .recipe-details-container .recipe-action-btn,
+  .recipe-details-container .recipe-info-box {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    padding: 6px 3px !important;
+  }
+  
+  .recipe-details-container .recipe-action-btn-icon {
+    font-size: 14px !important;
+    margin-bottom: 3px !important;
+  }
+  
+  .recipe-details-container .recipe-action-btn-text {
+    font-size: 9px !important;
+  }
+  
+  .recipe-details-container .recipe-info-box-icon {
+    font-size: 14px !important;
+    margin-bottom: 3px !important;
+  }
+  
+  .recipe-details-container .recipe-info-box-label {
+    font-size: 9px !important;
+  }
+  
+  .recipe-details-container .recipe-info-box-value {
+    font-size: 11px !important;
+  }
+  
+  /* Açıklama ve püf noktaları mobilde */
+  .recipe-details-container .bd.bgc-yellow-50 {
+    margin-bottom: 15px !important;
+    padding: 15px !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+  
+  .recipe-details-container .bd.bgc-yellow-50 h5 {
+    font-size: 1rem !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .recipe-details-container .bd.bgc-yellow-50 p {
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+  }
+  
+  /* Malzemeler ve yapılış mobilde */
+  .recipe-details-container .recipe-section .col-lg-6 {
+    margin-bottom: 20px !important;
+  }
+  
+  .recipe-details-container .numbered-ingredients-container,
+  .recipe-details-container .numbered-steps-container {
+    min-height: 300px !important;
+  }
+  
+  /* Yorumlar mobilde */
+  .recipe-details-container .comment-item {
+    padding: 15px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  /* Benzer tarifler mobilde */
+  .recipe-details-container #similarRecipes .col-md-6,
+  .recipe-details-container #authorRecipes .col-md-6 {
+    margin-bottom: 15px !important;
+  }
+}

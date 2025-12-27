@@ -92,7 +92,12 @@
                     @if (isOwnRecipes)
                     {
                         <div class="d-flex gap-5 mT-15" style="justify-content: flex-end;">
-                            <a asp-controller="Recipes" asp-action="Edit" asp-route-id="@recipe.Id" class="btn btn-sm btn-primary">
+                            @{
+                                var myRecipesUrl = authorId.HasValue 
+                                    ? Url.Action("MyRecipes", "Author", new { authorId = authorId.Value })
+                                    : Url.Action("MyRecipes", "Author");
+                            }
+                            <a asp-controller="Recipes" asp-action="Edit" asp-route-id="@recipe.Id" asp-route-returnUrl="@myRecipesUrl" class="btn btn-sm btn-primary">
                                 <i class="ti-pencil mR-5"></i> Düzenle
                             </a>
                         </div>

@@ -92,7 +92,7 @@ public class AdminController : Controller
 
     // Tarif Düzenle
     [HttpGet]
-    public async Task<IActionResult> EditRecipe(int id)
+    public async Task<IActionResult> EditRecipe(int id, string? returnUrl = null)
     {
         var client = CreateApiClient();
         var recipe = await client.GetFromJsonAsync<RecipeViewModel>($"/api/recipes/{id}", JsonOptions);
@@ -103,15 +103,16 @@ public class AdminController : Controller
         }
 
         var categories = await client.GetFromJsonAsync<List<CategoryViewModel>>("/api/categories", JsonOptions) 
-                         ?? new List<CategoryViewModel>();
+?? new List<CategoryViewModel>();
         ViewBag.Categories = categories;
+        ViewBag.ReturnUrl = returnUrl;
 
         return View(recipe);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditRecipe(int id, RecipeViewModel model, IFormFile? imageFile, string? imageUrlsJson, string? removedImageIds, int? primaryImageIndex)
+    public async Task<IActionResult> EditRecipe(int id, RecipeViewModel model, IFormFile? imageFile, string? imageUrlsJson, string? removedImageIds, int? primaryImageIndex, string? returnUrl = null)
     {
         var client = CreateApiClient();
         var categories = await client.GetFromJsonAsync<List<CategoryViewModel>>("/api/categories", JsonOptions) 
@@ -352,6 +353,13 @@ public class AdminController : Controller
         }
 
         TempData["SuccessMessage"] = "Tarif başarıyla güncellendi.";
+        
+        // returnUrl varsa oraya yönlendir, yoksa Admin/Recipes'e git
+        if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
+        
         return RedirectToAction(nameof(Recipes));
     }
 
